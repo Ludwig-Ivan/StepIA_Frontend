@@ -1,0 +1,314 @@
+/* =========================================
+   APARIENCIA GLOBAL DE STEPAI
+========================================= */
+
+:root {
+  /* CAPA SOBRE LA IMAGEN */
+  --step-overlay:
+    linear-gradient(
+      rgba(44, 94, 90, 0.48),
+      rgba(44, 94, 90, 0.48)
+    );
+
+  /* COLORES */
+  --step-header: rgba(48, 86, 82, 0.88);
+
+  --step-surface: rgba(43, 77, 73, 0.72);
+
+  --step-surface-hover: rgba(52, 91, 87, 0.82);
+
+  --step-input-bg: rgba(255, 255, 255, 0.12);
+
+  --step-text: #ffffff;
+
+  --step-text-secondary:
+    rgba(255, 255, 255, 0.75);
+
+  --step-border:
+    rgba(255, 255, 255, 0.18);
+
+  --step-accent: #59a890;
+
+  --step-shadow:
+    rgba(0, 0, 0, 0.20);
+}
+
+
+/* =========================================
+   TEMA CLARO
+========================================= */
+
+html.tema-claro {
+  --step-overlay:
+    linear-gradient(
+      rgba(210, 235, 231, 0.30),
+      rgba(210, 235, 231, 0.30)
+    );
+
+  --step-header:
+    rgba(70, 120, 114, 0.82);
+
+  --step-surface:
+    rgba(245, 252, 251, 0.82);
+
+  --step-surface-hover:
+    rgba(255, 255, 255, 0.94);
+
+  --step-input-bg:
+    rgba(255, 255, 255, 0.88);
+
+  --step-text: #243b39;
+
+  --step-text-secondary: #58706e;
+
+  --step-border:
+    rgba(40, 80, 75, 0.22);
+
+  --step-accent: #478f7a;
+
+  --step-shadow:
+    rgba(40, 75, 71, 0.18);
+}
+
+
+/* =========================================
+   TEMA OSCURO
+========================================= */
+
+html.tema-oscuro {
+  --step-overlay:
+    linear-gradient(
+      rgba(5, 20, 18, 0.74),
+      rgba(5, 20, 18, 0.74)
+    );
+
+  --step-header:
+    rgba(13, 31, 28, 0.94);
+
+  --step-surface:
+    rgba(25, 48, 44, 0.92);
+
+  --step-surface-hover:
+    rgba(34, 62, 57, 0.95);
+
+  --step-input-bg:
+    rgba(15, 35, 32, 0.90);
+
+  --step-text: #ffffff;
+
+  --step-text-secondary:
+    rgba(255, 255, 255, 0.70);
+
+  --step-border:
+    rgba(255, 255, 255, 0.13);
+
+  --step-accent: #60b99d;
+
+  --step-shadow:
+    rgba(0, 0, 0, 0.42);
+}
+
+
+/* =========================================
+   TEMA AUTOMÁTICO - OSCURO
+========================================= */
+
+@media (prefers-color-scheme: dark) {
+
+  html.tema-automatico {
+    --step-overlay:
+      linear-gradient(
+        rgba(5, 20, 18, 0.74),
+        rgba(5, 20, 18, 0.74)
+      );
+
+    --step-header:
+      rgba(13, 31, 28, 0.94);
+
+    --step-surface:
+      rgba(25, 48, 44, 0.92);
+
+    --step-surface-hover:
+      rgba(34, 62, 57, 0.95);
+
+    --step-input-bg:
+      rgba(15, 35, 32, 0.90);
+
+    --step-text: #ffffff;
+
+    --step-text-secondary:
+      rgba(255, 255, 255, 0.70);
+
+    --step-border:
+      rgba(255, 255, 255, 0.13);
+
+    --step-accent: #60b99d;
+
+    --step-shadow:
+      rgba(0, 0, 0, 0.42);
+  }
+
+}
+
+
+/* =========================================
+   TEMA AUTOMÁTICO - CLARO
+========================================= */
+
+@media (prefers-color-scheme: light) {
+
+  html.tema-automatico {
+    --step-overlay:
+      linear-gradient(
+        rgba(210, 235, 231, 0.30),
+        rgba(210, 235, 231, 0.30)
+      );
+
+    --step-header:
+      rgba(70, 120, 114, 0.82);
+
+    --step-surface:
+      rgba(245, 252, 251, 0.82);
+
+    --step-surface-hover:
+      rgba(255, 255, 255, 0.94);
+
+    --step-input-bg:
+      rgba(255, 255, 255, 0.88);
+
+    --step-text: #243b39;
+
+    --step-text-secondary: #58706e;
+
+    --step-border:
+      rgba(40, 80, 75, 0.22);
+
+    --step-accent: #478f7a;
+
+    --step-shadow:
+      rgba(40, 75, 71, 0.18);
+  }
+
+}
+
+
+/* =========================================
+   TAMAÑO
+========================================= */
+
+html.tamano-pequeno {
+  font-size: 14px;
+}
+
+html.tamano-normal {
+  font-size: 16px;
+}
+
+html.tamano-grande {
+  font-size: 18px;
+}
+
+
+/* =========================================
+   ELEMENTOS GENERALES
+========================================= */
+
+body {
+  color: var(--step-text);
+}
+
+
+/* INPUTS */
+
+input,
+select,
+textarea {
+  color: var(--step-text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--step-text-secondary);
+}
+
+
+/* =========================================
+   HEADERS
+========================================= */
+
+.menu-header,
+.registro-header,
+.ha-header,
+.ajustes-header,
+.agenda-header {
+  background:
+    var(--step-header) !important;
+
+  border-color:
+    var(--step-border) !important;
+}
+
+
+/* =========================================
+   TARJETAS
+========================================= */
+
+.ha-resumen-card,
+.ha-actividad,
+.ha-vacio,
+.apariencia-card {
+  background:
+    var(--step-surface) !important;
+
+  color:
+    var(--step-text) !important;
+
+  border-color:
+    var(--step-border) !important;
+
+  box-shadow:
+    0 7px 18px
+    var(--step-shadow) !important;
+}
+
+
+/* =========================================
+   TEXTOS
+========================================= */
+
+.ha-titulo h1,
+.ajustes-titulo h1,
+.apariencia-header h2,
+.ajuste-campo h3 {
+  color:
+    var(--step-text) !important;
+}
+
+
+.ha-titulo p,
+.ha-fecha,
+.ha-descripcion,
+.ajustes-titulo p,
+.apariencia-header p,
+.ajuste-campo p {
+  color:
+    var(--step-text-secondary) !important;
+}
+
+
+/* =========================================
+   CAMPOS
+========================================= */
+
+.ha-buscador,
+.ha-filtros select,
+.ajuste-campo select {
+  background:
+    var(--step-input-bg) !important;
+
+  color:
+    var(--step-text) !important;
+
+  border-color:
+    var(--step-border) !important;
+}

@@ -1,0 +1,871 @@
+* {
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   PÁGINA
+========================================= */
+
+.agenda-page {
+  width: 100vw;
+
+  min-height: 100vh;
+
+  margin: 0;
+
+  background-image:
+    linear-gradient(
+      rgba(0, 50, 48, 0.35),
+      rgba(0, 65, 60, 0.35)
+    ),
+    url('../../assets/images/fondo-medico.jpg');
+
+  background-size: cover;
+
+  background-position: center;
+
+  background-attachment: fixed;
+
+  color: white;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.agenda-header {
+  width: 100%;
+
+  min-height: 64px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 8px 28px;
+
+  background:
+    rgba(46, 81, 78, 0.65);
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.22);
+
+  backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 5px 15px
+    rgba(0, 0, 0, 0.20);
+}
+
+
+.agenda-logo {
+  border: none;
+
+  background: transparent;
+
+  color: white;
+
+  font-size: 28px;
+
+  font-weight: 900;
+
+  cursor: pointer;
+
+  text-shadow:
+    0 2px 5px
+    rgba(0, 0, 0, 0.35);
+}
+
+
+.agenda-header-right {
+  display: flex;
+
+  align-items: center;
+
+  gap: 22px;
+}
+
+
+.agenda-conectado {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 14px;
+}
+
+
+.agenda-punto {
+  width: 11px;
+
+  height: 11px;
+
+  border-radius: 50%;
+
+  background: #21eb49;
+
+  box-shadow:
+    0 0 10px #21eb49;
+}
+
+
+.agenda-menu-btn {
+  border: none;
+
+  border-radius: 10px;
+
+  padding: 9px 14px;
+
+  background:
+    rgba(255, 255, 255, 0.12);
+
+  color: white;
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+
+.agenda-menu-btn:hover {
+  background:
+    rgba(255, 255, 255, 0.20);
+}
+
+
+/* =========================================
+   CONTENIDO
+========================================= */
+
+.agenda-main {
+  width: 100%;
+
+  max-width: 1450px;
+
+  margin: auto;
+
+  padding: 35px 30px 50px;
+}
+
+
+.agenda-title {
+  margin-bottom: 25px;
+}
+
+
+.agenda-title h1 {
+  margin: 0;
+
+  font-size: 36px;
+
+  font-weight: 900;
+
+  text-shadow:
+    0 3px 7px
+    rgba(0, 0, 0, 0.35);
+}
+
+
+.agenda-title p {
+  margin-top: 7px;
+
+  color:
+    rgba(255, 255, 255, 0.82);
+}
+
+
+/* =========================================
+   LAYOUT
+========================================= */
+
+.agenda-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 2fr)
+    minmax(300px, 0.8fr);
+
+  gap: 25px;
+
+  align-items: start;
+}
+
+
+/* =========================================
+   CALENDARIO
+========================================= */
+
+.calendario-card {
+  background:
+    rgba(39, 62, 65, 0.52);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.25);
+
+  border-radius: 20px;
+
+  padding: 22px;
+
+  backdrop-filter: blur(13px);
+
+  box-shadow:
+    0 15px 35px
+    rgba(0, 0, 0, 0.25);
+}
+
+
+.calendario-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+}
+
+
+.calendario-header h2 {
+  margin: 0;
+
+  font-size: 27px;
+
+  text-transform: capitalize;
+}
+
+
+.calendario-header button {
+  width: 42px;
+
+  height: 42px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.15);
+
+  color: white;
+
+  font-size: 29px;
+
+  cursor: pointer;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+}
+
+
+.calendario-header button:hover {
+  background:
+    rgba(255, 255, 255, 0.25);
+}
+
+
+/* =========================================
+   DÍAS SEMANA
+========================================= */
+
+.dias-semana {
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+
+  gap: 7px;
+
+  margin-bottom: 7px;
+}
+
+
+.dias-semana div {
+  text-align: center;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  color:
+    rgba(255, 255, 255, 0.75);
+
+  padding: 7px;
+}
+
+
+/* =========================================
+   GRID CALENDARIO
+========================================= */
+
+.calendario-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+
+  gap: 7px;
+}
+
+
+.calendario-dia {
+  position: relative;
+
+  min-height: 110px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.18);
+
+  border-radius: 11px;
+
+  padding: 8px;
+
+  background:
+    rgba(255, 255, 255, 0.08);
+
+  color: white;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition: 0.18s ease;
+}
+
+
+.calendario-dia:hover {
+  transform:
+    translateY(-2px);
+
+  background:
+    rgba(255, 255, 255, 0.14);
+}
+
+
+.calendario-dia.vacio {
+  visibility: hidden;
+
+  pointer-events: none;
+}
+
+
+.calendario-dia.tiene-cita {
+  background:
+    rgba(45, 161, 126, 0.26);
+
+  border:
+    1px solid
+    rgba(108, 245, 199, 0.55);
+}
+
+
+.calendario-dia.seleccionado {
+  outline:
+    3px solid
+    rgba(255, 255, 255, 0.72);
+
+  background:
+    rgba(57, 173, 137, 0.42);
+}
+
+
+.calendario-dia.hoy
+.numero-dia {
+  background: white;
+
+  color: #23584d;
+}
+
+
+/* =========================================
+   NÚMERO DÍA
+========================================= */
+
+.numero-dia {
+  width: 28px;
+
+  height: 28px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  font-weight: 900;
+
+  margin-bottom: 4px;
+}
+
+
+/* =========================================
+   MINI CITAS EN CALENDARIO
+========================================= */
+
+.mini-citas {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+
+.mini-cita {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  padding: 4px 5px;
+
+  border-radius: 6px;
+
+  background:
+    rgba(0, 40, 36, 0.50);
+
+  font-size: 10px;
+
+  overflow: hidden;
+}
+
+
+.mini-hora {
+  font-weight: 900;
+
+  flex-shrink: 0;
+}
+
+
+.mini-nombre {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+.mas-citas {
+  font-size: 10px;
+
+  color:
+    rgba(255, 255, 255, 0.8);
+
+  padding-left: 4px;
+}
+
+
+/* =========================================
+   PANEL DERECHO
+========================================= */
+
+.citas-dia-card {
+  background:
+    rgba(39, 62, 65, 0.58);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.25);
+
+  border-radius: 20px;
+
+  padding: 20px;
+
+  backdrop-filter: blur(13px);
+
+  box-shadow:
+    0 15px 35px
+    rgba(0, 0, 0, 0.25);
+}
+
+
+.citas-dia-header {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+  padding-bottom: 15px;
+
+  margin-bottom: 15px;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.18);
+}
+
+
+.citas-dia-header span {
+  font-size: 21px;
+
+  font-weight: 900;
+}
+
+
+.citas-dia-header strong {
+  font-size: 14px;
+
+  color:
+    rgba(255, 255, 255, 0.72);
+}
+
+
+/* =========================================
+   SIN CITAS
+========================================= */
+
+.sin-citas {
+  min-height: 280px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+  text-align: center;
+}
+
+
+.sin-citas-icon {
+  font-size: 50px;
+
+  margin-bottom: 10px;
+}
+
+
+.sin-citas h3 {
+  margin: 0 0 6px;
+}
+
+
+.sin-citas p {
+  margin: 0;
+
+  color:
+    rgba(255, 255, 255, 0.7);
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   LISTA DE CITAS
+========================================= */
+
+.lista-citas {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+
+.cita-card {
+  width: 100%;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.16);
+
+  border-radius: 13px;
+
+  padding: 12px;
+
+  background:
+    rgba(255, 255, 255, 0.09);
+
+  color: white;
+
+  cursor: pointer;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+
+  text-align: left;
+
+  transition: 0.18s ease;
+}
+
+
+.cita-card:hover {
+  background:
+    rgba(255, 255, 255, 0.16);
+
+  transform:
+    translateY(-1px);
+}
+
+
+.cita-hora {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 14px;
+}
+
+
+.cita-paciente {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.cita-avatar {
+  width: 40px;
+
+  height: 40px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background:
+    rgba(255, 255, 255, 0.86);
+
+  color: #2a5d53;
+}
+
+
+.cita-paciente h3 {
+  margin: 0;
+
+  font-size: 16px;
+}
+
+
+.cita-paciente p {
+  margin: 3px 0 0;
+
+  font-size: 11px;
+
+  color:
+    rgba(255, 255, 255, 0.7);
+}
+
+
+.cita-flecha {
+  align-self: flex-end;
+}
+
+
+/* =========================================
+   RESUMEN
+========================================= */
+
+.agenda-resumen {
+  display: flex;
+
+  gap: 15px;
+
+  margin-top: 22px;
+}
+
+
+.resumen-card {
+  min-width: 180px;
+
+  padding: 14px 18px;
+
+  border-radius: 13px;
+
+  background:
+    rgba(38, 70, 66, 0.50);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.20);
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 25px;
+}
+
+
+.resumen-card span {
+  font-size: 12px;
+}
+
+
+.resumen-card strong {
+  font-size: 25px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+
+  .agenda-layout {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 750px) {
+
+  .agenda-main {
+    padding:
+      25px 12px 35px;
+  }
+
+
+  .calendario-card {
+    padding: 12px;
+  }
+
+
+  .calendario-grid {
+    gap: 4px;
+  }
+
+
+  .dias-semana {
+    gap: 4px;
+  }
+
+
+  .calendario-dia {
+    min-height: 75px;
+
+    padding: 4px;
+  }
+
+
+  .mini-cita {
+    display: none;
+  }
+
+
+  .calendario-dia.tiene-cita::after {
+    content: '';
+
+    width: 7px;
+
+    height: 7px;
+
+    position: absolute;
+
+    bottom: 7px;
+
+    left: 50%;
+
+    transform:
+      translateX(-50%);
+
+    background: #91ffd6;
+
+    border-radius: 50%;
+  }
+
+
+  .agenda-title h1 {
+    font-size: 28px;
+  }
+
+}
+
+
+@media (max-width: 520px) {
+
+  .agenda-header {
+    padding: 8px 12px;
+  }
+
+
+  .agenda-conectado {
+    display: none;
+  }
+
+
+  .agenda-logo {
+    font-size: 22px;
+  }
+
+
+  .agenda-menu-btn {
+    font-size: 12px;
+
+    padding: 8px 10px;
+  }
+
+
+  .calendario-header h2 {
+    font-size: 21px;
+  }
+
+
+  .dias-semana div {
+    font-size: 10px;
+
+    padding: 3px;
+  }
+
+
+  .calendario-dia {
+    min-height: 55px;
+  }
+
+
+  .numero-dia {
+    width: 24px;
+
+    height: 24px;
+
+    font-size: 12px;
+  }
+
+
+  .agenda-resumen {
+    flex-direction: column;
+  }
+
+
+  .resumen-card {
+    width: 100%;
+  }
+
+}

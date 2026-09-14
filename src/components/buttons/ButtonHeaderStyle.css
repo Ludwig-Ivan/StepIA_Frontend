@@ -1,0 +1,41 @@
+/* =========================================
+   BOTONES SUPERIORES
+========================================= */
+
+.btn-option {
+    min-height: 46px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding:
+        5px 8px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: transparent;
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease;
+}
+
+
+.btn-option:hover {
+    background:
+        rgba(255, 255, 255, 0.10);
+}

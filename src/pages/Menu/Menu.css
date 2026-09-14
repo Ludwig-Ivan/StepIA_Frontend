@@ -1,0 +1,379 @@
+* {
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   PÁGINA
+========================================= */
+
+.menu-page {
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+
+  background-image:
+    var(--step-overlay),
+    url('../../assets/images/fondo-medico.jpg');
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  color:
+    var(--step-text, white);
+
+  position: relative;
+}
+
+
+/* =========================================
+   CONTENIDO CENTRAL
+========================================= */
+
+.menu-overlay {
+  width: 100%;
+
+  min-height:
+    calc(100vh - 64px);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding:
+    35px 20px;
+}
+
+
+/* =========================================
+   TARJETA PRINCIPAL
+========================================= */
+
+.menu-card {
+  width: 100%;
+
+  max-width: 580px;
+
+  padding:
+    24px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.20);
+
+  border-radius: 18px;
+
+  background:
+    rgba(60, 100, 95, 0.30);
+
+  backdrop-filter:
+    blur(12px);
+
+  -webkit-backdrop-filter:
+    blur(12px);
+
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.22);
+}
+
+
+/* =========================================
+   TÍTULOS
+========================================= */
+
+.menu-stepai {
+  text-align: center;
+
+  color: white;
+
+  font-size: 32px;
+
+  font-weight: 900;
+}
+
+
+.menu-title {
+  margin:
+    4px 0 0;
+
+  text-align: center;
+
+  color: white;
+
+  font-size: 37px;
+
+  font-weight: 900;
+}
+
+
+.menu-subtitle {
+  margin:
+    9px 0 24px;
+
+  text-align: center;
+
+  color:
+    rgba(255, 255, 255, 0.82);
+
+  font-size: 12px;
+}
+
+
+/* =========================================
+   OPCIONES CENTRALES
+========================================= */
+
+.menu-options {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 13px;
+}
+
+
+.menu-option {
+  width: 100%;
+
+  min-height: 74px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding:
+    12px 14px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background:
+    rgba(65, 105, 100, 0.72);
+
+  color: white;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 6px 15px rgba(0, 0, 0, 0.16);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+
+.menu-option:hover {
+  transform:
+    translateY(-2px);
+
+  background:
+    rgba(75, 120, 114, 0.82);
+}
+
+
+.menu-option-left {
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  min-width: 0;
+}
+
+
+.menu-icon-box {
+  width: 47px;
+
+  height: 47px;
+
+  flex:
+    0 0 47px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background:
+    rgba(255, 255, 255, 0.92);
+
+  font-size: 22px;
+}
+
+
+.menu-texts {
+  text-align: left;
+
+  min-width: 0;
+}
+
+
+.menu-texts h3 {
+  margin:
+    0 0 3px;
+
+  color: white;
+
+  font-size: 17px;
+}
+
+
+.menu-texts p {
+  margin: 0;
+
+  color:
+    rgba(255, 255, 255, 0.78);
+
+  font-size: 10px;
+}
+
+.option-icon {
+  font-size: 21px;
+
+  flex-shrink: 0;
+}
+
+
+.menu-arrow {
+  width: 34px;
+
+  height: 34px;
+
+  flex:
+    0 0 34px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    rgba(25, 35, 34, 0.60);
+
+  color: white;
+
+  font-size: 16px;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 950px) {
+
+  .top-menu {
+    padding:
+      6px 12px;
+  }
+
+  .top-menu-left,
+  .top-menu-right {
+    gap: 4px;
+  }
+
+  .top-menu-option {
+    padding:
+      4px 5px;
+
+    font-size: 9px;
+  }
+
+  .top-menu-icon {
+    font-size: 18px;
+  }
+
+  .doctor-info {
+    min-width: auto;
+  }
+
+  .doctor-datos {
+    display: none;
+  }
+
+  .perfil-flecha {
+    display: none;
+  }
+
+}
+
+
+/* =========================================
+   MÓVIL
+========================================= */
+
+@media (max-width: 650px) {
+
+  .connection-status {
+    display: none;
+  }
+
+  .top-menu-option span:last-child {
+    display: none;
+  }
+
+  .top-menu-option {
+    min-height: 40px;
+  }
+
+  .top-logo {
+    font-size: 21px;
+  }
+
+  .doctor-avatar {
+    width: 32px;
+
+    height: 32px;
+
+    flex-basis: 32px;
+
+    font-size: 19px;
+  }
+
+  .perfil-dropdown {
+    position: fixed;
+
+    top: 72px;
+
+    left: 15px;
+
+    right: 15px;
+
+    width: auto;
+  }
+
+  .perfil-dropdown-footer {
+    flex-direction: column;
+  }
+
+  .menu-card {
+    padding:
+      20px 15px;
+  }
+
+  .menu-title {
+    font-size: 29px;
+  }
+
+  .menu-stepai {
+    font-size: 26px;
+  }
+
+}

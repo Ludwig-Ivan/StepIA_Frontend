@@ -1,0 +1,506 @@
+/* =========================================
+   MENÚ SUPERIOR
+========================================= */
+
+.top-menu {
+    width: 100%;
+    min-height: 64px;
+
+    position: relative;
+
+    z-index: 5000;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding:
+        6px 22px;
+
+    background:
+        var(--step-header,
+            rgba(32, 54, 62, 0.92));
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.15);
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.20);
+}
+
+
+/* =========================================
+   IZQUIERDA / DERECHA
+========================================= */
+
+.top-menu-left,
+.top-menu-right {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.top-menu-left {
+    min-width: 0;
+}
+
+
+.top-menu-right {
+    flex-shrink: 0;
+}
+
+
+/* =========================================
+   LOGO
+========================================= */
+
+.top-logo {
+    border: none;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 27px;
+
+    font-weight: 900;
+
+    cursor: pointer;
+
+    padding: 5px 0;
+
+    text-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.30);
+}
+
+
+/* =========================================
+   CONEXIÓN
+========================================= */
+
+.connection-status {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    color: white;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+}
+
+
+.connection-dot {
+    width: 10px;
+
+    height: 10px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #31ec55;
+
+    box-shadow:
+        0 0 6px #31ec55,
+        0 0 10px #31ec55;
+}
+
+
+/* =========================================
+   PERFIL EN EL MENÚ
+========================================= */
+
+.perfil-menu-container {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    z-index: 9999;
+}
+
+
+.doctor-info {
+    min-width: 175px;
+
+    max-width: 230px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding:
+        4px 8px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.10);
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    color: white;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease;
+}
+
+
+.doctor-info:hover {
+    background:
+        rgba(255, 255, 255, 0.14);
+}
+
+
+.doctor-avatar {
+    width: 36px;
+
+    height: 36px;
+
+    flex:
+        0 0 36px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.92);
+
+    font-size: 22px;
+}
+
+
+.doctor-datos {
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    text-align: left;
+}
+
+
+.doctor-nombre {
+    width: 100%;
+
+    color: white;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+.doctor-rol {
+    margin-top: 2px;
+
+    color:
+        rgba(255, 255, 255, 0.65);
+
+    font-size: 9px;
+}
+
+
+.perfil-flecha {
+    flex-shrink: 0;
+
+    color:
+        rgba(255, 255, 255, 0.65);
+
+    font-size: 7px;
+}
+
+
+/* =========================================
+   DROPDOWN PERFIL
+========================================= */
+
+.perfil-dropdown {
+    position: absolute;
+
+    top: calc(100% + 10px);
+
+    right: 0;
+
+    width: 350px;
+
+    z-index: 99999;
+
+    border:
+        1px solid var(--step-border,
+            rgba(255, 255, 255, 0.15));
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    background:
+        var(--step-surface,
+            rgba(36, 68, 65, 0.98));
+
+    color:
+        var(--step-text, white);
+
+    box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.40);
+
+    backdrop-filter:
+        blur(18px);
+
+    -webkit-backdrop-filter:
+        blur(18px);
+}
+
+
+/* =========================================
+   HEADER PERFIL
+========================================= */
+
+.perfil-dropdown-header {
+    display: grid;
+
+    grid-template-columns:
+        52px minmax(0, 1fr) 32px;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 17px;
+
+    border-bottom:
+        1px solid var(--step-border,
+            rgba(255, 255, 255, 0.12));
+}
+
+
+.perfil-avatar-grande {
+    width: 50px;
+
+    height: 50px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.92);
+
+    font-size: 28px;
+}
+
+
+.perfil-identidad {
+    min-width: 0;
+}
+
+
+.perfil-identidad h3 {
+    margin:
+        0 0 3px;
+
+    color:
+        var(--step-text, white);
+
+    font-size: 16px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+.perfil-identidad p {
+    margin: 0;
+
+    color:
+        var(--step-text-secondary,
+            rgba(255, 255, 255, 0.65));
+
+    font-size: 11px;
+}
+
+
+.perfil-cerrar {
+    width: 30px;
+
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    color:
+        var(--step-text, white);
+
+    cursor: pointer;
+}
+
+
+.perfil-cerrar:hover {
+    background:
+        rgba(255, 255, 255, 0.15);
+}
+
+
+/* =========================================
+   CUERPO DEL PERFIL
+========================================= */
+
+.perfil-dropdown-body {
+    padding:
+        6px 17px;
+}
+
+
+.perfil-campo {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    padding:
+        11px 0;
+
+    border-bottom:
+        1px solid var(--step-border,
+            rgba(255, 255, 255, 0.10));
+}
+
+
+.perfil-campo:last-child {
+    border-bottom: none;
+}
+
+
+.perfil-campo span {
+    color:
+        var(--step-text-secondary,
+            rgba(255, 255, 255, 0.62));
+
+    font-size: 10px;
+}
+
+
+.perfil-campo strong {
+    color:
+        var(--step-text, white);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================
+   BOTONES DEL PERFIL
+========================================= */
+
+.perfil-dropdown-footer {
+    display: flex;
+
+    gap: 9px;
+
+    padding:
+        14px 17px;
+
+    border-top:
+        1px solid var(--step-border,
+            rgba(255, 255, 255, 0.12));
+}
+
+
+.perfil-editar,
+.perfil-salir {
+    flex: 1;
+
+    border: none;
+
+    padding:
+        9px 10px;
+
+    border-radius: 8px;
+
+    color: white;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.perfil-editar {
+    background:
+        var(--step-accent,
+            #55958a);
+}
+
+
+.perfil-salir {
+    background:
+        rgba(169, 65, 65, 0.92);
+}
+
+
+.perfil-editar:hover,
+.perfil-salir:hover {
+    opacity: 0.88;
+
+    transform:
+        translateY(-1px);
+}
