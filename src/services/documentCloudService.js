@@ -1,9 +1,8 @@
 import api from "../api/api.js";
-
-const BASE_URL = "/document-service/documents";
+import { ENDPOINTS } from "../config/endpoints.js";
 
 export const GenerateUploadUrl = async (documentId, filename, contentType) => {
-  const response = await api.post(`${BASE_URL}/upload-url`, {
+  const response = await api.post(ENDPOINTS.R2.GENERATE_UPLOAD_URL, {
     documentId,
     filename,
     contentType,
@@ -12,14 +11,20 @@ export const GenerateUploadUrl = async (documentId, filename, contentType) => {
 };
 
 export const CompleteUpload = async (idDocument, storageKey) => {
-  const response = await api.post(`${BASE_URL}/${idDocument}/complete`, null, {
-    params: { storageKey },
-  });
+  const response = await api.post(
+    ENDPOINTS.R2.COMPLETE_UPLOAD(idDocument),
+    null,
+    {
+      params: { storageKey },
+    },
+  );
   return response.data;
 };
 
 export const GeneratedDownloadUrl = async (storageKey) => {
-  const response = await api.post(`${BASE_URL}/download-url`, { storageKey });
+  const response = await api.post(ENDPOINTS.R2.GENERATE_DOWNLOAD_URL, {
+    storageKey,
+  });
   return response.data;
 };
 
