@@ -1,12 +1,14 @@
+const HOST = "https://api-gateway-255553194796.northamerica-south1.run.app";
+
 const BASE_URL = {
-  PROFESIONALES: "/core-service/profesionales",
-  PACIENTES: "/core-service/pacientes",
-  EXPEDIENTE: "/core-service/expedientes",
-  INFORME: "/core-service/informes",
-  ANALISIS: "/core-service/analisis",
-  DOCUMENTS: "/core-service/documentos",
-  R2: "/document-service/documents",
-  IA: "/ia-service",
+  PROFESIONALES: `${HOST}/core-service/profesionales`,
+  PACIENTES: `${HOST}/core-service/pacientes`,
+  EXPEDIENTE: `${HOST}/core-service/expedientes`,
+  INFORME: `${HOST}/core-service/informes`,
+  ANALISIS: `${HOST}/core-service/analisis`,
+  DOCUMENTS: `${HOST}/core-service/documentos`,
+  R2: `${HOST}/document-service/documents`,
+  IA: `${HOST}/ia-service`,
 };
 
 export const ENDPOINTS = {
