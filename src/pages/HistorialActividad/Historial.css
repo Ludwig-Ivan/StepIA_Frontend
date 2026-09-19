@@ -2,14 +2,21 @@
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
-  margin: 0;
-  width: 100%;
-  min-height: 100%;
-}
+/* =========================
+   UTILIDADES
+========================= */
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* =========================
    PÁGINA
@@ -17,7 +24,6 @@ body,
 
 .ha-page {
   width: 100%;
-
   min-height: 100vh;
 
   background-image:
@@ -25,24 +31,22 @@ body,
     url('../../assets/images/fondo-medico.jpg');
 
   background-size: cover;
-
   background-position: center;
-
   background-repeat: no-repeat;
-
   background-attachment: fixed;
 
-  color:
-    var(--step-text);
-
+  color: var(--step-text);
 }
-
 
 /* =========================
    HEADER
 ========================= */
 
 .ha-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
   width: 100%;
   height: 64px;
 
@@ -52,21 +56,18 @@ body,
 
   padding: 0 25px;
 
-  background: rgba(48, 86, 82, 0.85);
+  background: var(--step-header);
 
-  border-bottom:
-    1px solid rgba(255, 255, 255, 0.20);
+  border-bottom: 1px solid var(--step-border);
 
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.20);
+  box-shadow: var(--step-shadow);
 }
-
 
 .ha-logo {
   border: none;
   background: transparent;
 
-  color: white;
+  color: var(--step-text);
 
   font-size: 27px;
   font-weight: 900;
@@ -74,53 +75,35 @@ body,
   cursor: pointer;
 }
 
-
-.ha-header-right {
+.ha-user {
   display: flex;
   align-items: center;
 
-  gap: 20px;
-}
-
-
-.ha-conectado {
-  display: flex;
-  align-items: center;
-
-  gap: 7px;
+  gap: 10px;
 
   font-size: 13px;
 }
 
+.ha-user > span {
+  opacity: 0.85;
+}
 
-.ha-punto {
-  width: 11px;
-  height: 11px;
+.ha-user-icon {
+  width: 38px;
+  height: 38px;
 
-  background: #2aff4d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   border-radius: 50%;
 
-  box-shadow:
-    0 0 8px #2aff4d;
+  background: var(--step-accent);
+
+  color: #ffffff;
+
+  font-size: 15px;
 }
-
-
-.ha-panel-btn {
-  border: none;
-
-  border-radius: 8px;
-
-  padding: 9px 14px;
-
-  background:
-    rgba(255, 255, 255, 0.15);
-
-  color: white;
-
-  cursor: pointer;
-}
-
 
 /* =========================
    CONTENIDO
@@ -133,10 +116,7 @@ body,
   margin: 0 auto;
 
   padding: 35px 0 60px;
-
-  display: block;
 }
-
 
 /* =========================
    TÍTULO
@@ -154,35 +134,33 @@ body,
   margin-bottom: 25px;
 }
 
-
-.ha-titulo > div {
+.ha-titulo-izq {
   flex: 1;
 }
-
 
 .ha-titulo h1 {
   margin: 0;
 
-  font-size: 36px;
-
+  font-size: clamp(28px, 4vw, 36px);
   line-height: 1.2;
-
   font-weight: 900;
 }
-
 
 .ha-titulo p {
   margin: 8px 0 0;
 
   font-size: 14px;
 
-  color:
-    rgba(255, 255, 255, 0.80);
+  color: var(--step-text-secondary);
 }
-
 
 .ha-limpiar {
   flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 8px;
 
   border: none;
 
@@ -190,13 +168,45 @@ body,
 
   padding: 11px 16px;
 
-  background: #ad4f4f;
+  background: #d15353;
 
-  color: white;
+  color: #ffffff;
+
+  font-weight: 600;
 
   cursor: pointer;
 }
 
+.ha-limpiar:hover {
+  filter: brightness(1.08);
+}
+
+.ha-confirm {
+  width: 100%;
+  max-width: 460px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  gap: 10px;
+}
+
+.ha-confirm-botones {
+  display: flex;
+
+  gap: 10px;
+}
+
+/* =========================
+   MENSAJE DE FEEDBACK
+========================= */
+
+.ha-mensaje {
+  margin-bottom: 18px;
+}
 
 /* =========================
    RESUMEN
@@ -207,47 +217,65 @@ body,
 
   display: grid;
 
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
   gap: 15px;
 
   margin-bottom: 22px;
 }
 
-
 .ha-resumen-card {
-  min-height: 75px;
+  min-height: 82px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
 
-  gap: 15px;
+  gap: 14px;
 
   padding: 16px 18px;
 
   border-radius: 13px;
 
-  background:
-    rgba(42, 77, 73, 0.70);
+  background: var(--step-surface);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--step-border);
 }
 
+.ha-resumen-texto {
+  flex: 1;
+}
 
 .ha-resumen-card span {
-  font-size: 13px;
-}
+  display: block;
 
+  font-size: 13px;
+
+  color: var(--step-text-secondary);
+}
 
 .ha-resumen-card strong {
-  font-size: 28px;
+  font-size: 26px;
 }
 
+.ha-resumen-icono {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: var(--step-input-bg);
+
+  color: var(--step-accent);
+
+  font-size: 18px;
+}
 
 /* =========================
    FILTROS
@@ -258,40 +286,47 @@ body,
 
   display: grid;
 
-  grid-template-columns:
-    minmax(0, 1fr) 260px;
+  grid-template-columns: minmax(0, 1fr) 260px;
 
   gap: 15px;
 
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 
-
 .ha-buscador {
-  width: 100%;
-
-  height: 46px;
+  min-height: 46px;
 
   display: flex;
-
   align-items: center;
 
   gap: 10px;
 
   padding: 0 14px;
 
-  background:
-    rgba(42, 77, 73, 0.70);
+  background: var(--step-surface);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--step-border);
 
   border-radius: 10px;
 }
 
+.ha-buscador:focus-within {
+  border-color: var(--step-accent);
+  box-shadow: 0 0 0 2px rgba(89, 168, 144, 0.25);
+}
+
+.ha-buscador-icono {
+  color: var(--step-text-secondary);
+
+  font-size: 15px;
+
+  flex-shrink: 0;
+}
 
 .ha-buscador input {
-  width: 100%;
+  flex: 1;
+
+  min-width: 0;
 
   border: none;
 
@@ -299,36 +334,168 @@ body,
 
   background: transparent;
 
-  color: white;
+  color: var(--step-text);
 
   font-size: 14px;
 }
 
-
 .ha-buscador input::placeholder {
-  color:
-    rgba(255, 255, 255, 0.65);
+  color: var(--step-text-secondary);
 }
 
+.ha-clear {
+  width: 28px;
+  height: 28px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: var(--step-text-secondary);
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+.ha-clear:hover {
+  background: var(--step-input-bg);
+
+  color: var(--step-text);
+}
+
+.ha-select-contenedor {
+  width: 100%;
+}
 
 .ha-filtros select {
   width: 100%;
 
-  height: 46px;
+  min-height: 46px;
 
   padding: 0 12px;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--step-border);
 
   border-radius: 10px;
 
-  background:
-    rgb(52, 91, 87);
+  background: var(--step-surface-hover);
 
-  color: white;
+  color: var(--step-text);
+
+  font-size: 14px;
+
+  cursor: pointer;
 }
 
+.ha-filtros select option {
+  background: #2a4d49;
+
+  color: #ffffff;
+}
+
+/* =========================
+   CARGA
+========================= */
+
+.ha-carga {
+  width: 100%;
+
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  border-radius: 15px;
+
+  background: var(--step-surface);
+
+  border: 1px solid var(--step-border);
+
+  text-align: center;
+}
+
+.ha-carga p {
+  margin: 0;
+
+  color: var(--step-text-secondary);
+}
+
+.ha-carga-spinner {
+  width: 44px;
+  height: 44px;
+
+  border: 4px solid var(--step-input-bg);
+
+  border-top-color: var(--step-accent);
+
+  border-radius: 50%;
+
+  animation: ha-girar 0.8s linear infinite;
+}
+
+@keyframes ha-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   VACÍO
+========================= */
+
+.ha-vacio {
+  width: 100%;
+
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  padding: 30px;
+
+  border-radius: 15px;
+
+  background: var(--step-surface);
+
+  border: 1px solid var(--step-border);
+
+  text-align: center;
+}
+
+.ha-vacio-icono {
+  font-size: 46px;
+
+  color: var(--step-accent);
+}
+
+.ha-vacio h2 {
+  margin: 10px 0 4px;
+}
+
+.ha-vacio p {
+  margin: 0 0 18px;
+
+  max-width: 460px;
+
+  color: var(--step-text-secondary);
+}
 
 /* =========================
    LISTA
@@ -344,11 +511,6 @@ body,
   gap: 14px;
 }
 
-
-/* =========================
-   ACTIVIDAD
-========================= */
-
 .ha-actividad {
   width: 100%;
 
@@ -356,42 +518,37 @@ body,
 
   align-items: flex-start;
 
-  gap: 17px;
+  gap: 16px;
 
   padding: 19px;
 
   border-radius: 14px;
 
-  background:
-    rgba(42, 75, 72, 0.72);
+  background: var(--step-surface);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.17);
+  border: 1px solid var(--step-border);
 
-  box-shadow:
-    0 5px 14px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--step-shadow);
 }
 
-
 .ha-actividad-icono {
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
 
-  flex: 0 0 52px;
+  flex: 0 0 50px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
   border-radius: 12px;
 
-  background: white;
+  background: var(--step-input-bg);
 
-  font-size: 26px;
+  color: var(--step-accent);
+
+  font-size: 22px;
 }
-
 
 .ha-actividad-contenido {
   flex: 1;
@@ -399,46 +556,47 @@ body,
   min-width: 0;
 }
 
-
 .ha-actividad-arriba {
   width: 100%;
 
   display: flex;
 
   align-items: flex-start;
-
   justify-content: space-between;
 
-  gap: 15px;
+  gap: 14px;
 }
 
+.ha-actividad-cabecera h3 {
+  margin: 0 0 4px;
 
-.ha-actividad-arriba h3 {
-  margin: 0 0 5px;
-
-  font-size: 19px;
+  font-size: 17px;
 }
-
 
 .ha-fecha {
-  font-size: 12px;
+  display: flex;
+  align-items: center;
 
-  color:
-    rgba(255, 255, 255, 0.70);
+  flex-wrap: wrap;
+
+  gap: 5px;
+
+  font-size: 12.5px;
+
+  color: var(--step-text-secondary);
 }
-
 
 .ha-descripcion {
   margin: 12px 0 8px;
 
   font-size: 14px;
 
-  line-height: 1.45;
+  line-height: 1.5;
 }
-
 
 .ha-paciente {
   display: flex;
+  align-items: center;
 
   gap: 6px;
 
@@ -449,135 +607,169 @@ body,
   font-size: 13px;
 }
 
+.ha-paciente-icono {
+  color: var(--step-accent);
+}
 
 .ha-detalles {
   display: inline-block;
 
   max-width: 100%;
 
-  margin-top: 10px;
+  margin-top: 8px;
 
   padding: 8px 11px;
 
   border-radius: 7px;
 
-  background:
-    rgba(0, 0, 0, 0.15);
+  background: var(--step-input-bg);
 
   font-size: 12px;
 }
 
-
 .ha-eliminar {
-  width: 35px;
-  height: 35px;
+  width: 34px;
+  height: 34px;
 
   flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   border: none;
 
   border-radius: 8px;
 
-  background:
-    rgba(255, 255, 255, 0.09);
+  background: transparent;
 
-  color: white;
+  color: var(--step-text-secondary);
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+.ha-eliminar:hover {
+  background: rgba(209, 83, 83, 0.18);
+
+  color: #f0b3b3;
+}
+
+/* =========================
+   META / PAGINACIÓN
+========================= */
+
+.ha-meta {
+  margin: 0 0 14px;
+
+  font-size: 13px;
+
+  color: var(--step-text-secondary);
+}
+
+.ha-paginacion {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 22px;
+}
+
+.ha-pagina-boton {
+  min-width: 38px;
+  height: 38px;
+
+  padding: 0 10px;
+
+  border: 1px solid var(--step-border);
+
+  border-radius: 9px;
+
+  background: var(--step-surface);
+
+  color: var(--step-text);
+
+  font-size: 14px;
+  font-weight: 600;
 
   cursor: pointer;
 }
 
+.ha-pagina-boton:hover:not(:disabled) {
+  background: var(--step-surface-hover);
 
-/* =========================
-   VACÍO
-========================= */
-
-.ha-vacio {
-  width: 100%;
-
-  min-height: 320px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 15px;
-
-  background:
-    rgba(42, 75, 72, 0.55);
-
-  text-align: center;
+  border-color: var(--step-accent);
 }
 
+.ha-pagina-boton:disabled {
+  opacity: 0.45;
 
-.ha-vacio-icono {
-  font-size: 50px;
+  cursor: default;
 }
 
+.ha-pagina-boton--activa {
+  background: var(--step-accent);
 
-.ha-vacio h2 {
-  margin: 10px 0 5px;
+  border-color: var(--step-accent);
+
+  color: #ffffff;
 }
 
+.ha-pagina-elipsis {
+  color: var(--step-text-secondary);
 
-.ha-vacio p {
-  margin: 0;
-
-  opacity: 0.75;
+  font-weight: 700;
 }
-
 
 /* =========================
    RESPONSIVE
 ========================= */
 
 @media (max-width: 850px) {
-
   .ha-resumen {
-    grid-template-columns:
-      repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
-
 
   .ha-filtros {
     grid-template-columns: 1fr;
   }
-
 }
 
-
 @media (max-width: 600px) {
-
   .ha-main {
     width: 94%;
   }
 
-
   .ha-titulo {
     flex-direction: column;
+
+    gap: 18px;
   }
 
-
-  .ha-titulo h1 {
-    font-size: 28px;
+  .ha-confirm {
+    max-width: 100%;
   }
 
+  .ha-user > span {
+    display: none;
+  }
 
   .ha-resumen {
     grid-template-columns: 1fr;
   }
-
-
-  .ha-conectado {
-    display: none;
-  }
-
 
   .ha-actividad {
     padding: 14px;
   }
 
+  .ha-actividad-cabecera h3 {
+    font-size: 15.5px;
+  }
 }
