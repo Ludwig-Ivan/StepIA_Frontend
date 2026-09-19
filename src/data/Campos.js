@@ -58,7 +58,7 @@ const CAMPOS_REGISTRO_PACIENTE = [
     config: {
       label: "Teléfono",
       name: "telefono",
-      type: "number",
+      type: "text",
       placeholder: "Teléfono",
     },
   },

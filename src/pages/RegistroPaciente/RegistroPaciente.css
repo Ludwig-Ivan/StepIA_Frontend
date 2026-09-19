@@ -219,6 +219,11 @@
 
 /* Responsive */
 @media (max-width: 780px) {
+
+  .input-group {
+    max-width: 100%;
+  }
+
   .registro-card {
     max-width: 95%;
     padding: 24px;
@@ -233,22 +238,14 @@
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 650px) {
   .registro-header {
     padding: 0 18px;
-  }
-
-  .registro-header h2 {
-    font-size: 18px;
   }
 
   .registro-main {
     padding: 24px 12px;
     align-items: flex-start;
-  }
-
-  .registro-card h1 {
-    font-size: 26px;
   }
 
   .registro-buttons {

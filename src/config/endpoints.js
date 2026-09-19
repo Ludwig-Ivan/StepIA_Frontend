@@ -1,14 +1,15 @@
-const HOST = "https://api-gateway-255553194796.northamerica-south1.run.app";
+// const HOST = "https://api-gateway-255553194796.northamerica-south1.run.app";
+const HOST = "http://localhost:8080";
 
 const BASE_URL = {
-  PROFESIONALES: `${HOST}/core-service/profesionales`,
-  PACIENTES: `${HOST}/core-service/pacientes`,
-  EXPEDIENTE: `${HOST}/core-service/expedientes`,
-  INFORME: `${HOST}/core-service/informes`,
-  ANALISIS: `${HOST}/core-service/analisis`,
-  DOCUMENTS: `${HOST}/core-service/documentos`,
-  R2: `${HOST}/document-service/documents`,
-  IA: `${HOST}/ia-service`,
+  PROFESIONALES: `${HOST}/api/core-service/profesionales`,
+  PACIENTES: `${HOST}/api/core-service/pacientes`,
+  EXPEDIENTE: `${HOST}/api/core-service/expedientes`,
+  INFORME: `${HOST}/api/core-service/informes`,
+  ANALISIS: `${HOST}/api/core-service/analisis`,
+  DOCUMENTS: `${HOST}/api/core-service/documentos`,
+  R2: `${HOST}/api/document-service/documents`,
+  IA: `${HOST}/api/ia-service`,
 };
 
 export const ENDPOINTS = {

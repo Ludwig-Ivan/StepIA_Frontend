@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./RegistroPaciente.css";
 import { PacienteCreateModel } from "../../models/pacientes/pacienteCreateModel.js";
@@ -7,36 +6,32 @@ import { createPaciente } from "../../services/pacienteService.js";
 import InputComponent from "../../components/inputs/InputComponent.jsx";
 import CAMPOS_REGISTRO_PACIENTES from "../../data/Campos.js";
 import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
+import { useForm } from "react-hook-form";
+import { Controller } from "react-hook-form";
+import { PacienteModel } from "../../schema/PacienteSchema.js";
 
 function RegistroPaciente() {
   const navigate = useNavigate();
-  const [paciente, setPaciente] = useState(PacienteCreateModel());
 
-  const manejarCambio = (e) => {
-    const { name, value } = e.target;
-    const nuevosDatos = {
-      ...paciente,
-      [name]: value,
-    };
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: PacienteCreateModel(),
+  });
 
-    setPaciente(PacienteCreateModel(nuevosDatos));
-  };
-
-  const limpiar = () => {
-    setPaciente(PacienteCreateModel());
-  };
-
-  function validarCampos() {
+  function validarCampos(data) {
     if (
-      paciente.nombre.trim() === "" ||
-      paciente.apellidoPaterno.toString().trim() === "" ||
-      paciente.apellidoMaterno.toString().trim() === ""
+      data.nombre.trim() === "" ||
+      data.apellidoPaterno.toString().trim() === "" ||
+      data.apellidoMaterno.toString().trim() === ""
     ) {
       alert("Nombre, Número de Registro Social y Peso son obligatorios");
       return false;
     }
 
-    if (paciente.telefono.trim() !== "" && isNaN(Number(paciente.telefono))) {
+    if (data.telefono.trim() !== "" && isNaN(Number(data.telefono))) {
       alert("El teléfono debe ser numérico");
       return false;
     }
@@ -44,19 +39,20 @@ function RegistroPaciente() {
     return true;
   }
 
-  const siguiente = async () => {
-    if (!validarCampos()) {
+  const registrarPaciente = async (data) => {
+    if (!validarCampos(data)) {
       return;
     }
-    await createPaciente(PacienteCreateModel(paciente));
-    localStorage.setItem("idPaciente", paciente.curp);
+    console.log(data);
+    await createPaciente(data);
+    localStorage.setItem("idPaciente", data.curp);
     console.log("Paciente Creado con exito");
 
     registrarActividad({
       tipo: "Registro de paciente",
       descripcion: "Se capturaron los datos generales del paciente",
-      paciente: paciente.nombre,
-      detalles: `CURP: ${paciente.curp}`,
+      paciente: data.nombre,
+      detalles: `CURP: ${data.curp}`,
     });
 
     navigate("/expediente");
@@ -71,17 +67,26 @@ function RegistroPaciente() {
       <main className="registro-main">
         <section className="registro-card">
           <h1>Registro Paciente</h1>
-          <form className="registro-form">
+          <form
+            className="registro-form"
+            onSubmit={handleSubmit(registrarPaciente)}
+          >
             {CAMPOS_REGISTRO_PACIENTES.map((campo) => {
               return (
-                <InputComponent
+                <Controller
                   key={campo.key}
-                  config={{
-                    value: paciente[campo.key],
-                    func: manejarCambio,
-                    ...campo.config,
-                  }}
-                  style={{ marginBottom: 8 }}
+                  name={campo.key}
+                  control={control}
+                  render={({ field }) => (
+                    <InputComponent
+                      config={{
+                        value: field.value,
+                        func: field.onChange,
+                        ...campo.config,
+                      }}
+                      containerStyle={{ marginBottom: 8 }}
+                    />
+                  )}
                 />
               );
             })}
@@ -92,6 +97,7 @@ function RegistroPaciente() {
                   name: "volver",
                   text: "Volver",
                   variant: "white",
+                  type: "button",
                 }}
                 onClick={() => navigate(-1)}
               />
@@ -101,8 +107,8 @@ function RegistroPaciente() {
                   name: "limpiar",
                   text: "Limpiar",
                   variant: "blue",
+                  type: "reset",
                 }}
-                onClick={limpiar}
               />
 
               <ButtonComponent
@@ -110,8 +116,8 @@ function RegistroPaciente() {
                   name: "siguiente",
                   text: "Siguiente",
                   variant: "green",
+                  type: "submit",
                 }}
-                onClick={siguiente}
               />
             </div>
           </form>

@@ -47,3 +47,12 @@
         0 0 14px rgba(36, 220, 220, 0.25),
         0 8px 16px rgba(0, 0, 0, 0.3);
 }
+
+.btn-purple {
+    background: linear-gradient(180deg, #8a66dd, #5e3db7);
+    color: white;
+    box-shadow:
+        0 0 18px rgba(138, 102, 221, 0.36),
+        0 8px 16px rgba(0, 0, 0, 0.3);
+
+}

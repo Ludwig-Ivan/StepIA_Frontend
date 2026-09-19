@@ -1,60 +1,36 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Expediente.css";
-import { expedienteCreateModel } from "../../models/expedientes/expedienteCreateModel.js";
+
 import { createExpediente } from "../../services/expedienteService.js";
+import { Controller, useForm } from "react-hook-form";
+import InputComponent from "../../components/inputs/InputComponent.jsx";
+import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
 
 function Expediente() {
   const navigate = useNavigate();
-
   const idPaciente = localStorage.getItem("idPaciente");
-  const [expediente, setExpediente] = useState(expedienteCreateModel());
-  const [carga, setCarga] = useState(true);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ defaultValues: { antecedentes: "" } });
 
-  useEffect(() => {
-    const obtenerPaciente = async () => {
-      try {
-        setExpediente({
-          ...expediente,
-          idPaciente: idPaciente,
-          numeroExpediente: "EXP-" + idPaciente,
-          estado: "ACTIVO",
-        });
-      } catch (error) {
-        console.log("Error, no se encontro al paciente", error);
-        navigate("/registro-paciente");
-      } finally {
-        setCarga(false);
-      }
-    };
+  const guardarExpediente = async (data) => {
+    const expediente = await createExpediente({
+      antecedentes: data.antecedentes,
+      idPaciente: idPaciente,
+      numeroExpediente: "EXP-" + idPaciente,
+      estado: "ACTIVO",
+    });
 
-    obtenerPaciente();
-  }, []);
-
-  const manejarCambio = (e) => {
-    const { name, value } = e.target;
-    const nuevosDatos = {
-      ...expediente,
-      [name]: value,
-    };
-
-    setExpediente(expedienteCreateModel(nuevosDatos));
-  };
-
-  const guardarExpediente = async () => {
-    await createExpediente(expediente);
+    if (!expediente) {
+      console.log("No se pudo guardar el expediente");
+      return;
+    }
 
     console.log("Expediente guardado correctamente");
     navigate("/informe-paciente");
   };
-
-  if (carga)
-    return (
-      <div className="loading-screen">
-        <h2>Cargando...</h2>
-        <p>Obteniendo información del paciente</p>
-      </div>
-    );
 
   return (
     <div className="datos-page">
@@ -66,41 +42,70 @@ function Expediente() {
         <section className="datos-card">
           <h1>Expediente</h1>
 
-          <form className="datos-form">
-            <div className="datos-group">
-              <label>Antecedentes</label>
-              <textarea
-                name="antecedentes"
-                placeholder="Antecedentes del paciente"
-                value={expediente.antecedentes}
-                onChange={manejarCambio}
-              ></textarea>
-            </div>
+          <form
+            className="datos-form"
+            onSubmit={handleSubmit(guardarExpediente)}
+          >
+            <Controller
+              name="antecedentes"
+              control={control}
+              render={({ field }) => (
+                <InputComponent
+                  config={{
+                    label: "Antecedentes",
+                    placeholder: "Antecedentes del paciente",
+                    type: "text",
+                    value: field.value,
+                    func: field.onChange,
+                  }}
+                  containerStyle={{
+                    maxWidth: "none",
+                    width: "100%",
+                    height: "fit-content",
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      height: "35vh",
+                    },
+                    "& .MuiOutlinedInput-input": {
+                      fontSize: "18px",
+                    },
+                  }}
+                  multiline
+                  rows={9}
+                />
+              )}
+            />
 
             <div className="datos-buttons">
-              <button
-                type="button"
-                className="btn-volver-form"
+              <ButtonComponent
+                config={{
+                  name: "volver",
+                  text: "Volver",
+                  type: "button",
+                  variant: "white",
+                }}
                 onClick={() => navigate(-1)}
-              >
-                Volver
-              </button>
+              />
 
-              <button
-                type="button"
-                className="btn-anterior"
+              <ButtonComponent
+                config={{
+                  name: "anterior",
+                  text: "Anterior",
+                  type: "button",
+                  variant: "blue",
+                }}
                 onClick={() => navigate("/registro-paciente")}
-              >
-                Anterior
-              </button>
+              />
 
-              <button
-                type="button"
-                className="btn-siguiente"
-                onClick={guardarExpediente}
-              >
-                Siguiente
-              </button>
+              <ButtonComponent
+                config={{
+                  name: "siguiente",
+                  text: "Siguiente",
+                  type: "submit",
+                  variant: "green",
+                }}
+              />
             </div>
           </form>
         </section>

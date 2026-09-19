@@ -9,7 +9,6 @@ import { FcOpenedFolder } from "react-icons/fc";
 import "./InformePaciente.css";
 import { registrarActividad } from "../../utils/historial";
 import { AnalisisCreateModel } from "../../models/analisis/AnalisisCreateModel.js";
-import { InformeCreateUpdateModel } from "../../models/informes/InformeCreateUpdateModel.js";
 import { createAnalisis } from "../../services/analisisService.js";
 import { createPredict } from "../../services/predictService.js";
 import { PredictModel } from "../../models/analisis/PredictModel.js";
@@ -22,39 +21,53 @@ import {
   UploadFile,
 } from "../../services/documentCloudService.js";
 import { createDocumento } from "../../services/documentService.js";
+import { Controller, useForm } from "react-hook-form";
+import InputComponent from "../../components/inputs/InputComponent.jsx";
+import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
+import { InformeCreateUpdateModel } from "../../models/informes/InformeCreateUpdateModel.js";
 
 function InformePaciente() {
   const navigate = useNavigate();
   const informeRef = useRef(null);
   const idProfesional = localStorage.getItem("idProfesional");
   const idPaciente = localStorage.getItem("idPaciente");
-  const [informe, setInforme] = useState(InformeCreateUpdateModel());
+
+  const [paciente, setPaciente] = useState(null);
   const [analisisPieIzq, setAnalisisPieIzq] = useState(PredictModel());
   const [analisisPieDer, setAnalisisPieDer] = useState(PredictModel());
-  const [imgPieIzq, setImgPieIzq] = useState();
-  const [imgPieDer, setImgPieDer] = useState();
   const [imgPieIzq64, setImgPieIzq64] = useState();
   const [imgPieDer64, setImgPieDer64] = useState();
   const [estudios, setEstudios] = useState([]);
-  const [fechaConsulta, setFechaConsulta] = useState("0000-00-00");
-  const [horaConsulta, setHoraConsulta] = useState("00:00");
   const [cargando, setCargando] = useState(false);
   const [carga, setCarga] = useState(true);
-  const [paciente, setPaciente] = useState(null);
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      nombre: "",
+      peso: 0,
+      estadoGeneral: "",
+      observaciones: "",
+      diagnostico: "",
+      sintomas: "",
+      tratamiento: "",
+      evolucion: "",
+      proximaFechaConsulta: "0001-01-01",
+      proximaHoraConsulta: "00:00",
+      pieDerecho: null,
+      pieIzquierdo: null,
+    },
+  });
 
   useEffect(() => {
-    const cargarInforme = async () => {
-      setInforme({
-        ...informe,
-        idPaciente: idPaciente,
-        idProfesional: idProfesional,
-      });
-    };
     const obtenerPaciente = async () => {
       try {
         const paciente = await getPacienteById(idPaciente);
         setPaciente(paciente);
-        cargarInforme();
       } catch (error) {
         console.log("Error, no se encontro al paciente", error);
         navigate("/registro-paciente");
@@ -65,15 +78,6 @@ function InformePaciente() {
 
     obtenerPaciente();
   }, [idPaciente]);
-
-  const manejarCambioInforme = (e) => {
-    const { name, value } = e.target;
-
-    setInforme({
-      ...informe,
-      [name]: value,
-    });
-  };
 
   const calcularSHA256 = async (archivo) => {
     const buffer = await archivo.arrayBuffer();
@@ -112,15 +116,18 @@ function InformePaciente() {
     const imagenBase64 = await convertirABase64(archivo);
 
     if (tipo === "izquierdo") {
-      setImgPieIzq(archivo);
+      // setImgPieIzq(archivo);
       setImgPieIzq64(imagenBase64);
     } else {
-      setImgPieDer(archivo);
+      // setImgPieDer(archivo);
       setImgPieDer64(imagenBase64);
     }
   };
 
   const analizarDesdeInforme = async () => {
+    const imgPieDer = watch("pieDerecho");
+    const imgPieIzq = watch("pieIzquierdo");
+
     if (!imgPieDer || !imgPieDer) {
       alert("Debes cargar ambas imágenes de los pies");
       return;
@@ -305,7 +312,7 @@ function InformePaciente() {
     });
   };
 
-  const guardarCambios = async () => {
+  const guardarCambios = async (data) => {
     registrarActividad({
       tipo: "Informe médico",
       descripcion: "Se guardaron cambios en el informe médico",
@@ -320,10 +327,23 @@ function InformePaciente() {
       return;
     }
 
-    const { idInforme } = await createInforme(informe);
+    const { idInforme } = await createInforme(
+      InformeCreateUpdateModel({
+        idPaciente: paciente.curp,
+        idProfesional: idProfesional,
+        estadoGeneral: data.estadoGeneral,
+        pesoKg: data.peso,
+        sintomas: data.sintomas,
+        descripcion: data.descripcion,
+        diagnostico: data.diagnostico,
+        tratamiento: data.tratamiento,
+        evolucion: data.evolucion,
+        observaciones: data.observaciones,
+      }),
+    );
 
-    await subirAnalisis(idInforme, "DERECHA", analisisPieDer, imgPieDer);
-    await subirAnalisis(idInforme, "IZQUIERDA", analisisPieIzq, imgPieIzq);
+    await subirAnalisis(idInforme, "DERECHA", analisisPieDer, data.imgPieDer);
+    await subirAnalisis(idInforme, "IZQUIERDA", analisisPieIzq, data.imgPieIzq);
 
     await estudios.forEach(async (estudio) => {
       await subirDocumentos(estudio, idInforme);
@@ -334,8 +354,8 @@ function InformePaciente() {
       JSON.parse(localStorage.getItem(historialKey)) || [];
 
     const nuevoRegistroHistorial = {
-      proximaFechaConsulta: fechaConsulta || "",
-      proximaHoraConsulta: fechaConsulta || "",
+      proximaFechaConsulta: data.proximaFechaConsulta || "",
+      proximaHoraConsulta: data.proximaHoraConsulta || "",
       otrosEstudios: estudios || [],
 
       idHistorial: Date.now(),
@@ -452,44 +472,85 @@ function InformePaciente() {
             type="text"
             name="fecha"
             placeholder="Fecha"
-            value={new Date().toDateString()}
+            disabled
+            defaultValue={new Date().toDateString()}
           />
         </div>
 
-        <section className="informe-card">
+        <form
+          id="formInforme"
+          className="informe-card"
+          onSubmit={handleSubmit(guardarCambios)}
+        >
           <div className="datos-basicos">
-            <div className="campo campo-nombre">
-              <label>Nombre Paciente</label>
-              <input
-                readOnly
-                type="text"
-                name="nombre"
-                placeholder="Nombre Paciente"
-                value={paciente.nombre}
-              />
-            </div>
+            <Controller
+              name="nombre"
+              control={control}
+              render={({ field }) => (
+                <InputComponent
+                  config={{
+                    name: "nombre",
+                    label: "Nombre del Paciente",
+                    placeholder: "Nombre del Paciente",
+                    value: field.value,
+                    func: field.onChange,
+                    type: "text",
+                  }}
+                  containerStyle={{ maxWidth: "400px" }}
+                />
+              )}
+            />
 
-            <div className="campo campo-peso">
-              <label>Peso</label>
-              <input
-                type="number"
-                name="pesoKg"
-                placeholder="Peso"
-                value={informe.pesoKg}
-                onChange={manejarCambioInforme}
-              />
-            </div>
+            <Controller
+              name="peso"
+              control={control}
+              render={({ field }) => (
+                <InputComponent
+                  config={{
+                    name: "pesoKg",
+                    label: "Peso",
+                    placeholder: "Peso",
+                    type: "number",
+                    value: field.value,
+                    func: field.onChange,
+                  }}
+                  containerStyle={{ maxWidth: "150px" }}
+                />
+              )}
+            />
           </div>
 
-          <div className="campo">
-            <label>Estado General</label>
-            <textarea
-              name="estadoGeneral"
-              placeholder="Estado General"
-              value={informe.estadoGeneral}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
+          <Controller
+            name="estadoGeneral"
+            control={control}
+            render={({ field }) => (
+              <InputComponent
+                config={{
+                  name: "estadoGeneral",
+                  label: "Estado General",
+                  placeholder: "Estado General",
+                  type: "text",
+                  value: field.value,
+                  func: field.onChange,
+                }}
+                multiline
+                containerStyle={{
+                  maxWidth: "none",
+                  width: "100%",
+                  height: "fit-content",
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    height: "15vh",
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    fontSize: "18px",
+                  },
+                }}
+                rows={3}
+              />
+            )}
+          />
 
           <section className="ai-panel">
             <div className="ai-panel-header">
@@ -509,16 +570,24 @@ function InformePaciente() {
                         <span>Sin imagen</span>
                       )}
                     </div>
-
-                    <label className="btn-subir-imagen">
-                      Subir imagen
-                      <input
-                        type="file"
-                        accept="image/*"
-                        testid="input-pie-izquierdo"
-                        onChange={(e) => cargarImagen(e, "izquierdo")}
-                      />
-                    </label>
+                    <Controller
+                      name="pieIzquierdo"
+                      control={control}
+                      render={({ field }) => (
+                        <label className="btn-subir-imagen">
+                          Subir imagen
+                          <input
+                            type="file"
+                            accept="image/*"
+                            testid="input-pie-izquierdo"
+                            onChange={(e) => {
+                              field.onChange(e.target.files[0]);
+                              cargarImagen(e, "izquierdo");
+                            }}
+                          />
+                        </label>
+                      )}
+                    />
                   </div>
 
                   <div className="upload-pie-card">
@@ -531,30 +600,25 @@ function InformePaciente() {
                         <span>Sin imagen</span>
                       )}
                     </div>
-
-                    <label className="btn-subir-imagen">
-                      Subir imagen
-                      <input
-                        type="file"
-                        accept="image/*"
-                        testid="input-pie-derecho"
-                        onChange={(e) => cargarImagen(e, "derecho")}
-                      />
-                    </label>
+                    <Controller
+                      name="pieDerecho"
+                      control={control}
+                      render={({ field }) => (
+                        <label className="btn-subir-imagen">
+                          Subir imagen
+                          <input
+                            type="file"
+                            accept="image/*"
+                            testid="input-pie-derecho"
+                            onChange={(e) => {
+                              field.onChange(e.target.files[0]);
+                              cargarImagen(e, "derecho");
+                            }}
+                          />
+                        </label>
+                      )}
+                    />
                   </div>
-                </div>
-
-                <div className="campo tipo-pie-box">
-                  <label>Tipo de Pie</label>
-
-                  <input
-                    type="text"
-                    name="tipoPie"
-                    placeholder="Tipo de Pie"
-                    value={``}
-                    readOnly
-                    className="campo-bloqueado"
-                  />
                 </div>
               </div>
 
@@ -586,58 +650,163 @@ function InformePaciente() {
             </div>
           </section>
 
-          <div className="campo observaciones-manuales">
-            <label>Observaciones Manuales</label>
-            <textarea
-              name="observaciones"
-              placeholder="Observaciones"
-              value={informe.observaciones}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
+          <Controller
+            name="observaciones"
+            control={control}
+            render={({ field }) => (
+              <InputComponent
+                config={{
+                  name: "observaciones",
+                  label: "Observaciones Manuales",
+                  placeholder: "Observaciones Manuales",
+                  type: "text",
+                  value: field.value,
+                  func: field.onChange,
+                }}
+                multiline
+                containerStyle={{
+                  maxWidth: "none",
+                  width: "100%",
+                  height: "fit-content",
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    height: "20vh",
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    fontSize: "18px",
+                  },
+                }}
+                rows={4}
+              />
+            )}
+          />
+          <Controller
+            name="diagnostico"
+            control={control}
+            render={({ field }) => (
+              <InputComponent
+                config={{
+                  name: "diagnostico",
+                  label: "Diagnostico",
+                  placeholder: "Diagnostico",
+                  type: "text",
+                  value: field.value,
+                  func: field.onChange,
+                }}
+                multiline
+                containerStyle={{
+                  maxWidth: "none",
+                  width: "100%",
+                  height: "fit-content",
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    height: "20vh",
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    fontSize: "18px",
+                  },
+                }}
+                rows={4}
+              />
+            )}
+          />
+          <Controller
+            name="sintomas"
+            control={control}
+            render={({ field }) => (
+              <InputComponent
+                config={{
+                  name: "sintomas",
+                  label: "Sintomas",
+                  placeholder: "Sintomas",
+                  type: "text",
+                  value: field.value,
+                  func: field.onChange,
+                }}
+                multiline
+                containerStyle={{
+                  maxWidth: "none",
+                  width: "100%",
+                  height: "fit-content",
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    height: "20vh",
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    fontSize: "18px",
+                  },
+                }}
+                rows={4}
+              />
+            )}
+          />
 
-          <div className="campo diagnostico-final">
-            <label>Diagnóstico</label>
-            <textarea
-              name="diagnostico"
-              placeholder="Diagnóstico"
-              value={informe.diagnostico}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
+          <Controller
+            name="tratamiento"
+            control={control}
+            render={({ field }) => (
+              <InputComponent
+                config={{
+                  name: "tratamiento",
+                  label: "Tratamiento",
+                  placeholder: "Tratamiento",
+                  type: "text",
+                  value: field.value,
+                  func: field.onChange,
+                }}
+                multiline
+                containerStyle={{
+                  maxWidth: "none",
+                  width: "100%",
+                  height: "fit-content",
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    height: "20vh",
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    fontSize: "18px",
+                  },
+                }}
+                rows={4}
+              />
+            )}
+          />
 
-          <div className="campo">
-            <label>Síntomas</label>
-
-            <textarea
-              name="sintomas"
-              placeholder="Síntomas"
-              value={informe.sintomas}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
-
-          <div className="campo">
-            <label>Tratamiento</label>
-
-            <textarea
-              name="tratamiento"
-              placeholder="Tratamiento"
-              value={informe.tratamiento}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
-
-          <div className="campo">
-            <label>Evoluciones</label>
-
-            <textarea
-              name="evolucion"
-              placeholder="Evoluciones"
-              value={informe.evolucion}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
+          <Controller
+            name="evolucion"
+            control={control}
+            render={({ field }) => (
+              <InputComponent
+                config={{
+                  name: "evolucion",
+                  label: "Evoluciones",
+                  placeholder: "Evoluciones",
+                  type: "text",
+                  value: field.value,
+                  func: field.onChange,
+                }}
+                multiline
+                containerStyle={{
+                  maxWidth: "none",
+                  width: "100%",
+                  height: "fit-content",
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    height: "20vh",
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    fontSize: "18px",
+                  },
+                }}
+                rows={4}
+              />
+            )}
+          />
 
           {/* OTROS ESTUDIOS */}
 
@@ -719,52 +888,71 @@ function InformePaciente() {
             <p>Selecciona la fecha y hora de la siguiente cita del paciente.</p>
 
             <div className="proxima-consulta-grid">
-              <div className="campo">
-                <label>Fecha de la próxima consulta</label>
-
-                <input
-                  type="date"
-                  name="proximaFechaConsulta"
-                  value={fechaConsulta}
-                  onChange={() => {
-                    setFechaConsulta(fechaConsulta);
-                  }}
-                />
-              </div>
-
-              <div className="campo">
-                <label>Hora de la próxima consulta</label>
-
-                <input
-                  type="time"
-                  name="proximaHoraConsulta"
-                  value={horaConsulta}
-                  onChange={() => {
-                    setHoraConsulta(horaConsulta);
-                  }}
-                />
-              </div>
+              <Controller
+                name="proximaFechaConsulta"
+                control={control}
+                render={({ field }) => (
+                  <InputComponent
+                    config={{
+                      name: "proximaFechaConsulta",
+                      label: "Fecha de la proxima consulta",
+                      type: "date",
+                      value: field.value,
+                      func: field.onChange,
+                    }}
+                    containerStyle={{ maxWidth: "none" }}
+                  />
+                )}
+              />
+              <Controller
+                name="proximaHoraConsulta"
+                control={control}
+                render={({ field }) => (
+                  <InputComponent
+                    config={{
+                      name: "proximaHoraConsulta",
+                      label: "Hora de la proxima consulta",
+                      type: "time",
+                      value: field.value,
+                      func: field.onChange,
+                    }}
+                    containerStyle={{ maxWidth: "none" }}
+                  />
+                )}
+              />
             </div>
           </div>
-        </section>
+        </form>
 
         <div className="informe-buttons">
-          <button type="button" onClick={() => navigate("/menu")}>
-            Cerrar
-          </button>
-
+          <ButtonComponent
+            config={{
+              name: "cerrar",
+              text: "Cerrar",
+              type: "button",
+              variant: "blue",
+            }}
+            onClick={() => navigate("/menu")}
+          />
           <div>
-            <button
-              type="button"
-              testid="boton-guardar-informe"
-              onClick={guardarCambios}
-            >
-              Guardar
-            </button>
-
-            <button type="button" onClick={descargarPDF}>
-              PDF
-            </button>
+            <ButtonComponent
+              config={{
+                name: "guardar",
+                text: "Guardar",
+                type: "submit",
+                variant: "green",
+              }}
+              form="formInforme"
+            />
+            <ButtonComponent
+              config={{
+                name: "pdf",
+                text: "PDF",
+                type: "button",
+                variant: "purple",
+              }}
+              onClick={descargarPDF}
+            />
           </div>
         </div>
       </main>
