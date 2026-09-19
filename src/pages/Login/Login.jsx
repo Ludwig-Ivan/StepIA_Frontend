@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { obtenerByEmail } from "../../services/profesionalService";
@@ -11,70 +12,118 @@ import loginSchema from "../../schema/LoginSchema";
 
 function Login() {
   const navigate = useNavigate();
+  const [errorGeneral, setErrorGeneral] = useState("");
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
   const iniciarSesion = async (datos) => {
-    const profesional = await obtenerByEmail(datos.email);
+    setErrorGeneral("");
+    try {
+      const profesional = await obtenerByEmail(datos.email);
 
-    localStorage.setItem("UsuarioActivo", profesional.email);
-    localStorage.setItem("idProfesional", profesional.idProfesional);
+      if (!profesional) {
+        setErrorGeneral(
+          "No se encontró un profesional con ese correo electrónico.",
+        );
+        return;
+      }
 
-    navigate("/menu");
+      localStorage.setItem("UsuarioActivo", profesional.email);
+      localStorage.setItem("idProfesional", profesional.idProfesional);
+
+      navigate("/menu");
+    } catch (error) {
+      setErrorGeneral(
+        error?.message ||
+          "No se pudo iniciar sesión. Verifica tu conexión e inténtalo de nuevo.",
+      );
+    }
   };
 
   return (
     <div className="login-page">
       <div className="login-overlay">
-        <form className="login-card" onSubmit={handleSubmit(iniciarSesion)}>
-          <div className="login-badge">StepIA</div>
+        <form
+          className="login-card"
+          noValidate
+          onSubmit={handleSubmit(iniciarSesion)}
+        >
+          <header className="login-header">
+            <div className="login-badge" aria-hidden="true">
+              StepIA
+            </div>
 
-          <h1>Iniciar Sesión</h1>
+            <h1 id="login-title">Iniciar Sesión</h1>
 
-          <p className="login-subtitle">
-            Accede al sistema de análisis plantar
-          </p>
+            <p className="login-subtitle">
+              Accede al sistema de análisis plantar para gestionar pacientes y
+              estudios.
+            </p>
+          </header>
 
-          <Controller
-            name="email"
-            control={control}
-            render={({ field }) => (
-              <InputComponent
-                config={{
-                  label: "Correo Electrónico",
-                  name: "email",
-                  type: "text",
-                  placeholder: "Ingresa tu correo",
-                  value: field.value,
-                  func: field.onChange,
-                }}
-              />
-            )}
-          />
+          <div className="login-fields" role="group" aria-label="Datos de acceso">
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <InputComponent
+                  config={{
+                    id: "login-email",
+                    label: "Correo Electrónico",
+                    name: "email",
+                    type: "text",
+                    placeholder: "Ingresa tu correo",
+                    value: field.value,
+                    func: field.onChange,
+                    onBlur: field.onBlur,
+                    autoComplete: "email",
+                    autoFocus: true,
+                    error: errors.email?.message,
+                  }}
+                />
+              )}
+            />
 
-          <Controller
-            name="password"
-            control={control}
-            render={({ field }) => (
-              <InputComponent
-                config={{
-                  label: "Contraseña",
-                  name: "password",
-                  type: "password",
-                  placeholder: "Ingresa tu contraseña",
-                  value: field.value,
-                  func: field.onChange,
-                }}
-              />
-            )}
-          />
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => (
+                <InputComponent
+                  config={{
+                    id: "login-password",
+                    label: "Contraseña",
+                    name: "password",
+                    type: "password",
+                    placeholder: "Ingresa tu contraseña",
+                    value: field.value,
+                    func: field.onChange,
+                    onBlur: field.onBlur,
+                    autoComplete: "current-password",
+                    showToggle: true,
+                    error: errors.password?.message,
+                  }}
+                />
+              )}
+            />
+          </div>
+
+          <Collapse in={Boolean(errorGeneral)}>
+            <Alert
+              variant="filled"
+              severity="error"
+              role="alert"
+              sx={{ boxShadow: 3, my: 1, width: "100%" }}
+            >
+              {errorGeneral}
+            </Alert>
+          </Collapse>
 
           <ButtonComponent
             config={{
@@ -82,33 +131,14 @@ function Login() {
               text: "Ingresar",
               variant: "green",
               type: "submit",
+              loading: isSubmitting,
+              loadingText: "Ingresando…",
             }}
           />
         </form>
       </div>
-      <div
-        style={{
-          position: "fixed",
-          bottom: 24,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "min(90%, 420px)",
-          zIndex: 1400,
-        }}
-      >
-        {errors.email ? (
-          <Collapse in={errors.email}>
-            <Alert variant="filled" severity="warning" sx={{ boxShadow: 3 }}>
-              {errors.email ? errors.email.message : ""}
-            </Alert>
-          </Collapse>
-        ) : (
-          <Collapse in={errors.password}>
-            <Alert variant="filled" severity="warning" sx={{ boxShadow: 3 }}>
-              {errors.password ? errors.password.message : ""}
-            </Alert>
-          </Collapse>
-        )}
+      <div className="sr-only" aria-live="polite">
+        {isSubmitting ? "Ingresando al sistema" : ""}
       </div>
     </div>
   );

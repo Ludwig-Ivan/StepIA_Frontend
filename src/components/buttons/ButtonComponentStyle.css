@@ -34,6 +34,44 @@
     box-shadow: 0 0 18px rgba(35, 255, 143, 0.36), 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
+/* Estado de carga */
+.btn--loading {
+    cursor: progress;
+    opacity: 0.85;
+}
+
+.btn-spinner {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: -3px;
+
+    display: inline-block;
+
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #ffffff;
+
+    border-radius: 50%;
+
+    animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-spinner {
+        animation: none;
+    }
+}
+
+.boton-error {
+    border: 2px solid #c94242;
+}
+
 .btn-white {
     background: linear-gradient(#f0f3f4, #aebbc1);
     color: #1f2d35;

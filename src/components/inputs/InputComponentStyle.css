@@ -10,7 +10,7 @@
 }
 
 .input-group .label-custom {
-    color: white;
+    color: rgb(0, 0, 0, 0.7);
     font-size: 15px;
     font-weight: 800;
     margin-bottom: 8px;
@@ -58,4 +58,17 @@
 .input-group .MuiOutlinedInput-input::placeholder {
     color: #4f5558;
     opacity: 1;
+}
+
+/* Estado de error (Design System) */
+.input-group--error .MuiOutlinedInput-root fieldset {
+    border-color: #c94242 !important;
+}
+
+.input-group--error .MuiOutlinedInput-root.Mui-focused fieldset {
+    border-color: #c94242 !important;
+}
+
+.input-group--error .label-custom {
+    color: #c94242;
 }
