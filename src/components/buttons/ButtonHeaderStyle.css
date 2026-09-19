@@ -39,3 +39,8 @@
     background:
         rgba(255, 255, 255, 0.10);
 }
+
+.btn-option:focus-visible {
+    outline: 2px solid #42b883;
+    outline-offset: 2px;
+}

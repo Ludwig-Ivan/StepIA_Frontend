@@ -12,8 +12,9 @@ import "./ButtonHeaderStyle.css";
  */
 
 function ButtonHeader({ config, children, ...res }) {
+  const label = (config.text || config.name || "").replace(/\n/g, " ").trim();
   return (
-    <button type="button" name={config.name} className="btn-option" {...res}>
+    <button type="button" name={config.name} title={label} className="btn-option" {...res}>
       {children}
       <span>{config.text}</span>
     </button>

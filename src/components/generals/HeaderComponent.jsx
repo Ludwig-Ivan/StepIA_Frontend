@@ -1,5 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  LuChevronDown,
+  LuChevronUp,
+  LuLogOut,
+  LuPencil,
+  LuX,
+  LuUser,
+} from "react-icons/lu";
 import "./HeaderComponentStyle.css";
 /**
  * @param {Object} props
@@ -12,18 +20,56 @@ function HeaderComponent({ childrenLeft, childrenRigth, data }) {
   const { usuario } = data;
   const navigate = useNavigate();
   const [mostrarPerfil, setMostrarPerfil] = useState(false);
+  const [enLinea, setEnLinea] = useState(
+    typeof navigator !== "undefined" ? navigator.onLine : true,
+  );
+  const dropdownRef = useRef(null);
 
-  const cerrarSesion = () => {
-    const confirmar = window.confirm("¿Deseas cerrar sesión?");
-
-    if (!confirmar) {
+  useEffect(() => {
+    if (!mostrarPerfil) {
       return;
     }
 
-    localStorage.removeItem("UsuarioActivo");
+    const alHacerClicFuera = (evento) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(evento.target)
+      ) {
+        setMostrarPerfil(false);
+      }
+    };
 
-    navigate("/");
-  };
+    const alPresionarEscape = (evento) => {
+      if (evento.key === "Escape") {
+        setMostrarPerfil(false);
+      }
+    };
+
+    document.addEventListener("mousedown", alHacerClicFuera);
+    document.addEventListener("keydown", alPresionarEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", alHacerClicFuera);
+      document.removeEventListener("keydown", alPresionarEscape);
+    };
+  }, [mostrarPerfil]);
+
+  useEffect(() => {
+    const alConectar = () => setEnLinea(true);
+    const alDesconectar = () => setEnLinea(false);
+
+    window.addEventListener("online", alConectar);
+    window.addEventListener("offline", alDesconectar);
+
+    return () => {
+      window.removeEventListener("online", alConectar);
+      window.removeEventListener("offline", alDesconectar);
+    };
+  }, []);
+
+  const iniciales =
+    ((usuario.nombre || "D").charAt(0) +
+      (usuario.apellidoPaterno || "").charAt(0)) || "D";
 
   return (
     <header className="top-menu">
@@ -33,12 +79,15 @@ function HeaderComponent({ childrenLeft, childrenRigth, data }) {
           className="top-logo"
           onClick={() => navigate("/menu")}
         >
-          StepAI
+          StepIA
         </button>
 
-        <div className="connection-status">
-          <span className="connection-dot"></span>
-          <span>Conectado</span>
+        <div className="connection-status" role="status" aria-live="polite">
+          <span
+            className={`connection-dot${enLinea ? "" : " connection-dot--offline"}`}
+            aria-hidden="true"
+          />
+          <span>{enLinea ? "Conectado" : "Sin conexión"}</span>
         </div>
 
         {childrenLeft}
@@ -47,38 +96,53 @@ function HeaderComponent({ childrenLeft, childrenRigth, data }) {
       <div className="top-menu-right">
         {childrenRigth}
 
-        <div className="perfil-menu-container">
+        <div className="perfil-menu-container" ref={dropdownRef}>
           <button
             type="button"
             className="doctor-info"
-            onClick={() => setMostrarPerfil(!mostrarPerfil)}
+            aria-expanded={mostrarPerfil}
+            aria-haspopup="true"
+            aria-controls="perfil-dropdown"
+            onClick={() => setMostrarPerfil((previo) => !previo)}
           >
-            <div className="doctor-avatar"></div>
-            <div className="doctor-datos">
+            <span className="doctor-avatar" aria-hidden="true">
+              {initialAvatar(iniciales)}
+            </span>
+            <span className="doctor-datos">
               <span className="doctor-nombre">
                 {usuario.nombre || "Doctor"}
               </span>
               <span className="doctor-rol">
                 {usuario.especialidad || "Médico"}
               </span>
-            </div>
-            <span className="perfil-flecha">{mostrarPerfil ? "▲" : "▼"}</span>
+            </span>
+            <span className="perfil-flecha" aria-hidden="true">
+              {mostrarPerfil ? <LuChevronUp /> : <LuChevronDown />}
+            </span>
           </button>
 
           {mostrarPerfil && (
-            <div className="perfil-dropdown">
+            <div
+              className="perfil-dropdown"
+              id="perfil-dropdown"
+              role="menu"
+              aria-label="Menú de perfil"
+            >
               <div className="perfil-dropdown-header">
-                <div className="perfil-avatar-grande"></div>
-                <div>
+                <div className="perfil-avatar-grande" aria-hidden="true">
+                  {initialAvatar(iniciales)}
+                </div>
+                <div className="perfil-identidad">
                   <h3>{`${usuario.nombre} ${usuario.apellidoPaterno} ${usuario.apellidoMaterno}`}</h3>
                   <p>{usuario.especialidad}</p>
                 </div>
                 <button
                   type="button"
                   className="perfil-cerrar"
+                  aria-label="Cerrar menú de perfil"
                   onClick={() => setMostrarPerfil(false)}
                 >
-                  ✕
+                  <LuX />
                 </button>
               </div>
 
@@ -123,14 +187,22 @@ function HeaderComponent({ childrenLeft, childrenRigth, data }) {
                     navigate("/ajustes");
                   }}
                 >
-                  ⚙️ Editar perfil
+                  <LuPencil aria-hidden="true" />
+                  Editar perfil
                 </button>
                 <button
                   type="button"
                   className="perfil-salir"
-                  onClick={cerrarSesion}
+                  onClick={() => {
+                    // Confirmación manejada por el usuario vía botón nativo
+                    if (window.confirm("¿Deseas cerrar sesión?")) {
+                      localStorage.removeItem("UsuarioActivo");
+                      navigate("/");
+                    }
+                  }}
                 >
-                  🚪 Cerrar sesión
+                  <LuLogOut aria-hidden="true" />
+                  Cerrar sesión
                 </button>
               </div>
             </div>
@@ -139,6 +211,10 @@ function HeaderComponent({ childrenLeft, childrenRigth, data }) {
       </div>
     </header>
   );
+}
+
+function initialAvatar(iniciales) {
+  return iniciales ? iniciales : <LuUser />;
 }
 
 export default HeaderComponent;

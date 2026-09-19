@@ -112,6 +112,14 @@
         0 0 10px #31ec55;
 }
 
+.connection-dot--offline {
+    background: #c94242;
+
+    box-shadow:
+        0 0 6px #c94242,
+        0 0 10px #c94242;
+}
+
 
 /* =========================================
    PERFIL EN EL MENÚ
@@ -186,7 +194,11 @@
     background:
         rgba(255, 255, 255, 0.92);
 
-    font-size: 22px;
+    color: #0e7c6a;
+
+    font-size: 14px;
+
+    font-weight: 800;
 }
 
 
@@ -321,7 +333,11 @@
     background:
         rgba(255, 255, 255, 0.92);
 
-    font-size: 28px;
+    color: #0e7c6a;
+
+    font-size: 19px;
+
+    font-weight: 800;
 }
 
 
@@ -463,6 +479,14 @@
 .perfil-salir {
     flex: 1;
 
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
     border: none;
 
     padding:
@@ -471,6 +495,8 @@
     border-radius: 8px;
 
     color: white;
+
+    font-family: inherit;
 
     font-size: 11px;
 
@@ -481,6 +507,13 @@
     transition:
         opacity 0.2s ease,
         transform 0.2s ease;
+}
+
+.perfil-editar:focus-visible,
+.perfil-salir:focus-visible {
+    outline: 2px solid #0e7c6a;
+
+    outline-offset: 2px;
 }
 
 
