@@ -17,3 +17,5 @@ const PacienteSchema = z.object({
 });
 
 export const PacienteModel = (data) => PacienteSchema.parse(data);
+
+export { PacienteSchema };
