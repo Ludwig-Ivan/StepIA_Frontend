@@ -1,13 +1,371 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AnalisisPlantar.css";
 import { registrarActividad } from "../../utils/historial";
+import { FaUserAlt } from "react-icons/fa";
+import {
+  FaCloudArrowUp,
+  FaMagnifyingGlass,
+  FaShoePrints,
+  FaXmark,
+} from "react-icons/fa6";
+import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
+import Collapse from "@mui/material/Collapse";
+import Alert from "@mui/material/Alert";
+
+const TAMANO_PACIENTES = 5;
+
+/** @param {unknown} valor @returns {string} */
+const convertirTexto = (valor) => {
+  return String(valor || "")
+    .toLowerCase()
+    .trim();
+};
+
+const generarIdPaciente = (pacienteData = {}, index = 0) => {
+  const base =
+    pacienteData.idPaciente ||
+    `${
+      pacienteData.nss ||
+      pacienteData.numeroRegistroSocial ||
+      pacienteData.nombre ||
+      "paciente"
+    }-${pacienteData.fecha || ""}-${pacienteData.hora || ""}-${index}`;
+
+  return String(base)
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]/g, "");
+};
+
+const leerPacientesLocal = () => {
+  try {
+    const guardados = JSON.parse(localStorage.getItem("pacientes"));
+    return Array.isArray(guardados) ? guardados : [];
+  } catch {
+    return [];
+  }
+};
+
+const normalizarPacientes = (lista) => {
+  return lista.map((paciente, index) => {
+    const nssFinal =
+      paciente.nss ||
+      paciente.numeroRegistroSocial ||
+      paciente.registroSocial ||
+      "";
+
+    return {
+      ...paciente,
+      nss: nssFinal,
+      idPaciente: generarIdPaciente({ ...paciente, nss: nssFinal }, index),
+    };
+  });
+};
+
+const convertirABase64 = (archivo) => {
+  return new Promise((resolve, reject) => {
+    const lector = new FileReader();
+
+    lector.onload = () => resolve(lector.result);
+    lector.onerror = (error) => reject(error);
+
+    lector.readAsDataURL(archivo);
+  });
+};
+
+const crearPaginas = (paginaActual, total) => {
+  const paginas = [];
+  const incluidas = new Set();
+
+  const incluir = (valor) => {
+    if (valor < 0 || valor > total - 1 || incluidas.has(valor)) return;
+
+    const ultima = paginas[paginas.length - 1];
+
+    if (ultima && valor - ultima.valor > 1) {
+      paginas.push({ valor: null, elipsis: true });
+    }
+
+    incluidas.add(valor);
+    paginas.push({ valor, elipsis: false });
+  };
+
+  incluir(0);
+  if (total > 3) {
+    incluir(paginaActual - 1);
+    incluir(paginaActual);
+    incluir(paginaActual + 1);
+  }
+  incluir(total - 1);
+
+  return paginas;
+};
+
+function HeaderAnalisis({ onMenu }) {
+  return (
+    <header className="analisis-header">
+      <button type="button" className="analisis-logo" onClick={onMenu}>
+        StepIA
+      </button>
+
+      <div className="analisis-user" title="Profesional en sesión">
+        <span>USUARIO</span>
+        <div className="analisis-user-icon" aria-hidden="true">
+          <FaUserAlt />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function SubidaImagen({ idInput, titulo, alt, preview, nombreArchivo, onCargar }) {
+  const inputRef = useRef(null);
+
+  return (
+    <div className="pie-upload" role="group" aria-label={`Imagen del ${alt}`}>
+      <span className="pie-upload-rotulo">{titulo}</span>
+
+      <div className="pie-box">
+        {preview ? (
+          <img src={preview} alt={alt} />
+        ) : (
+          <div className="pie-box-vacio">
+            <FaShoePrints className="pie-box-vacio-icono" aria-hidden="true" />
+            <span>Sin imagen</span>
+          </div>
+        )}
+      </div>
+
+      <input
+        ref={inputRef}
+        id={idInput}
+        className="sr-only"
+        type="file"
+        accept="image/*"
+        onChange={onCargar}
+      />
+
+      <label className="analisis-btn-subir" htmlFor={idInput}>
+        <FaCloudArrowUp aria-hidden="true" />
+        {preview ? "Cambiar imagen" : "Subir imagen"}
+      </label>
+
+      {nombreArchivo && <small className="pie-archivo">{nombreArchivo}</small>}
+    </div>
+  );
+}
+
+function SelectorPaciente({
+  cargando,
+  hayPacientes,
+  pacientesPagina,
+  totalPaginas,
+  pagina,
+  onIrAPagina,
+  busqueda,
+  onCambioBusqueda,
+  onLimpiarBusqueda,
+  seleccionado,
+  onSeleccionar,
+  onRegistrarPaciente,
+}) {
+  let contenido;
+
+  if (cargando) {
+    contenido = (
+      <div className="analisis-carga" role="status" aria-live="polite">
+        <span className="analisis-spinner analisis-spinner--mini" aria-hidden="true" />
+        Cargando pacientes…
+      </div>
+    );
+  } else if (!hayPacientes) {
+    contenido = (
+      <div className="analisis-aviso" role="status" aria-live="polite">
+        <Alert
+          variant="filled"
+          severity="warning"
+          sx={{ fontWeight: 600, borderRadius: 1.5 }}
+        >
+          No hay pacientes registrados. Regístralo antes de realizar un análisis.
+        </Alert>
+
+        <ButtonComponent
+          config={{
+            name: "registrar-paciente",
+            text: "Registrar paciente",
+            type: "button",
+            variant: "green",
+          }}
+          onClick={onRegistrarPaciente}
+        />
+      </div>
+    );
+  } else if (pacientesPagina.length === 0) {
+    contenido = (
+      <div className="analisis-aviso" role="status" aria-live="polite">
+        <Alert
+          variant="filled"
+          severity="info"
+          sx={{ fontWeight: 600, borderRadius: 1.5 }}
+        >
+          No se encontraron pacientes con esa búsqueda.
+        </Alert>
+
+        <ButtonComponent
+          config={{
+            name: "limpiar-busqueda",
+            text: "Limpiar búsqueda",
+            type: "button",
+            variant: "blue",
+          }}
+          onClick={onLimpiarBusqueda}
+        />
+      </div>
+    );
+  } else {
+    contenido = (
+      <>
+        <div className="paciente-lista" role="radiogroup" aria-label="Pacientes disponibles">
+          {pacientesPagina.map((paciente) => {
+            const coincide =
+              seleccionado?.idPaciente === paciente.idPaciente;
+
+            return (
+              <label
+                key={paciente.idPaciente}
+                className={`paciente-opcion${coincide ? " paciente-opcion--activa" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="paciente-seleccion"
+                  value={paciente.idPaciente}
+                  checked={coincide}
+                  onChange={() => onSeleccionar(paciente.idPaciente)}
+                />
+
+                <span className="paciente-opcion-marcador" aria-hidden="true" />
+
+                <span className="paciente-opcion-info">
+                  <strong>{paciente.nombre || "Sin nombre"}</strong>
+                  <small>
+                    {paciente.curp || paciente.nss || "Sin registro"}
+                    {paciente.fechaNacimiento
+                      ? ` • ${paciente.fechaNacimiento}`
+                      : ""}
+                  </small>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+
+        {totalPaginas > 1 && (
+          <div className="analisis-paginacion">
+            <button
+              type="button"
+              className="analisis-pagina-boton"
+              aria-label="Página anterior"
+              onClick={() => onIrAPagina(pagina - 1)}
+              disabled={pagina <= 0}
+            >
+              ‹
+            </button>
+
+            {crearPaginas(pagina, totalPaginas).map((itemPagina, indice) =>
+              itemPagina.elipsis ? (
+                <span
+                  key={`elipsis-${indice}`}
+                  className="analisis-pagina-elipsis"
+                  aria-hidden="true"
+                >
+                  …
+                </span>
+              ) : (
+                <button
+                  key={itemPagina.valor}
+                  type="button"
+                  className={`analisis-pagina-boton${itemPagina.valor === pagina ? " analisis-pagina-boton--activa" : ""}`}
+                  aria-label={`Página ${itemPagina.valor + 1}`}
+                  aria-current={itemPagina.valor === pagina ? "page" : undefined}
+                  onClick={() => onIrAPagina(itemPagina.valor)}
+                >
+                  {itemPagina.valor + 1}
+                </button>
+              ),
+            )}
+
+            <button
+              type="button"
+              className="analisis-pagina-boton"
+              aria-label="Página siguiente"
+              onClick={() => onIrAPagina(pagina + 1)}
+              disabled={pagina >= totalPaginas - 1}
+            >
+              ›
+            </button>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <section className="analisis-step" aria-labelledby="analisis-paso-1">
+      <h2 id="analisis-paso-1">
+        <span className="analisis-step-num" aria-hidden="true">
+          1
+        </span>
+        Seleccionar paciente
+      </h2>
+
+      {hayPacientes && (
+        <search className="analisis-buscador">
+          <label className="sr-only" htmlFor="analisis-input-busqueda">
+            Buscar paciente
+          </label>
+
+          <FaMagnifyingGlass className="analisis-buscador-icono" aria-hidden="true" />
+
+          <input
+            id="analisis-input-busqueda"
+            type="search"
+            placeholder="Buscar por nombre o número de registro social..."
+            value={busqueda}
+            onChange={(e) => onCambioBusqueda(e.target.value)}
+          />
+
+          {busqueda && (
+            <button
+              type="button"
+              className="analisis-clear"
+              aria-label="Limpiar búsqueda"
+              onClick={onLimpiarBusqueda}
+            >
+              <FaXmark aria-hidden="true" />
+            </button>
+          )}
+        </search>
+      )}
+
+      {contenido}
+
+      {seleccionado && (
+        <div className="paciente-seleccionado" role="status" aria-live="polite">
+          Paciente seleccionado: <strong>{seleccionado.nombre}</strong>
+        </div>
+      )}
+    </section>
+  );
+}
 
 function AnalisisPlantar() {
   const navigate = useNavigate();
 
   const [pacientes, setPacientes] = useState([]);
+  const [cargandoPacientes, setCargandoPacientes] = useState(true);
   const [busqueda, setBusqueda] = useState("");
+  const [pagina, setPagina] = useState(0);
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState(null);
 
   const [pieIzquierdo, setPieIzquierdo] = useState(null);
@@ -19,112 +377,100 @@ function AnalisisPlantar() {
   const [resultadoIA, setResultadoIA] = useState("");
   const [tipoPie, setTipoPie] = useState("");
   const [cargando, setCargando] = useState(false);
-
-  const convertirTexto = (valor) => {
-    return String(valor || "")
-      .toLowerCase()
-      .trim();
-  };
-
-  const generarIdPaciente = (pacienteData = {}, index = 0) => {
-    const base =
-      pacienteData.idPaciente ||
-      `${
-        pacienteData.nss ||
-        pacienteData.numeroRegistroSocial ||
-        pacienteData.nombre ||
-        "paciente"
-      }-${pacienteData.fecha || ""}-${pacienteData.hora || ""}-${index}`;
-
-    return String(base)
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]/g, "");
-  };
+  const [guardando, setGuardando] = useState(false);
+  const [mensaje, setMensaje] = useState(null);
 
   useEffect(() => {
-    const pacientesGuardados =
-      JSON.parse(localStorage.getItem("pacientes")) || [];
+    Promise.resolve().then(() => {
+      const pacientesGuardados = leerPacientesLocal();
+      const pacientesConId = normalizarPacientes(pacientesGuardados);
 
-    const pacientesConId = pacientesGuardados.map((paciente, index) => {
-      const nssFinal =
-        paciente.nss ||
-        paciente.numeroRegistroSocial ||
-        paciente.registroSocial ||
-        "";
+      localStorage.setItem("pacientes", JSON.stringify(pacientesConId));
 
-      return {
-        ...paciente,
-
-        nss: nssFinal,
-
-        idPaciente: generarIdPaciente(
-          {
-            ...paciente,
-            nss: nssFinal,
-          },
-          index,
-        ),
-      };
+      setPacientes(pacientesConId);
+      setCargandoPacientes(false);
     });
-
-    localStorage.setItem("pacientes", JSON.stringify(pacientesConId));
-
-    setPacientes(pacientesConId);
   }, []);
+
+  useEffect(() => {
+    if (!mensaje) return undefined;
+
+    const temporizador = setTimeout(() => setMensaje(null), 5000);
+
+    return () => clearTimeout(temporizador);
+  }, [mensaje]);
 
   const pacientesFiltrados = pacientes.filter((paciente) => {
     const texto = convertirTexto(busqueda);
 
-    if (texto === "") {
-      return true;
-    }
+    if (texto === "") return true;
+
+    const incluye = (valor) =>
+      `${valor || ""}`.toLowerCase().trim().includes(texto);
 
     return (
-      convertirTexto(paciente.nombre).includes(texto) ||
-      convertirTexto(paciente.nss).includes(texto) ||
-      convertirTexto(paciente.numeroRegistroSocial).includes(texto) ||
-      convertirTexto(paciente.registroSocial).includes(texto) ||
-      convertirTexto(paciente.fecha).includes(texto) ||
-      convertirTexto(paciente.hora).includes(texto) ||
-      convertirTexto(paciente.analisis).includes(texto)
+      incluye(paciente.nombre) ||
+      incluye(paciente.nss) ||
+      incluye(paciente.numeroRegistroSocial) ||
+      incluye(paciente.registroSocial) ||
+      incluye(paciente.fecha) ||
+      incluye(paciente.hora) ||
+      incluye(paciente.analisis)
     );
   });
+
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(pacientesFiltrados.length / TAMANO_PACIENTES),
+  );
+  const paginaSegura = Math.min(pagina, totalPaginas - 1);
+  const pacientesPagina = pacientesFiltrados.slice(
+    paginaSegura * TAMANO_PACIENTES,
+    (paginaSegura + 1) * TAMANO_PACIENTES,
+  );
+
+  const cambiarBusqueda = (valor) => {
+    setBusqueda(valor);
+    setPagina(0);
+    setPacienteSeleccionado(null);
+  };
+
+  const limpiarBusqueda = () => {
+    setBusqueda("");
+    setPagina(0);
+    setPacienteSeleccionado(null);
+  };
+
+  const irAPagina = (nuevaPagina) => {
+    if (
+      cargandoPacientes ||
+      nuevaPagina === paginaSegura ||
+      nuevaPagina < 0 ||
+      nuevaPagina >= totalPaginas
+    ) {
+      return;
+    }
+
+    setPagina(nuevaPagina);
+  };
 
   const seleccionarPaciente = (idPaciente) => {
     const paciente = pacientes.find((p) => p.idPaciente === idPaciente);
 
-    if (!paciente) {
-      setPacienteSeleccionado(null);
-
-      return;
-    }
-
-    setPacienteSeleccionado(paciente);
-  };
-
-  const convertirABase64 = (archivo) => {
-    return new Promise((resolve, reject) => {
-      const lector = new FileReader();
-
-      lector.onload = () => resolve(lector.result);
-
-      lector.onerror = (error) => reject(error);
-
-      lector.readAsDataURL(archivo);
-    });
+    setPacienteSeleccionado(paciente || null);
   };
 
   const cargarImagen = async (e, tipo) => {
     const archivo = e.target.files[0];
 
-    if (!archivo) {
-      return;
-    }
+    if (!archivo) return;
 
     if (!archivo.type.startsWith("image/")) {
-      alert("Solo se permiten imágenes");
-
+      setMensaje({
+        texto: "Solo se permiten imágenes. Selecciona un archivo de imagen.",
+        severidad: "error",
+      });
+      e.target.value = "";
       return;
     }
 
@@ -133,115 +479,75 @@ function AnalisisPlantar() {
 
       if (tipo === "izquierdo") {
         setPieIzquierdo(archivo);
-
         setPreviewIzquierdo(imagenBase64);
       } else {
         setPieDerecho(archivo);
-
         setPreviewDerecho(imagenBase64);
       }
-    } catch (error) {
-      console.error(error);
-
-      alert("Error al cargar la imagen");
+    } catch {
+      setMensaje({
+        texto: "Error al cargar la imagen. Inténtalo de nuevo.",
+        severidad: "error",
+      });
+    } finally {
+      e.target.value = "";
     }
   };
 
-  const analizarPies = async () => {
+  const analizarPies = () => {
     if (!pacienteSeleccionado) {
-      alert("Selecciona un paciente");
-
+      setMensaje({ texto: "Selecciona un paciente.", severidad: "error" });
       return;
     }
 
     if (!pieIzquierdo || !pieDerecho) {
-      alert("Debes cargar ambas imágenes de los pies");
-
+      setMensaje({
+        texto: "Debes cargar ambas imágenes de los pies.",
+        severidad: "error",
+      });
       return;
     }
 
+    setMensaje(null);
     setCargando(true);
 
-    try {
-      /*
-        =========================================
-        AQUÍ CONECTARÁS TU MODELO DE IA
-        =========================================
+    // Punto de conexión del modelo de IA: aquí se enviarían las imágenes
+    // (FormData con pieIzquierdo/pieDerecho) y se asignarían los resultados.
+    setTimeout(() => {
+      setResultadoIA(
+        "Análisis generado por el modelo IA pendiente de conexión.",
+      );
 
-        const formData =
-          new FormData()
-
-        formData.append(
-          'pieIzquierdo',
-          pieIzquierdo
-        )
-
-        formData.append(
-          'pieDerecho',
-          pieDerecho
-        )
-
-        const respuesta =
-          await fetch(
-            'http://localhost:5000/api/analizar-pies',
-            {
-              method: 'POST',
-              body: formData
-            }
-          )
-
-        const datos =
-          await respuesta.json()
-
-        setResultadoIA(
-          datos.resultado
-        )
-
-        setTipoPie(
-          datos.tipoPie
-        )
-        */
-
-      setTimeout(() => {
-        setResultadoIA(
-          "Análisis generado por el modelo IA pendiente de conexión.",
-        );
-
-        setTipoPie("Tipo de pie pendiente");
-
-        setCargando(false);
-      }, 1200);
-    } catch (error) {
-      console.error(error);
-
-      alert("Error al analizar las imágenes");
+      setTipoPie("Tipo de pie pendiente");
 
       setCargando(false);
-    }
+
+      setMensaje({
+        texto: "Análisis completado. Revisa el resultado antes de guardar.",
+        severidad: "success",
+      });
+    }, 1200);
   };
 
   const guardarAnalisis = () => {
-    if (!pacienteSeleccionado) {
-      alert("Selecciona un paciente");
+    if (guardando) return;
 
+    if (!pacienteSeleccionado) {
+      setMensaje({ texto: "Selecciona un paciente.", severidad: "error" });
       return;
     }
 
     if (!previewIzquierdo || !previewDerecho) {
-      alert("Carga ambas imágenes");
-
+      setMensaje({ texto: "Carga ambas imágenes.", severidad: "error" });
       return;
     }
 
     if (resultadoIA.trim() === "" || tipoPie.trim() === "") {
-      alert("Primero presiona Analizar");
-
+      setMensaje({ texto: "Primero presiona Analizar.", severidad: "error" });
       return;
     }
 
-    // =========================================
-    // ACTUALIZAR PACIENTE
-    // =========================================
+    setGuardando(true);
 
     const pacienteActualizado = {
       ...pacienteSeleccionado,
@@ -265,10 +571,6 @@ function AnalisisPlantar() {
       ultimaModificacion: new Date().toLocaleString(),
     };
 
-    // =========================================
-    // ACTUALIZAR LISTA DE PACIENTES
-    // =========================================
-
     const pacientesActualizados = pacientes.map((paciente) => {
       if (paciente.idPaciente === pacienteSeleccionado.idPaciente) {
         return pacienteActualizado;
@@ -277,10 +579,6 @@ function AnalisisPlantar() {
       return paciente;
     });
 
-    // =========================================
-    // GUARDAR EN LOCALSTORAGE
-    // =========================================
-
     localStorage.setItem("pacientes", JSON.stringify(pacientesActualizados));
 
     localStorage.setItem(
@@ -288,203 +586,175 @@ function AnalisisPlantar() {
       JSON.stringify(pacienteActualizado),
     );
 
-    // =========================================
-    // REGISTRAR EN HISTORIAL
-    // =========================================
-
     registrarActividad({
       tipo: "Análisis plantar",
-
       descripcion: "Se realizó un análisis plantar",
-
       paciente: pacienteSeleccionado.nombre || "Paciente",
-
       detalles: resultadoIA || "Análisis realizado correctamente",
     });
 
-    // =========================================
-    // ACTUALIZAR ESTADO
-    // =========================================
-
     setPacientes(pacientesActualizados);
-
     setPacienteSeleccionado(pacienteActualizado);
 
-    // =========================================
-    // MENSAJE Y NAVEGACIÓN
-    // =========================================
+    setMensaje({
+      texto: "Análisis guardado en el informe del paciente.",
+      severidad: "success",
+    });
 
-    alert("Análisis guardado en el informe del paciente");
-
-    navigate("/informe-paciente");
+    setTimeout(() => navigate("/informe-paciente"), 900);
   };
 
   return (
     <div className="analisis-page">
-      <header className="analisis-header">
-        <h2>StepIA</h2>
-      </header>
+      <HeaderAnalisis onMenu={() => navigate("/menu")} />
+
       <main className="analisis-main">
-        <section className="analisis-card">
-          <h1>Análisis Plantar</h1>
+        <section className="analisis-card" aria-labelledby="analisis-titulo">
+          <h1 id="analisis-titulo">Análisis Plantar</h1>
 
           <p className="analisis-subtitle">
             Busca y selecciona un paciente registrado para guardar el análisis
             en su informe.
           </p>
-          <div className="selector-paciente">
-            <label>Buscar Paciente</label>
-            <input
-              type="text"
-              placeholder="Buscar por nombre o número de registro social..."
-              value={busqueda}
-              onChange={(e) => {
-                setBusqueda(e.target.value);
 
-                setPacienteSeleccionado(null);
-              }}
-            />
-          </div>
-          <div className="selector-paciente">
-            <label>Elegir Paciente</label>
-            <select
-              value={pacienteSeleccionado?.idPaciente || ""}
-              onChange={(e) => seleccionarPaciente(e.target.value)}
+          <SelectorPaciente
+            cargando={cargandoPacientes}
+            hayPacientes={pacientes.length > 0}
+            pacientesPagina={pacientesPagina}
+            totalPaginas={totalPaginas}
+            pagina={paginaSegura}
+            onIrAPagina={irAPagina}
+            busqueda={busqueda}
+            onCambioBusqueda={cambiarBusqueda}
+            onLimpiarBusqueda={limpiarBusqueda}
+            seleccionado={pacienteSeleccionado}
+            onSeleccionar={seleccionarPaciente}
+            onRegistrarPaciente={() => navigate("/registro-paciente")}
+          />
+
+          <section className="analisis-step" aria-labelledby="analisis-paso-2">
+            <h2 id="analisis-paso-2">
+              <span className="analisis-step-num" aria-hidden="true">
+                2
+              </span>
+              Imágenes de los pies
+            </h2>
+
+            <div className="pies-container">
+              <SubidaImagen
+                idInput="input-pie-izquierdo"
+                titulo="Pie Izquierdo"
+                alt="Pie izquierdo"
+                preview={previewIzquierdo}
+                nombreArchivo={pieIzquierdo?.name}
+                onCargar={(e) => cargarImagen(e, "izquierdo")}
+              />
+
+              <SubidaImagen
+                idInput="input-pie-derecho"
+                titulo="Pie Derecho"
+                alt="Pie derecho"
+                preview={previewDerecho}
+                nombreArchivo={pieDerecho?.name}
+                onCargar={(e) => cargarImagen(e, "derecho")}
+              />
+            </div>
+          </section>
+
+          <section className="analisis-step" aria-labelledby="analisis-paso-3">
+            <h2 id="analisis-paso-3">
+              <span className="analisis-step-num" aria-hidden="true">
+                3
+              </span>
+              Resultado del análisis
+            </h2>
+
+            <div className="resultado-panel">
+              <div className="analisis-campo">
+                <label htmlFor="resultado-ia">Resultado IA</label>
+
+                <textarea
+                  id="resultado-ia"
+                  value={resultadoIA}
+                  placeholder="Resultado generado por IA..."
+                  aria-readonly="true"
+                  readOnly
+                />
+              </div>
+
+              <div className="analisis-campo">
+                <label htmlFor="tipo-pie">Tipo de Pie</label>
+
+                <input
+                  id="tipo-pie"
+                  type="text"
+                  placeholder="Tipo de Pie"
+                  value={tipoPie}
+                  aria-readonly="true"
+                  readOnly
+                />
+              </div>
+            </div>
+          </section>
+
+          <Collapse in={Boolean(mensaje)}>
+            <div
+              className="analisis-mensaje"
+              role={mensaje?.severidad === "error" ? "alert" : "status"}
             >
-              <option value="">
-                {pacientesFiltrados.length > 0
-                  ? "Selecciona un paciente"
-                  : "No hay coincidencias"}
-              </option>
+              <Alert
+                variant="filled"
+                severity={mensaje?.severidad || "info"}
+                sx={{ fontWeight: 600, borderRadius: 1.5 }}
+              >
+                {mensaje?.texto}
+              </Alert>
+            </div>
+          </Collapse>
 
-              {pacientesFiltrados.map((paciente) => (
-                <option key={paciente.idPaciente} value={paciente.idPaciente}>
-                  {paciente.nombre || "Sin nombre"}
-
-                  {" | NSS: "}
-
-                  {paciente.curp || "Sin registro"}
-
-                  {" | "}
-
-                  {paciente.fechaNacimiento || "Sin fecha"}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {pacienteSeleccionado && (
-            <div className="paciente-seleccionado">
-              Paciente seleccionado:{" "}
-              <strong>{pacienteSeleccionado.nombre}</strong>
+          {cargando && (
+            <div className="analisis-estado-ia" role="status" aria-live="polite">
+              <span className="analisis-spinner analisis-spinner--mini" aria-hidden="true" />
+              Analizando imágenes con el modelo de IA…
             </div>
           )}
-
-          {pacientes.length === 0 && (
-            <div className="sin-pacientes">
-              No hay pacientes registrados. Primero registra un paciente.
-            </div>
-          )}
-
-          {pacientes.length > 0 && pacientesFiltrados.length === 0 && (
-            <div className="sin-pacientes">
-              No se encontraron pacientes con esa búsqueda.
-            </div>
-          )}
-
-          <div className="pies-container">
-            <div className="pie-upload">
-              <label>Pie Izquierdo</label>
-
-              <div className="pie-box">
-                {previewIzquierdo ? (
-                  <img src={previewIzquierdo} alt="Pie izquierdo" />
-                ) : (
-                  <span>Sin imagen</span>
-                )}
-              </div>
-
-              <label className="btn-subir-imagen">
-                Subir imagen
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => cargarImagen(e, "izquierdo")}
-                />
-              </label>
-            </div>
-
-            <div className="pie-upload">
-              <label>Pie Derecho</label>
-
-              <div className="pie-box">
-                {previewDerecho ? (
-                  <img src={previewDerecho} alt="Pie derecho" />
-                ) : (
-                  <span>Sin imagen</span>
-                )}
-              </div>
-
-              <label className="btn-subir-imagen">
-                Subir imagen
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => cargarImagen(e, "derecho")}
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className="resultado-panel">
-            <div className="resultado-campo">
-              <label>Resultado IA</label>
-
-              <textarea
-                value={resultadoIA}
-                placeholder="Resultado generado por IA..."
-                readOnly
-              />
-            </div>
-
-            <div className="tipo-pie-campo">
-              <label>Tipo de Pie</label>
-
-              <input
-                type="text"
-                placeholder="Tipo de Pie"
-                value={tipoPie}
-                readOnly
-              />
-            </div>
-          </div>
 
           <div className="analisis-buttons">
-            <button
-              type="button"
-              className="btn-volver-form"
+            <ButtonComponent
+              config={{
+                name: "volver",
+                text: "Volver",
+                type: "button",
+                variant: "blue",
+              }}
               onClick={() => navigate(-1)}
-            >
-              Volver
-            </button>
+            />
 
-            <button
-              type="button"
-              className="btn-analizar"
+            <ButtonComponent
+              config={{
+                name: "analizar",
+                text: "Analizar",
+                type: "button",
+                variant: "green",
+                loading: cargando,
+                loadingText: "Analizando…",
+                disabled: pacientes.length === 0,
+              }}
               onClick={analizarPies}
-              disabled={cargando || pacientes.length === 0}
-            >
-              {cargando ? "Analizando..." : "Analizar"}
-            </button>
+            />
 
-            <button
-              type="button"
-              className="btn-siguiente"
+            <ButtonComponent
+              config={{
+                name: "guardar",
+                text: "Guardar",
+                type: "button",
+                variant: "purple",
+                loading: guardando,
+                loadingText: "Guardando…",
+                disabled: pacientes.length === 0,
+              }}
               onClick={guardarAnalisis}
-              disabled={pacientes.length === 0}
-            >
-              Guardar
-            </button>
+            />
           </div>
         </section>
       </main>
