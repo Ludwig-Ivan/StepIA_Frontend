@@ -1,0 +1,77 @@
+.no-encontrado {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+
+  background-image:
+    var(--step-overlay),
+    url("../../assets/images/fondo-medico.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.no-encontrado-card {
+  width: 100%;
+  max-width: 460px;
+  text-align: center;
+  padding: 40px 32px;
+
+  border-radius: 20px;
+  background: var(--step-surface);
+  border: 1px solid var(--step-border);
+  box-shadow: 0 18px 40px var(--step-shadow);
+  color: var(--step-text);
+}
+
+.no-encontrado-codigo {
+  margin: 0;
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--step-accent);
+}
+
+.no-encontrado-card h1 {
+  margin: 12px 0 8px;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.no-encontrado-texto {
+  margin: 0 0 24px;
+  color: var(--step-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.no-encontrado-boton {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+
+  background: var(--step-accent);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.no-encontrado-boton:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 520px) {
+  .no-encontrado-card {
+    padding: 32px 22px;
+  }
+
+  .no-encontrado-codigo {
+    font-size: 52px;
+  }
+}

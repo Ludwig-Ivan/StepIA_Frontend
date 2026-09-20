@@ -4,6 +4,13 @@ const CLAVES = {
   PACIENTE: "idPaciente",
 };
 
+const CLAVES_PII = [
+  "pacienteSeleccionado",
+  "pacienteActual",
+  "datosMedicosActual",
+  "resultadoAnalisisPlantar",
+];
+
 export const guardarSesion = (profesional) => {
   if (!profesional) {
     return;
@@ -43,7 +50,7 @@ export const haySesionActiva = () =>
   Boolean(localStorage.getItem(CLAVES.USUARIO));
 
 export const cerrarSesion = () => {
-  Object.values(CLAVES).forEach((clave) => {
+  [...Object.values(CLAVES), ...CLAVES_PII].forEach((clave) => {
     localStorage.removeItem(clave);
   });
 };

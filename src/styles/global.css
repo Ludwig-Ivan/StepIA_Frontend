@@ -24,3 +24,13 @@ input,
 textarea {
   font-family: inherit;
 }
+
+.app-cargando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: var(--step-text, #243b39);
+  font-size: 1rem;
+  font-weight: 600;
+}
