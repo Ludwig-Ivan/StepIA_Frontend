@@ -31,7 +31,7 @@ export const obtenerApariencia = () => {
         configuracionInicial.tamano
     }
 
-  } catch (error) {
+  } catch {
 
     return configuracionInicial
 

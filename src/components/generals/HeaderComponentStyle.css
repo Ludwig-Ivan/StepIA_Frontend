@@ -537,3 +537,61 @@
     transform:
         translateY(-1px);
 }
+
+
+.perfil-confirma {
+    flex: 1;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    color: white;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+
+.perfil-confirma-si,
+.perfil-confirma-no {
+    border: none;
+
+    padding:
+        8px 12px;
+
+    border-radius: 8px;
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        opacity 0.2s ease;
+}
+
+.perfil-confirma-si {
+    background:
+        rgba(169, 65, 65, 0.92);
+}
+
+.perfil-confirma-no {
+    background:
+        rgba(255, 255, 255, 0.12);
+}
+
+.perfil-confirma-si:hover,
+.perfil-confirma-no:hover {
+    opacity: 0.88;
+}

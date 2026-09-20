@@ -2,6 +2,7 @@ const CLAVES = {
   USUARIO: "UsuarioActivo",
   PROFESIONAL: "idProfesional",
   PACIENTE: "idPaciente",
+  INICIO_SESION: "fechaInicioSesion",
 };
 
 const CLAVES_PII = [
@@ -21,6 +22,7 @@ export const guardarSesion = (profesional) => {
     CLAVES.PROFESIONAL,
     String(profesional.idProfesional ?? ""),
   );
+  localStorage.setItem(CLAVES.INICIO_SESION, new Date().toISOString());
 };
 
 export const obtenerUsuarioActivo = () => {
@@ -48,6 +50,18 @@ export const guardarIdPaciente = (idPaciente) => {
 
 export const haySesionActiva = () =>
   Boolean(localStorage.getItem(CLAVES.USUARIO));
+
+export const obtenerFechaInicioSesion = () => {
+  const fecha = localStorage.getItem(CLAVES.INICIO_SESION);
+
+  if (fecha) {
+    return fecha;
+  }
+
+  const ahora = new Date().toISOString();
+  localStorage.setItem(CLAVES.INICIO_SESION, ahora);
+  return ahora;
+};
 
 export const cerrarSesion = () => {
   [...Object.values(CLAVES), ...CLAVES_PII].forEach((clave) => {

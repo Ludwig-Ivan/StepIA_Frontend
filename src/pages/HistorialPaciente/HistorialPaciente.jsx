@@ -211,7 +211,6 @@ const generarPdfHistorial = async (informe, paciente, analisis, documentos) => {
     agregarTexto("", "Sin estudios adicionales");
   }
 
-  const imagenesPie = [];
   const docsPorAnalisis = new Map();
 
   (documentos || []).forEach((d) => {
@@ -220,23 +219,29 @@ const generarPdfHistorial = async (informe, paciente, analisis, documentos) => {
     }
   });
 
-  for (const analisisItem of analisis || []) {
-    const doc = docsPorAnalisis.get(analisisItem.idAnalisis);
+  const imagenesPie = (
+    await Promise.all(
+      (analisis || []).map(async (analisisItem) => {
+        const doc = docsPorAnalisis.get(analisisItem.idAnalisis);
 
-    if (doc && doc.mimeType && doc.mimeType.startsWith("image/")) {
-      try {
-        const res = await GeneratedDownloadUrl(doc.storageKey);
-        const base64 = await fetchImagenComoBase64(res.downloadUrl);
-        imagenesPie.push({
-          pieType: analisisItem.pieType,
-          base64,
-          formato: formatoDeImagen(doc.mimeType),
-        });
-      } catch {
-        // Continuar con el resto de imágenes disponibles
-      }
-    }
-  }
+        if (!doc || !doc.mimeType || !doc.mimeType.startsWith("image/")) {
+          return null;
+        }
+
+        try {
+          const res = await GeneratedDownloadUrl(doc.storageKey);
+          const base64 = await fetchImagenComoBase64(res.downloadUrl);
+          return {
+            pieType: analisisItem.pieType,
+            base64,
+            formato: formatoDeImagen(doc.mimeType),
+          };
+        } catch {
+          return null;
+        }
+      }),
+    )
+  ).filter(Boolean);
 
   if (imagenesPie.length > 0) {
     pdf.addPage();
@@ -561,6 +566,7 @@ function VisorDocumento({ presignedUrl, alt }) {
         width="100%"
         height="600px"
         title={alt || "Documento adjunto"}
+        sandbox="allow-same-origin"
       />
     );
   }

@@ -132,8 +132,8 @@ function DiaCalendario({
       <div className="numero-dia">{dia}</div>
 
       <div className="mini-citas">
-        {citasDia.slice(0, 3).map((cita, index) => (
-          <div key={`${cita.id}-${index}`} className="mini-cita">
+        {citasDia.slice(0, 3).map((cita) => (
+          <div key={`${cita.id}-${cita.hora}`} className="mini-cita">
             <span className="mini-hora">{cita.hora}</span>
             <span className="mini-nombre">{cita.nombre}</span>
           </div>
@@ -328,9 +328,9 @@ function PanelCitasAgenda({
     contenido = (
       <>
         <div className="lista-citas">
-          {citasPagina.map((cita, index) => (
+          {citasPagina.map((cita) => (
             <CitaAgenda
-              key={`${cita.id}-${index}`}
+              key={`${cita.id}-${cita.hora}`}
               cita={cita}
               onAbrir={onAbrirCita}
             />
@@ -564,18 +564,18 @@ function AgendaConsultas() {
   const mesAnterior = () => {
     if (mesActual === 0) {
       setMesActual(11);
-      setAnioActual(anioActual - 1);
+      setAnioActual((anio) => anio - 1);
     } else {
-      setMesActual(mesActual - 1);
+      setMesActual((mes) => mes - 1);
     }
   };
 
   const mesSiguiente = () => {
     if (mesActual === 11) {
       setMesActual(0);
-      setAnioActual(anioActual + 1);
+      setAnioActual((anio) => anio + 1);
     } else {
-      setMesActual(mesActual + 1);
+      setMesActual((mes) => mes + 1);
     }
   };
 
