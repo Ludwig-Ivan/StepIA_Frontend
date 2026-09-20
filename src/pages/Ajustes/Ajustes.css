@@ -1,31 +1,16 @@
-* {
-  box-sizing: border-box;
-}
-
-
 /* =========================================
    PÁGINA
 ========================================= */
 
 .ajustes-page {
   width: 100%;
-
   min-height: 100vh;
-
-  background-image:
-    var(--step-overlay),
-    url('../../assets/images/fondo-medico.jpg');
-
+  background-image: var(--step-overlay), url("../../assets/images/fondo-medico.jpg");
   background-size: cover;
-
   background-position: center;
-
   background-repeat: no-repeat;
-
   background-attachment: fixed;
-
-  color:
-    var(--step-text);
+  color: var(--step-text);
 }
 
 /* =========================================
@@ -33,434 +18,361 @@
 ========================================= */
 
 .ajustes-header {
-
+  position: sticky;
+  top: 0;
+  z-index: 20;
   width: 100%;
-
-  height: 64px;
-
+  min-height: 64px;
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
-  padding: 0 25px;
-
-  background:
-    var(--step-header);
-
-  border-bottom:
-    1px solid
-    var(--step-border);
-
-  box-shadow:
-    0 4px 12px
-    var(--step-shadow);
-
+  padding: 8px 28px;
+  background: var(--step-header);
+  border-bottom: 1px solid var(--step-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px var(--step-shadow);
 }
-
 
 .ajustes-logo {
-
   border: none;
-
   background: transparent;
-
-  color: white;
-
-  font-size: 27px;
-
+  color: var(--step-text);
+  font-size: 26px;
   font-weight: 900;
-
+  letter-spacing: 0.5px;
   cursor: pointer;
-
+  padding: 6px 0;
 }
 
-
-.ajustes-volver {
-
-  border: 1px solid
-    rgba(255, 255, 255, 0.15);
-
-  padding: 9px 14px;
-
-  border-radius: 8px;
-
-  background:
-    rgba(255, 255, 255, 0.12);
-
-  color: white;
-
-  cursor: pointer;
-
+.ajustes-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--step-text);
+  font-size: 14px;
+  font-weight: 700;
 }
 
+.ajustes-user-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--step-accent);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
 
 /* =========================================
    MAIN
 ========================================= */
 
 .ajustes-main {
-
   width: 92%;
-
   max-width: 1000px;
-
   margin: 0 auto;
-
   padding: 40px 0 60px;
-
 }
 
+.ajustes-carga {
+  min-height: calc(100vh - 64px - 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--step-text-secondary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.ajustes-spinner {
+  width: 30px;
+  height: 30px;
+  border: 4px solid rgba(89, 168, 144, 0.25);
+  border-top-color: var(--step-accent);
+  border-radius: 50%;
+  display: block;
+  animation: ajustes-girar 0.7s linear infinite;
+}
+
+@keyframes ajustes-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* =========================================
    TÍTULO
 ========================================= */
 
 .ajustes-titulo {
-
   margin-bottom: 25px;
-
 }
-
 
 .ajustes-titulo h1 {
-
   margin: 0;
-
   font-size: 2.2rem;
-
   font-weight: 900;
-
-  color:
-    var(--step-text);
-
+  color: var(--step-text);
 }
-
 
 .ajustes-titulo p {
-
   margin-top: 7px;
-
-  color:
-    var(--step-text-secondary);
-
+  color: var(--step-text-secondary);
+  font-weight: 600;
 }
-
 
 /* =========================================
    TARJETA
 ========================================= */
 
 .apariencia-card {
-
   width: 100%;
-
   border-radius: 17px;
-
-  background:
-    var(--step-surface);
-
-  border:
-    1px solid
-    var(--step-border);
-
-  box-shadow:
-    0 8px 20px
-    var(--step-shadow);
-
+  background: var(--step-surface);
+  border: 1px solid var(--step-border);
+  box-shadow: 0 8px 20px var(--step-shadow);
   overflow: hidden;
-
 }
-
-
-/* =========================================
-   CABECERA DE TARJETA
-========================================= */
 
 .apariencia-header {
-
   display: flex;
-
   align-items: center;
-
   gap: 15px;
-
   padding: 22px;
-
-  border-bottom:
-    1px solid
-    var(--step-border);
-
+  border-bottom: 1px solid var(--step-border);
 }
-
 
 .apariencia-icono {
-
   width: 50px;
-
   height: 50px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   flex-shrink: 0;
-
   border-radius: 12px;
-
-  background:
-    var(--step-input-bg);
-
-  font-size: 25px;
-
+  background: rgba(89, 168, 144, 0.28);
+  color: var(--step-text);
+  font-size: 22px;
 }
-
 
 .apariencia-header h2 {
-
   margin: 0 0 4px;
-
   font-size: 22px;
-
-  color:
-    var(--step-text);
-
+  color: var(--step-text);
 }
-
 
 .apariencia-header p {
-
   margin: 0;
-
   font-size: 13px;
-
-  color:
-    var(--step-text-secondary);
-
+  color: var(--step-text-secondary);
 }
 
-
 /* =========================================
-   CONTENIDO
+   CONTENIDO / CAMPOS
 ========================================= */
 
 .apariencia-contenido {
-
-  padding: 5px 22px;
-
+  padding: 4px 22px;
 }
-
-
-/* =========================================
-   CAMPO
-========================================= */
 
 .ajuste-campo {
-
-  min-height: 100px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 25px;
-
+  display: grid;
+  gap: 14px;
   padding: 20px 0;
-
-  border-bottom:
-    1px solid
-    var(--step-border);
-
+  border-bottom: 1px solid var(--step-border);
 }
-
 
 .ajuste-campo:last-child {
-
   border-bottom: none;
-
 }
 
-
-.ajuste-campo h3 {
-
+.ajuste-campo-texto h3 {
   margin: 0 0 5px;
-
   font-size: 17px;
-
-  color:
-    var(--step-text);
-
+  color: var(--step-text);
 }
 
-
-.ajuste-campo p {
-
+.ajuste-campo-texto p {
   margin: 0;
-
-  color:
-    var(--step-text-secondary);
-
   font-size: 13px;
-
+  color: var(--step-text-secondary);
 }
-
 
 /* =========================================
-   SELECT
+   OPCIONES (RADIO)
 ========================================= */
 
-.ajuste-campo select {
-
-  width: 210px;
-
-  height: 43px;
-
-  padding: 0 12px;
-
-  border:
-    1px solid
-    var(--step-border);
-
-  border-radius: 9px;
-
-  outline: none;
-
-  background:
-    var(--step-input-bg);
-
-  color:
-    var(--step-text);
-
-  cursor: pointer;
-
+.ajuste-opciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
 }
 
+.ajuste-opcion {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--step-border);
+  border-radius: 12px;
+  background: var(--step-input-bg);
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.ajuste-opcion:hover {
+  background: var(--step-surface-hover);
+}
+
+.ajuste-opcion--activa {
+  border-color: var(--step-accent);
+  background: rgba(89, 168, 144, 0.18);
+  box-shadow: 0 0 0 2px rgba(89, 168, 144, 0.4);
+}
+
+.ajuste-opcion:has(input:focus-visible) {
+  outline: 3px solid rgba(89, 168, 144, 0.55);
+  outline-offset: 2px;
+}
+
+.ajuste-opcion input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ajuste-opcion-icono {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(89, 168, 144, 0.22);
+  color: var(--step-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.ajuste-opcion-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ajuste-opcion-texto strong {
+  font-size: 14px;
+  color: var(--step-text);
+}
+
+.ajuste-opcion-texto small {
+  font-size: 12px;
+  color: var(--step-text-secondary);
+}
 
 /* =========================================
-   BOTONES
+   FOOTER / BOTONES
 ========================================= */
 
 .apariencia-footer {
-
   display: flex;
-
-  justify-content: flex-end;
-
   align-items: center;
-
-  gap: 12px;
-
-  padding: 20px 22px;
-
-  border-top:
-    1px solid
-    var(--step-border);
-
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 22px;
+  border-top: 1px solid var(--step-border);
 }
 
-
-.btn-guardar-ajustes,
-.btn-restaurar-ajustes {
-
-  border: none;
-
-  border-radius: 9px;
-
-  padding: 11px 18px;
-
-  color: white;
-
+.ajustes-hint {
+  font-size: 13px;
   font-weight: 700;
-
-  cursor: pointer;
-
-  transition: 0.2s;
-
+  color: var(--step-text-secondary);
 }
 
-
-.btn-guardar-ajustes {
-
-  background:
-    var(--step-accent);
-
+.apariencia-acciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
 }
-
-
-.btn-restaurar-ajustes {
-
-  background:
-    rgba(100, 100, 100, 0.70);
-
-}
-
-
-.btn-guardar-ajustes:hover,
-.btn-restaurar-ajustes:hover {
-
-  transform:
-    translateY(-1px);
-
-  opacity: 0.90;
-
-}
-
 
 /* =========================================
-   MÓVIL
+   FEEDBACK / CONFIRMACIÓN
+========================================= */
+
+.ajustes-mensaje {
+  margin-top: 18px;
+}
+
+.ajustes-confirmacion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.ajustes-confirmacion-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* =========================================
+   RESPONSIVE
 ========================================= */
 
 @media (max-width: 600px) {
+  .ajustes-header {
+    padding: 8px 14px;
+  }
+
+  .ajustes-logo {
+    font-size: 22px;
+  }
 
   .ajustes-main {
-
     width: 94%;
-
     padding-top: 25px;
-
   }
-
 
   .ajustes-titulo h1 {
-
     font-size: 29px;
-
   }
 
-
-  .ajuste-campo {
-
-    flex-direction: column;
-
-    align-items: flex-start;
-
+  .ajuste-opciones {
+    grid-template-columns: 1fr;
   }
-
-
-  .ajuste-campo select {
-
-    width: 100%;
-
-  }
-
 
   .apariencia-footer {
-
-    flex-direction: column-reverse;
-
+    flex-direction: column;
+    align-items: stretch;
   }
 
+  .apariencia-acciones {
+    margin-left: 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-  .btn-guardar-ajustes,
-  .btn-restaurar-ajustes {
-
+  .apariencia-acciones button {
     width: 100%;
-
   }
 
+  .ajustes-confirmacion-acciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ajustes-confirmacion-acciones button {
+    width: 100%;
+  }
 }
