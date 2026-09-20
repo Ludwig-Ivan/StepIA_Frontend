@@ -9,6 +9,7 @@ import Collapse from "@mui/material/Collapse";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import loginSchema from "../../schema/LoginSchema";
+import { guardarSesion } from "../../utils/session";
 
 function Login() {
   const navigate = useNavigate();
@@ -35,8 +36,7 @@ function Login() {
         return;
       }
 
-      localStorage.setItem("UsuarioActivo", profesional.email);
-      localStorage.setItem("idProfesional", profesional.idProfesional);
+      guardarSesion(profesional);
 
       navigate("/menu");
     } catch (error) {

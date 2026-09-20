@@ -9,6 +9,7 @@ import {
   LuUser,
 } from "react-icons/lu";
 import "./HeaderComponentStyle.css";
+import { cerrarSesion } from "../../utils/session";
 /**
  * @param {Object} props
  * @param {Object} props.data
@@ -196,7 +197,7 @@ function HeaderComponent({ childrenLeft, childrenRigth, data }) {
                   onClick={() => {
                     // Confirmación manejada por el usuario vía botón nativo
                     if (window.confirm("¿Deseas cerrar sesión?")) {
-                      localStorage.removeItem("UsuarioActivo");
+                      cerrarSesion();
                       navigate("/");
                     }
                   }}

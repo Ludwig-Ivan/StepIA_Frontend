@@ -8,9 +8,11 @@ import "./styles/appearance.css";
 import { aplicarApariencia } from "./utils/apariencia";
 
 async function enableMocking() {
-  // if (import.meta.env.VITE_USE_MOCKS !== "true") {
-  //   return;
-  // }
+  // Los mocks solo se habilitan en desarrollo y de forma explícita.
+  if (!import.meta.env.DEV || import.meta.env.VITE_USE_MOCKS !== "true") {
+    return;
+  }
+
   const { worker } = await import("./mocks/browser");
   return worker.start({
     onUnhandledRequest: "bypass", // lo que no esté mockeado, pasa a la red real

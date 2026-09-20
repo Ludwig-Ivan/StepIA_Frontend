@@ -1,5 +1,4 @@
-// const HOST = "https://api-gateway-255553194796.northamerica-south1.run.app";
-const HOST = "http://localhost:8080";
+const HOST = import.meta.env.VITE_API_HOST || "http://localhost:8080";
 
 const BASE_URL = {
   PROFESIONALES: `${HOST}/api/core-service/profesionales`,

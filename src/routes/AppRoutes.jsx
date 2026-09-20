@@ -12,23 +12,101 @@ import Historial from "../pages/HistorialActividad/Historial";
 import Ajustes from "../pages/Ajustes/Ajustes";
 import Soporte from "../pages/Soporte/Soporte";
 import Expediente from "../pages/Expediente/Expediente";
+import RutaProtegida from "./RutaProtegida";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/menu" element={<Menu />} />
-        <Route path="/registro-paciente" element={<RegistroPaciente />} />
-        <Route path="/analisis-plantar" element={<AnalisisPlantar />} />
-        <Route path="/historial-paciente" element={<HistorialPaciente />} />
-        <Route path="/expediente" element={<Expediente />} />
-        <Route path="/informe-paciente" element={<InformePaciente />} />
-        <Route path="/lista-pacientes" element={<ListaPacientes />} />
-        <Route path="/agenda-consultas" element={<AgendaConsultas />} />
-        <Route path="/historial" element={<Historial />} />
-        <Route path="/ajustes" element={<Ajustes />} />
-        <Route path="/soporte" element={<Soporte />} />
+        <Route
+          path="/menu"
+          element={
+            <RutaProtegida>
+              <Menu />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/registro-paciente"
+          element={
+            <RutaProtegida>
+              <RegistroPaciente />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/analisis-plantar"
+          element={
+            <RutaProtegida>
+              <AnalisisPlantar />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/historial-paciente"
+          element={
+            <RutaProtegida>
+              <HistorialPaciente />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/expediente"
+          element={
+            <RutaProtegida>
+              <Expediente />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/informe-paciente"
+          element={
+            <RutaProtegida>
+              <InformePaciente />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/lista-pacientes"
+          element={
+            <RutaProtegida>
+              <ListaPacientes />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/agenda-consultas"
+          element={
+            <RutaProtegida>
+              <AgendaConsultas />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/historial"
+          element={
+            <RutaProtegida>
+              <Historial />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/ajustes"
+          element={
+            <RutaProtegida>
+              <Ajustes />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/soporte"
+          element={
+            <RutaProtegida>
+              <Soporte />
+            </RutaProtegida>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

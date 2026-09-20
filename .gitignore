@@ -26,3 +26,5 @@ dist-ssr
 # Elementos del agente
 .agents/*
 skills*
+
+.env*
