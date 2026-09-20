@@ -1,8 +1,3 @@
-* {
-  box-sizing: border-box;
-}
-
-
 /* =========================================
    PÁGINA
 ========================================= */
@@ -10,292 +5,228 @@
 .soporte-page {
   width: 100%;
   min-height: 100vh;
-
+  margin: 0;
   background-image:
     var(--step-overlay),
-    url('../../assets/images/fondo-medico.jpg');
-
+    url("../../assets/images/fondo-medico.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-
-  color:
-    var(--step-text);
+  color: var(--step-text);
 }
-
 
 /* =========================================
    HEADER
 ========================================= */
 
 .soporte-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   width: 100%;
-  height: 64px;
-
+  min-height: 64px;
   display: flex;
-
-  align-items: center;
-
   justify-content: space-between;
-
-  padding: 0 25px;
-
-  background:
-    var(--step-header);
-
-  border-bottom:
-    1px solid
-    var(--step-border);
-
-  box-shadow:
-    0 4px 12px
-    var(--step-shadow);
+  align-items: center;
+  padding: 8px 28px;
+  background: var(--step-header);
+  border-bottom: 1px solid var(--step-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 5px 15px var(--step-shadow);
 }
-
 
 .soporte-logo {
   border: none;
-
   background: transparent;
-
-  color: white;
-
-  font-size: 27px;
-
+  color: var(--step-text);
+  font-size: 26px;
   font-weight: 900;
-
+  letter-spacing: 0.5px;
+  padding: 6px 0;
   cursor: pointer;
 }
 
-
-.soporte-volver {
-  border:
-    1px solid
-    rgba(255,255,255,0.16);
-
-  padding: 9px 14px;
-
-  border-radius: 8px;
-
-  background:
-    rgba(255,255,255,0.12);
-
-  color: white;
-
-  cursor: pointer;
+.soporte-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--step-text);
+  font-size: 14px;
+  font-weight: 700;
 }
 
+.soporte-user-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--step-accent);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
 
 /* =========================================
-   MAIN
+   CONTENIDO
 ========================================= */
 
 .soporte-main {
-  width: 92%;
-
+  width: 100%;
   max-width: 1150px;
-
-  margin: 0 auto;
-
-  padding: 38px 0 60px;
+  margin: auto;
+  padding: 35px 30px 55px;
 }
-
-
-/* =========================================
-   TÍTULO
-========================================= */
 
 .soporte-titulo {
   margin-bottom: 22px;
 }
 
-
 .soporte-titulo h1 {
   margin: 0;
-
-  color:
-    var(--step-text);
-
-  font-size: 36px;
-
+  font-size: 34px;
   font-weight: 900;
+  color: var(--step-text);
 }
-
 
 .soporte-titulo p {
-  margin: 7px 0 0;
-
-  color:
-    var(--step-text-secondary);
+  margin-top: 7px;
+  color: var(--step-text-secondary);
+  font-weight: 600;
 }
 
+/* =========================================
+   MENSAJES
+========================================= */
+
+.soporte-mensaje {
+  margin-bottom: 20px;
+}
 
 /* =========================================
    BUSCADOR
 ========================================= */
 
 .soporte-buscador {
-  width: 100%;
-  height: 48px;
-
+  position: relative;
   display: flex;
-
   align-items: center;
-
-  gap: 10px;
-
-  padding: 0 15px;
-
   margin-bottom: 24px;
-
-  border:
-    1px solid
-    var(--step-border);
-
-  border-radius: 12px;
-
-  background:
-    var(--step-input-bg);
-
-  backdrop-filter:
-    blur(10px);
 }
 
+.soporte-buscador-icono {
+  position: absolute;
+  left: 15px;
+  color: var(--step-text-secondary);
+  font-size: 15px;
+  pointer-events: none;
+}
 
 .soporte-buscador input {
   width: 100%;
-
-  border: none;
-
-  outline: none;
-
-  background: transparent;
-
-  color:
-    var(--step-text);
-
+  height: 48px;
+  border: 1px solid var(--step-border);
+  border-radius: 12px;
+  background: var(--step-input-bg);
+  color: var(--step-text);
+  padding: 0 44px;
   font-size: 14px;
+  outline: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: 0.2s ease;
 }
 
+.soporte-buscador input::placeholder {
+  color: var(--step-text-secondary);
+}
+
+.soporte-buscador input:focus {
+  border-color: var(--step-accent);
+  box-shadow: 0 0 0 3px rgba(89, 168, 144, 0.22);
+}
+
+.soporte-clear {
+  position: absolute;
+  right: 11px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--step-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.soporte-clear:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.soporte-clear:focus-visible {
+  outline: 3px solid rgba(89, 168, 144, 0.55);
+  outline-offset: 2px;
+}
 
 /* =========================================
-   GRID
+   GRID DE TARJETAS
 ========================================= */
 
 .soporte-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(
-      2,
-      minmax(0,1fr)
-    );
-
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
-
   margin-bottom: 28px;
 }
 
-
-/* =========================================
-   TARJETAS
-========================================= */
-
 .soporte-card {
-  min-height: 220px;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: flex-start;
-
   padding: 22px;
-
   border-radius: 16px;
-
-  background:
-    var(--step-surface);
-
-  border:
-    1px solid
-    var(--step-border);
-
-  box-shadow:
-    0 7px 18px
-    var(--step-shadow);
-
-  backdrop-filter:
-    blur(11px);
+  background: var(--step-surface);
+  border: 1px solid var(--step-border);
+  box-shadow: 0 7px 18px var(--step-shadow);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
 }
-
 
 .soporte-card-icono {
   width: 50px;
   height: 50px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
-  margin-bottom: 12px;
-
+  margin-bottom: 14px;
   border-radius: 12px;
-
-  background:
-    rgba(255,255,255,0.90);
-
-  font-size: 25px;
+  background: rgba(89, 168, 144, 0.28);
+  color: var(--step-text);
+  font-size: 22px;
 }
 
-
-.soporte-card h2 {
-  margin:
-    0 0 7px;
-
-  color:
-    var(--step-text);
-
+.soporte-card h3 {
+  margin: 0 0 7px;
+  color: var(--step-text);
   font-size: 20px;
+  font-weight: 900;
 }
-
 
 .soporte-card p {
-  margin:
-    0 0 18px;
-
-  color:
-    var(--step-text-secondary);
-
+  margin: 0 0 18px;
+  color: var(--step-text-secondary);
   line-height: 1.5;
-
   font-size: 13px;
 }
 
-
-.soporte-card-btn {
+.soporte-card .btn {
   margin-top: auto;
-
-  border: none;
-
-  padding:
-    10px 15px;
-
-  border-radius: 8px;
-
-  background:
-    var(--step-accent);
-
-  color: white;
-
-  font-weight: 700;
-
-  cursor: pointer;
 }
-
 
 /* =========================================
    SECCIONES
@@ -303,52 +234,44 @@
 
 .soporte-seccion {
   width: 100%;
-
   margin-top: 25px;
-
   padding: 22px;
-
   border-radius: 17px;
-
-  background:
-    var(--step-surface);
-
-  border:
-    1px solid
-    var(--step-border);
-
-  box-shadow:
-    0 7px 18px
-    var(--step-shadow);
-
-  backdrop-filter:
-    blur(11px);
+  background: var(--step-surface);
+  border: 1px solid var(--step-border);
+  box-shadow: 0 7px 18px var(--step-shadow);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
+  scroll-margin-top: 80px;
 }
-
 
 .soporte-seccion-titulo {
   margin-bottom: 18px;
 }
 
-
 .soporte-seccion-titulo h2 {
-  margin:
-    0 0 5px;
-
-  color:
-    var(--step-text);
+  margin: 0 0 5px;
+  color: var(--step-text);
+  font-size: 22px;
+  font-weight: 900;
 }
-
 
 .soporte-seccion-titulo p {
   margin: 0;
-
-  color:
-    var(--step-text-secondary);
-
+  color: var(--step-text-secondary);
   font-size: 13px;
 }
 
+.soporte-resultado {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(89, 168, 144, 0.28);
+  color: var(--step-text);
+  font-size: 12px;
+  font-weight: 800;
+}
 
 /* =========================================
    FAQ
@@ -356,89 +279,139 @@
 
 .faq-lista {
   display: flex;
-
   flex-direction: column;
-
   gap: 10px;
 }
 
-
 .faq-item {
-  border:
-    1px solid
-    var(--step-border);
-
+  border: 1px solid var(--step-border);
   border-radius: 10px;
-
   overflow: hidden;
 }
 
-
 .faq-pregunta {
   width: 100%;
-
   display: flex;
-
   align-items: center;
-
-  justify-content:
-    space-between;
-
+  justify-content: space-between;
   gap: 15px;
-
-  padding:
-    14px 16px;
-
+  padding: 14px 16px;
   border: none;
-
-  background:
-    var(--step-input-bg);
-
-  color:
-    var(--step-text);
-
-  text-align: left;
-
-  cursor: pointer;
-}
-
-
-.faq-pregunta span {
+  background: var(--step-input-bg);
+  color: var(--step-text);
+  font-size: 14px;
   font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-
-.faq-pregunta strong {
-  font-size: 20px;
+.faq-pregunta:hover {
+  background: var(--step-surface-hover);
 }
 
+.faq-pregunta:focus-visible {
+  outline: 3px solid rgba(89, 168, 144, 0.55);
+  outline-offset: -3px;
+}
+
+.faq-icono {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(89, 168, 144, 0.28);
+  color: var(--step-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
 
 .faq-respuesta {
-  padding:
-    14px 16px;
-
-  border-top:
-    1px solid
-    var(--step-border);
-
-  color:
-    var(--step-text-secondary);
-
-  line-height: 1.5;
-
+  padding: 14px 16px;
+  border-top: 1px solid var(--step-border);
+  color: var(--step-text-secondary);
+  line-height: 1.55;
   font-size: 13px;
 }
 
-
-.faq-sin-resultados {
-  padding: 20px;
-
+.faq-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-
-  color:
-    var(--step-text-secondary);
+  padding: 30px 20px;
+  color: var(--step-text);
 }
 
+.faq-vacio-icono {
+  font-size: 42px;
+  margin-bottom: 12px;
+  color: var(--step-accent);
+}
+
+.faq-vacio h3 {
+  margin: 0 0 6px;
+  color: var(--step-text);
+}
+
+.faq-vacio p {
+  margin: 0 0 6px;
+  color: var(--step-text-secondary);
+  font-size: 13px;
+}
+
+/* =========================================
+   PAGINACIÓN
+========================================= */
+
+.faq-paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.faq-pagina-boton {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--step-border);
+  border-radius: 10px;
+  background: var(--step-input-bg);
+  color: var(--step-text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.faq-pagina-boton:hover:not(:disabled) {
+  background: var(--step-surface-hover);
+}
+
+.faq-pagina-boton:focus-visible {
+  outline: 3px solid rgba(89, 168, 144, 0.55);
+  outline-offset: 2px;
+}
+
+.faq-pagina-boton--activa {
+  background: var(--step-accent);
+  border-color: var(--step-accent);
+  color: #ffffff;
+}
+
+.faq-pagina-boton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.faq-pagina-elipsis {
+  color: var(--step-text-secondary);
+  padding: 0 2px;
+}
 
 /* =========================================
    GUÍA
@@ -446,343 +419,248 @@
 
 .guia-lista {
   display: flex;
-
   flex-direction: column;
-
   gap: 11px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-
 
 .guia-paso {
   display: grid;
-
-  grid-template-columns:
-    45px
-    minmax(0,1fr)
-    auto;
-
+  grid-template-columns: 45px minmax(0, 1fr) auto;
   align-items: center;
-
   gap: 14px;
-
   padding: 14px;
-
-  border:
-    1px solid
-    var(--step-border);
-
+  border: 1px solid var(--step-border);
   border-radius: 11px;
-
-  background:
-    var(--step-input-bg);
+  background: var(--step-input-bg);
 }
-
 
 .guia-numero {
   width: 38px;
   height: 38px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   border-radius: 50%;
-
-  background:
-    var(--step-accent);
-
-  color: white;
-
+  background: var(--step-accent);
+  color: #ffffff;
   font-weight: 900;
 }
 
-
-.guia-paso h3 {
-  margin:
-    0 0 3px;
-
-  color:
-    var(--step-text);
-
+.guia-texto h3 {
+  margin: 0 0 3px;
+  color: var(--step-text);
   font-size: 15px;
 }
 
-
-.guia-paso p {
+.guia-texto p {
   margin: 0;
-
-  color:
-    var(--step-text-secondary);
-
+  color: var(--step-text-secondary);
   font-size: 12px;
 }
 
-
-.guia-paso button {
-  border: none;
-
-  padding:
-    8px 12px;
-
-  border-radius: 8px;
-
-  background:
-    var(--step-accent);
-
-  color: white;
-
-  cursor: pointer;
+.guia-paso .btn {
+  width: auto;
+  min-width: 110px;
+  margin-top: 0;
+  padding: 0 18px;
 }
 
-
 /* =========================================
-   INFORMACIÓN SISTEMA
+   INFORMACIÓN DEL SISTEMA
 ========================================= */
 
 .sistema-info {
   display: flex;
-
   flex-direction: column;
 }
 
-
 .sistema-fila {
   display: flex;
-
   align-items: center;
-
-  justify-content:
-    space-between;
-
+  justify-content: space-between;
   gap: 20px;
-
-  padding:
-    14px 4px;
-
-  border-bottom:
-    1px solid
-    var(--step-border);
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--step-border);
 }
-
 
 .sistema-fila:last-child {
   border-bottom: none;
 }
 
-
 .sistema-fila span {
-  color:
-    var(--step-text-secondary);
+  color: var(--step-text-secondary);
 }
-
 
 .sistema-fila strong {
-  color:
-    var(--step-text);
+  color: var(--step-text);
 }
-
 
 .sistema-activo {
-  color:
-    #45dc68 !important;
+  color: #45dc68 !important;
 }
 
-
-/* =========================================
-   FONDO DEL MODAL
-========================================= */
-
-.soporte-modal-fondo {
-  position: fixed;
-
-  inset: 0;
-
-  z-index: 999;
-
+.sistema-acciones {
   display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 20px;
-
-  background:
-    rgba(0,0,0,0.65);
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
+.sistema-acciones .btn {
+  margin-top: 0;
+}
 
 /* =========================================
    MODAL
 ========================================= */
 
 .soporte-modal {
-  width: 100%;
-
-  max-width: 620px;
-
+  width: min(620px, calc(100% - 32px));
   max-height: 90vh;
-
+  margin: auto;
+  padding: 0;
   overflow-y: auto;
-
   border-radius: 17px;
-
-  background:
-    var(--step-surface);
-
-  border:
-    1px solid
-    var(--step-border);
-
-  box-shadow:
-    0 18px 45px
-    rgba(0,0,0,0.40);
+  background: var(--step-surface);
+  border: 1px solid var(--step-border);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
+  color: var(--step-text);
 }
 
+.soporte-modal::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.soporte-modal-contenido {
+  display: flex;
+  flex-direction: column;
+}
+
+.soporte-modal:focus {
+  outline: none;
+}
 
 .soporte-modal-header {
   display: flex;
-
   align-items: flex-start;
-
-  justify-content:
-    space-between;
-
+  justify-content: space-between;
   gap: 20px;
-
   padding: 20px;
-
-  border-bottom:
-    1px solid
-    var(--step-border);
+  border-bottom: 1px solid var(--step-border);
 }
-
 
 .soporte-modal-header h2 {
-  margin:
-    0 0 4px;
-
-  color:
-    var(--step-text);
+  margin: 0 0 4px;
+  color: var(--step-text);
 }
-
 
 .soporte-modal-header p {
   margin: 0;
-
-  color:
-    var(--step-text-secondary);
-
+  color: var(--step-text-secondary);
   font-size: 13px;
 }
 
-
 .soporte-modal-cerrar {
+  width: 34px;
+  height: 34px;
   border: none;
-
+  border-radius: 50%;
   background: transparent;
-
-  color:
-    var(--step-text);
-
-  font-size: 19px;
-
+  color: var(--step-text);
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: 0.2s ease;
 }
 
+.soporte-modal-cerrar:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.soporte-modal-cerrar:focus-visible {
+  outline: 3px solid rgba(89, 168, 144, 0.55);
+  outline-offset: 2px;
+}
 
 /* =========================================
    PRIVACIDAD
 ========================================= */
 
 .soporte-privacidad {
-  margin:
-    18px 20px 0;
-
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 20px 0;
   padding: 12px;
-
   border-radius: 9px;
-
-  background:
-    rgba(205,160,61,0.16);
-
-  border:
-    1px solid
-    rgba(205,160,61,0.35);
-
-  color:
-    var(--step-text);
-
+  background: rgba(205, 160, 61, 0.16);
+  border: 1px solid rgba(205, 160, 61, 0.35);
+  color: var(--step-text);
   font-size: 12px;
+  line-height: 1.5;
 }
-
 
 /* =========================================
    FORMULARIO
 ========================================= */
 
 .soporte-form {
-  padding: 20px;
-
   display: flex;
-
   flex-direction: column;
-
   gap: 16px;
+  padding: 20px;
 }
-
 
 .soporte-form-group {
   display: flex;
-
   flex-direction: column;
-
   gap: 6px;
 }
 
-
 .soporte-form-group label {
-  color:
-    var(--step-text);
-
+  color: var(--step-text);
   font-size: 13px;
-
   font-weight: 700;
 }
-
 
 .soporte-form-group input,
 .soporte-form-group select,
 .soporte-form-group textarea {
   width: 100%;
-
-  border:
-    1px solid
-    var(--step-border);
-
+  border: 1px solid var(--step-border);
   border-radius: 9px;
-
-  padding:
-    11px 12px;
-
+  padding: 11px 12px;
   outline: none;
-
-  background:
-    var(--step-input-bg);
-
-  color:
-    var(--step-text);
-
+  background: var(--step-input-bg);
+  color: var(--step-text);
   font-family: inherit;
+  transition: 0.2s ease;
 }
 
+.soporte-form-group input:focus,
+.soporte-form-group select:focus,
+.soporte-form-group textarea:focus {
+  border-color: var(--step-accent);
+  box-shadow: 0 0 0 3px rgba(89, 168, 144, 0.22);
+}
+
+.soporte-form-group [aria-invalid="true"] {
+  border-color: #e57373;
+}
 
 .soporte-form-group textarea {
   resize: vertical;
 }
 
+.soporte-error {
+  color: #ffb4ad;
+  font-size: 12px;
+  font-weight: 700;
+}
 
 /* =========================================
    BOTONES MODAL
@@ -790,150 +668,91 @@
 
 .soporte-modal-footer {
   display: flex;
-
-  justify-content:
-    flex-end;
-
+  justify-content: flex-end;
   flex-wrap: wrap;
-
   gap: 10px;
-
-  padding:
-    18px 20px;
-
-  border-top:
-    1px solid
-    var(--step-border);
+  padding: 18px 20px;
+  border-top: 1px solid var(--step-border);
 }
 
-
-.soporte-cancelar,
-.soporte-guardar,
-.soporte-whatsapp,
-.soporte-email {
-  border: none;
-
-  padding:
-    10px 16px;
-
-  border-radius: 8px;
-
-  color: white;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: 0.2s;
+.soporte-modal-footer .btn {
+  width: auto;
+  min-width: 120px;
+  margin-top: 0;
+  padding: 0 20px;
 }
 
+/* =========================================
+   UTILIDADES
+========================================= */
 
-.soporte-cancelar {
-  background:
-    rgba(100,100,100,0.75);
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-
-
-.soporte-guardar {
-  background:
-    rgba(83,108,135,0.90);
-}
-
-
-.soporte-whatsapp {
-  background:
-    #25d366;
-}
-
-
-.soporte-email {
-  background:
-    var(--step-accent);
-}
-
-
-.soporte-cancelar:hover,
-.soporte-guardar:hover,
-.soporte-whatsapp:hover,
-.soporte-email:hover {
-  opacity: 0.88;
-
-  transform:
-    translateY(-1px);
-}
-
 
 /* =========================================
    RESPONSIVE
 ========================================= */
 
 @media (max-width: 750px) {
+  .soporte-main {
+    padding: 25px 12px 40px;
+  }
 
   .soporte-grid {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
   }
-
 
   .guia-paso {
-    grid-template-columns:
-      40px
-      minmax(0,1fr);
+    grid-template-columns: 40px minmax(0, 1fr);
   }
 
-
-  .guia-paso button {
+  .guia-paso .btn {
     grid-column: 2;
-
-    justify-self:
-      start;
+    justify-self: start;
   }
-
 }
 
-
-@media (max-width: 500px) {
-
-  .soporte-main {
-    width: 94%;
-
-    padding-top: 25px;
+@media (max-width: 520px) {
+  .soporte-header {
+    padding: 8px 14px;
   }
 
+  .soporte-logo {
+    font-size: 22px;
+  }
 
   .soporte-titulo h1 {
     font-size: 28px;
   }
 
-
-  .soporte-header {
-    padding:
-      0 12px;
-  }
-
-
   .sistema-fila {
-    flex-direction:
-      column;
-
-    align-items:
-      flex-start;
-
+    flex-direction: column;
+    align-items: flex-start;
     gap: 4px;
   }
 
-
-  .soporte-modal-footer {
-    flex-direction:
-      column;
+  .sistema-acciones {
+    justify-content: stretch;
   }
 
-
-  .soporte-cancelar,
-  .soporte-guardar,
-  .soporte-whatsapp,
-  .soporte-email {
+  .sistema-acciones .btn {
     width: 100%;
   }
 
+  .soporte-modal-footer {
+    flex-direction: column;
+  }
+
+  .soporte-modal-footer .btn {
+    width: 100%;
+  }
 }
