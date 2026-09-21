@@ -1,61 +1,46 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { registrarActividad } from "../../utils/historial";
 import { convertirABase64 } from "../../utils/archivos.js";
+import { registrarAnalisisConDocumentos } from "../../utils/analisis.js";
+import {
+  getPacienteById,
+  getPacientes,
+} from "../../services/pacienteService.js";
+import { createPredict } from "../../services/predictService.js";
+import { PredictModel } from "../../models/analisis/PredictModel.js";
+import { createInforme } from "../../services/informeService.js";
+import { InformeCreateUpdateModel } from "../../models/informes/InformeCreateUpdateModel.js";
 
 const TAMANO_PACIENTES = 5;
 
-const convertirTexto = (valor) => {
-  return String(valor || "")
-    .toLowerCase()
-    .trim();
-};
+const idPacienteDe = (paciente) =>
+  paciente?.curp || paciente?.idPaciente || "";
 
-const generarIdPaciente = (pacienteData = {}, index = 0) => {
-  const base =
-    pacienteData.idPaciente ||
-    `${
-      pacienteData.nss ||
-      pacienteData.numeroRegistroSocial ||
-      pacienteData.nombre ||
-      "paciente"
-    }-${pacienteData.fecha || ""}-${pacienteData.hora || ""}-${index}`;
+const construirResultadoIA = (izquierdo, derecho) => {
+  const formatear = (predict, etiqueta) => {
+    const tipo = predict?.className || "";
+    const confianza = predict?.confidence;
+    const detalle =
+      confianza !== undefined && confianza !== null
+        ? ` (${confianza}%)`
+        : "";
+    return `${etiqueta}: ${tipo}${detalle}`;
+  };
 
-  return String(base)
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w-]/g, "");
-};
-
-const leerPacientesLocal = () => {
-  try {
-    const guardados = JSON.parse(localStorage.getItem("pacientes"));
-    return Array.isArray(guardados) ? guardados : [];
-  } catch {
-    return [];
-  }
-};
-
-const normalizarPacientes = (lista) => {
-  return lista.map((paciente, index) => {
-    const nssFinal =
-      paciente.nss ||
-      paciente.numeroRegistroSocial ||
-      paciente.registroSocial ||
-      "";
-
-    return {
-      ...paciente,
-      nss: nssFinal,
-      idPaciente: generarIdPaciente({ ...paciente, nss: nssFinal }, index),
-    };
-  });
+  return [
+    formatear(izquierdo, "Pie izquierdo"),
+    formatear(derecho, "Pie derecho"),
+  ].join("\n");
 };
 
 function useAnalisisPlantar() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [pacientes, setPacientes] = useState([]);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [totalElementos, setTotalElementos] = useState(0);
   const [cargandoPacientes, setCargandoPacientes] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [pagina, setPagina] = useState(0);
@@ -67,23 +52,66 @@ function useAnalisisPlantar() {
   const [previewIzquierdo, setPreviewIzquierdo] = useState("");
   const [previewDerecho, setPreviewDerecho] = useState("");
 
+  const [analisisIzquierdo, setAnalisisIzquierdo] = useState(() =>
+    PredictModel(),
+  );
+  const [analisisDerecho, setAnalisisDerecho] = useState(() => PredictModel());
+
   const [resultadoIA, setResultadoIA] = useState("");
   const [tipoPie, setTipoPie] = useState("");
   const [cargando, setCargando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [mensaje, setMensaje] = useState(null);
 
+  const hayPacientes = totalElementos > 0;
+
   useEffect(() => {
-    Promise.resolve().then(() => {
-      const pacientesGuardados = leerPacientesLocal();
-      const pacientesConId = normalizarPacientes(pacientesGuardados);
+    let activo = true;
 
-      localStorage.setItem("pacientes", JSON.stringify(pacientesConId));
+    const temporizador = setTimeout(
+      () => {
+        getPacientes(busqueda, pagina, TAMANO_PACIENTES)
+          .then((data) => {
+            if (!activo) return;
 
-      setPacientes(pacientesConId);
-      setCargandoPacientes(false);
-    });
-  }, []);
+            setPacientes(data.content || []);
+            setTotalPaginas(data.totalPages || 1);
+            setTotalElementos(data.totalElements ?? 0);
+
+            const paginaSegura = Math.max(
+              0,
+              Math.min(pagina, (data.totalPages || 1) - 1),
+            );
+
+            if (paginaSegura !== pagina) {
+              setPagina(paginaSegura);
+            }
+          })
+          .catch(() => {
+            if (!activo) return;
+
+            setPacientes([]);
+            setTotalPaginas(1);
+            setTotalElementos(0);
+            setPagina(0);
+            setMensaje({
+              texto:
+                "No se pudo cargar la lista de pacientes. Verifica tu conexión e inténtalo de nuevo.",
+              severidad: "error",
+            });
+          })
+          .finally(() => {
+            if (activo) setCargandoPacientes(false);
+          });
+      },
+      busqueda ? 300 : 0,
+    );
+
+    return () => {
+      activo = false;
+      clearTimeout(temporizador);
+    };
+  }, [busqueda, pagina]);
 
   useEffect(() => {
     if (!mensaje) return undefined;
@@ -93,51 +121,84 @@ function useAnalisisPlantar() {
     return () => clearTimeout(temporizador);
   }, [mensaje]);
 
-  const pacientesFiltrados = pacientes.filter((paciente) => {
-    const texto = convertirTexto(busqueda);
+  const seleccionarPaciente = useCallback(
+    async (idPaciente) => {
+      if (!idPaciente) {
+        setPacienteSeleccionado(null);
+        return;
+      }
 
-    if (texto === "") return true;
+      const enPagina = pacientes.find(
+        (paciente) => idPacienteDe(paciente) === idPaciente,
+      );
 
-    const incluye = (valor) =>
-      `${valor || ""}`.toLowerCase().trim().includes(texto);
+      if (enPagina) {
+        setPacienteSeleccionado(enPagina);
+        return;
+      }
 
-    return (
-      incluye(paciente.nombre) ||
-      incluye(paciente.nss) ||
-      incluye(paciente.numeroRegistroSocial) ||
-      incluye(paciente.registroSocial) ||
-      incluye(paciente.fecha) ||
-      incluye(paciente.hora) ||
-      incluye(paciente.analisis)
-    );
-  });
-
-  const totalPaginas = Math.max(
-    1,
-    Math.ceil(pacientesFiltrados.length / TAMANO_PACIENTES),
+      try {
+        const paciente = await getPacienteById(idPaciente);
+        setPacienteSeleccionado(paciente);
+      } catch {
+        setPacienteSeleccionado(null);
+        setMensaje({
+          texto:
+            "No se encontró al paciente. Regístralo antes de continuar.",
+          severidad: "error",
+        });
+      }
+    },
+    [pacientes],
   );
-  const paginaSegura = Math.min(pagina, totalPaginas - 1);
-  const pacientesPagina = pacientesFiltrados.slice(
-    paginaSegura * TAMANO_PACIENTES,
-    (paginaSegura + 1) * TAMANO_PACIENTES,
-  );
+
+  useEffect(() => {
+    const curp = searchParams.get("paciente");
+
+    if (!curp) {
+      return undefined;
+    }
+
+    let activo = true;
+
+    getPacienteById(curp)
+      .then((paciente) => {
+        if (activo) setPacienteSeleccionado(paciente);
+      })
+      .catch(() => {
+        if (activo) {
+          setPacienteSeleccionado(null);
+          setMensaje({
+            texto:
+              "No se encontró al paciente. Regístralo antes de continuar.",
+            severidad: "error",
+          });
+        }
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [searchParams]);
 
   const cambiarBusqueda = (valor) => {
     setBusqueda(valor);
     setPagina(0);
     setPacienteSeleccionado(null);
+    setCargandoPacientes(true);
   };
 
   const limpiarBusqueda = () => {
     setBusqueda("");
     setPagina(0);
     setPacienteSeleccionado(null);
+    setCargandoPacientes(true);
   };
 
   const irAPagina = (nuevaPagina) => {
     if (
       cargandoPacientes ||
-      nuevaPagina === paginaSegura ||
+      nuevaPagina === pagina ||
       nuevaPagina < 0 ||
       nuevaPagina >= totalPaginas
     ) {
@@ -145,12 +206,7 @@ function useAnalisisPlantar() {
     }
 
     setPagina(nuevaPagina);
-  };
-
-  const seleccionarPaciente = (idPaciente) => {
-    const paciente = pacientes.find((p) => p.idPaciente === idPaciente);
-
-    setPacienteSeleccionado(paciente || null);
+    setCargandoPacientes(true);
   };
 
   const cargarImagen = async (e, tipo) => {
@@ -187,7 +243,7 @@ function useAnalisisPlantar() {
     }
   };
 
-  const analizarPies = () => {
+  const analizarPies = async () => {
     if (!pacienteSeleccionado) {
       setMensaje({ texto: "Selecciona un paciente.", severidad: "error" });
       return;
@@ -204,23 +260,36 @@ function useAnalisisPlantar() {
     setMensaje(null);
     setCargando(true);
 
-    setTimeout(() => {
-      setResultadoIA(
-        "Análisis generado por el modelo IA pendiente de conexión.",
+    try {
+      const [derecho, izquierdo] = await Promise.all([
+        createPredict(pieDerecho),
+        createPredict(pieIzquierdo),
+      ]);
+
+      setAnalisisIzquierdo(izquierdo);
+      setAnalisisDerecho(derecho);
+      setResultadoIA(construirResultadoIA(izquierdo, derecho));
+      setTipoPie(
+        `Izquierdo: ${izquierdo.className} • Derecho: ${derecho.className}`,
       );
 
-      setTipoPie("Tipo de pie pendiente");
-
       setCargando(false);
-
       setMensaje({
         texto: "Análisis completado. Revisa el resultado antes de guardar.",
         severidad: "success",
       });
-    }, 1200);
+    } catch (error) {
+      setCargando(false);
+      setMensaje({
+        texto:
+          error?.message ||
+          "No se pudo analizar con IA. Verifica tu conexión e inténtalo de nuevo.",
+        severidad: "error",
+      });
+    }
   };
 
-  const guardarAnalisis = () => {
+  const guardarAnalisis = async () => {
     if (guardando) return;
 
     if (!pacienteSeleccionado) {
@@ -233,58 +302,77 @@ function useAnalisisPlantar() {
       return;
     }
 
-    if (resultadoIA.trim() === "" || tipoPie.trim() === "") {
+    if (!analisisIzquierdo.className || !analisisDerecho.className) {
       setMensaje({ texto: "Primero presiona Analizar.", severidad: "error" });
       return;
     }
 
     setGuardando(true);
 
-    const pacienteActualizado = {
-      ...pacienteSeleccionado,
-      resultadoIA: resultadoIA,
-      tipoPie: tipoPie,
-      imagenPieIzquierdo: previewIzquierdo,
-      imagenPieDerecho: previewDerecho,
-      fechaAnalisis: new Date().toLocaleDateString(),
-      analisis: pacienteSeleccionado.analisis || "A01",
-      diagnostico:
-        pacienteSeleccionado.diagnostico ||
-        `Con base en el análisis plantar realizado por IA, el paciente presenta: ${tipoPie}. ${resultadoIA}`,
-      ultimaModificacion: new Date().toLocaleString(),
-    };
+    const idPaciente = idPacienteDe(pacienteSeleccionado);
+    const idProfesional = Number(localStorage.getItem("idProfesional"));
 
-    const pacientesActualizados = pacientes.map((paciente) => {
-      if (paciente.idPaciente === pacienteSeleccionado.idPaciente) {
-        return pacienteActualizado;
-      }
+    localStorage.setItem("idPaciente", idPaciente);
 
-      return paciente;
-    });
+    try {
+      const { idInforme } = await createInforme(
+        InformeCreateUpdateModel({
+          idPaciente,
+          idProfesional,
+          estadoGeneral: "",
+          pesoKg: null,
+          sintomas: "",
+          descripcion: resultadoIA,
+          diagnostico: `Con base en el análisis plantar realizado por IA, el paciente presenta: ${tipoPie}.`,
+          tratamiento: "",
+          evolucion: "",
+          observaciones: resultadoIA,
+        }),
+      );
 
-    localStorage.setItem("pacientes", JSON.stringify(pacientesActualizados));
+      await registrarAnalisisConDocumentos({
+        idInforme,
+        idPaciente,
+        idProfesional,
+        pieType: "DERECHA",
+        analisis: analisisDerecho,
+        file: pieDerecho,
+      });
 
-    localStorage.setItem(
-      "pacienteSeleccionado",
-      JSON.stringify(pacienteActualizado),
-    );
+      await registrarAnalisisConDocumentos({
+        idInforme,
+        idPaciente,
+        idProfesional,
+        pieType: "IZQUIERDA",
+        analisis: analisisIzquierdo,
+        file: pieIzquierdo,
+      });
 
-    registrarActividad({
-      tipo: "Análisis plantar",
-      descripcion: "Se realizó un análisis plantar",
-      paciente: pacienteSeleccionado.nombre || "Paciente",
-      detalles: resultadoIA || "Análisis realizado correctamente",
-    });
+      registrarActividad({
+        tipo: "Análisis plantar",
+        descripcion: "Se creó un análisis plantar y su informe",
+        paciente:
+          pacienteSeleccionado.nombre ||
+          `${pacienteSeleccionado.nombre} ${pacienteSeleccionado.apellidoPaterno}`,
+        detalles: `Tipo de pie: ${tipoPie}`,
+      });
 
-    setPacientes(pacientesActualizados);
-    setPacienteSeleccionado(pacienteActualizado);
+      setGuardando(false);
+      setMensaje({
+        texto: "Análisis e informe guardados correctamente.",
+        severidad: "success",
+      });
 
-    setMensaje({
-      texto: "Análisis guardado en el informe del paciente.",
-      severidad: "success",
-    });
-
-    setTimeout(() => navigate("/informe-paciente"), 900);
+      setTimeout(() => navigate("/informe-paciente"), 900);
+    } catch (error) {
+      setGuardando(false);
+      setMensaje({
+        texto:
+          error?.message ||
+          "No se pudo guardar el análisis. Verifica tu conexión e inténtalo de nuevo.",
+        severidad: "error",
+      });
+    }
   };
 
   return {
@@ -292,7 +380,8 @@ function useAnalisisPlantar() {
     pacientes,
     cargandoPacientes,
     busqueda,
-    paginaSegura,
+    paginaSegura: pagina,
+    hayPacientes,
     pacienteSeleccionado,
     pieIzquierdo,
     pieDerecho,
@@ -304,7 +393,7 @@ function useAnalisisPlantar() {
     guardando,
     mensaje,
     totalPaginas,
-    pacientesPagina,
+    pacientesPagina: pacientes,
     cambiarBusqueda,
     limpiarBusqueda,
     irAPagina,

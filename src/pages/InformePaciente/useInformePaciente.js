@@ -4,19 +4,15 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { registrarActividad } from "../../utils/historial";
 import { convertirABase64 } from "../../utils/archivos.js";
-import { AnalisisCreateModel } from "../../models/analisis/AnalisisCreateModel.js";
-import { createAnalisis } from "../../services/analisisService.js";
+import {
+  registrarAnalisisConDocumentos,
+  subirDocumentos,
+} from "../../utils/analisis.js";
 import { createPredict } from "../../services/predictService.js";
 import { PredictModel } from "../../models/analisis/PredictModel.js";
 import { getPacienteById } from "../../services/pacienteService.js";
 import { estudio } from "../../models/estudios/estudio.js";
 import { createInforme } from "../../services/informeService.js";
-import {
-  CompleteUpload,
-  GenerateUploadUrl,
-  UploadFile,
-} from "../../services/documentCloudService.js";
-import { createDocumento } from "../../services/documentService.js";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -136,18 +132,6 @@ function useInformePaciente() {
       activo = false;
     };
   }, [idPaciente, navigate]);
-
-  const calcularSHA256 = async (archivo) => {
-    const buffer = await archivo.arrayBuffer();
-    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
-    return hashHex;
-  };
 
   const mostrarMensajeEstudios = (tipo, texto) => {
     setMensajeEstudios({ tipo, texto });
@@ -362,43 +346,13 @@ function useInformePaciente() {
   };
 
   const subirAnalisis = async (idInforme, pieType, analisis, img) => {
-    const { idAnalisis } = await createAnalisis(
-      AnalisisCreateModel({
-        idInforme: idInforme,
-        pieType: pieType,
-        className: analisis.className,
-        confidence: analisis.confidence,
-      }),
-    );
-
-    subirDocumentos(img, idInforme, idAnalisis);
-  };
-
-  const subirDocumentos = async (file, idInforme, idAnalisis = null) => {
-    const { storageKey, uploadUrl } = await GenerateUploadUrl(
-      paciente.curp,
-      file.name,
-      file.type,
-    );
-
-    await UploadFile(uploadUrl, file);
-
-    await CompleteUpload(paciente.curp, storageKey);
-
-    const hash = await calcularSHA256(file);
-    await createDocumento({
-      idPaciente: paciente.curp,
-      idProfesional: idProfesional,
+    await registrarAnalisisConDocumentos({
       idInforme: idInforme,
-      idAnalisis: idAnalisis,
-      storageUri: uploadUrl,
-      storageKey: storageKey,
-      nombreDocumento: file.name,
-      mimeType: file.type,
-      tamanoBytes: file.size,
-      hashSha256: hash,
-      version: 1,
-      fechaDocumento: new Date(file.lastModified).toISOString(),
+      idPaciente: paciente.curp,
+      idProfesional,
+      pieType,
+      analisis,
+      file: img,
     });
   };
 
@@ -459,7 +413,12 @@ function useInformePaciente() {
       await Promise.all(
         estudios.map(async (estudioItem) => {
           if (estudioItem?.archivo) {
-            await subirDocumentos(base64AFile(estudioItem), idInforme);
+            await subirDocumentos({
+              paciente,
+              idProfesional,
+              file: base64AFile(estudioItem),
+              idInforme,
+            });
           }
         }),
       );

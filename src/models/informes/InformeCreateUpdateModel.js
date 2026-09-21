@@ -2,7 +2,7 @@ export const InformeCreateUpdateModel = (data = {}) => ({
   idPaciente: data.idPaciente ?? "",
   idProfesional: data.idProfesional ?? "",
   estadoGeneral: data.estadoGeneral ?? "",
-  pesoKg: data.pesoKg ?? 0,
+  pesoKg: data.pesoKg ?? null,
   sintomas: data.sintomas ?? "",
   descripcion: data.descripcion ?? "",
   diagnostico: data.diagnostico ?? "",

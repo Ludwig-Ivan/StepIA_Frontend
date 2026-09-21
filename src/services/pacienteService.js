@@ -1,6 +1,9 @@
 import api from "../api/api.js";
 import { ENDPOINTS } from "../config/endpoints.js";
-import { PacienteModel } from "../schema/PacienteSchema.js";
+import {
+  PacienteModel,
+  parsePacienteTolerante,
+} from "../schema/PacienteSchema.js";
 import { z } from "zod";
 import CURP_REGEX from "../schema/ExpReg.js";
 import { ejecutarServicio } from "../utils/errores.js";
@@ -11,26 +14,24 @@ export const createPaciente = (paciente) =>
       ENDPOINTS.PACIENTES.CREATE,
       PacienteModel(paciente),
     );
-    return PacienteModel(response.data);
+    return parsePacienteTolerante(response.data);
   }, "No se pudo crear el paciente");
 
 export const getPacienteById = (id) =>
   ejecutarServicio(async () => {
     const curp = z.string().regex(CURP_REGEX).parse(id);
     const response = await api.get(ENDPOINTS.PACIENTES.GET_BY_ID(curp));
-    return PacienteModel(response.data);
+    return parsePacienteTolerante(response.data);
   }, "No se pudo obtener el paciente");
 
-export const getPacientes = (searchTerm, page = 0, limit = 10) =>
+export const getPacientes = (searchTerm, page = 0, size = 10) =>
   ejecutarServicio(async () => {
     const response = await api.get(
-      ENDPOINTS.PACIENTES.GET_ALL(searchTerm, page, limit),
+      ENDPOINTS.PACIENTES.GET_ALL(searchTerm, page, size),
     );
 
-    console.log(response);
-
     const content = response.data.content.map((paciente) =>
-      PacienteModel(paciente),
+      parsePacienteTolerante(paciente),
     );
 
     return {

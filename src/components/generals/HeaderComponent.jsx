@@ -3,7 +3,6 @@ import "./HeaderComponentStyle.css";
 import { cerrarSesion } from "../../utils/session";
 import EstadoConexion from "./EstadoConexion";
 import PerfilMenu from "./PerfilMenu";
-import Logo from "../../assets/images/Logo.svg";
 
 /**
  * @param {Object} props

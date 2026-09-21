@@ -164,6 +164,12 @@
   box-shadow: 0 0 0 3px rgba(66, 184, 131, 0.22);
 }
 
+.analisis-nuevo-paciente {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
 .analisis-clear {
   position: absolute;
   right: 10px;

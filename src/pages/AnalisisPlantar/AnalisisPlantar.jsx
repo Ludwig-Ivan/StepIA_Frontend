@@ -41,6 +41,9 @@ const crearPaginas = (paginaActual, total) => {
   return paginas;
 };
 
+const identificarPaciente = (paciente) =>
+  paciente?.curp || paciente?.idPaciente || paciente?.nss || "";
+
 function SubidaImagen({
   idInput,
   titulo,
@@ -165,19 +168,21 @@ function SelectorPaciente({
           aria-label="Pacientes disponibles"
         >
           {pacientesPagina.map((paciente) => {
-            const coincide = seleccionado?.idPaciente === paciente.idPaciente;
+            const idPaciente = identificarPaciente(paciente);
+            const coincide =
+              identificarPaciente(seleccionado) === idPaciente;
 
             return (
               <label
-                key={paciente.idPaciente}
+                key={idPaciente}
                 className={`paciente-opcion${coincide ? " paciente-opcion--activa" : ""}`}
               >
                 <input
                   type="radio"
                   name="paciente-seleccion"
-                  value={paciente.idPaciente}
+                  value={idPaciente}
                   checked={coincide}
-                  onChange={() => onSeleccionar(paciente.idPaciente)}
+                  onChange={() => onSeleccionar(idPaciente)}
                 />
 
                 <span className="paciente-opcion-marcador" aria-hidden="true" />
@@ -289,6 +294,20 @@ function SelectorPaciente({
         </search>
       )}
 
+      {hayPacientes && (
+        <div className="analisis-nuevo-paciente">
+          <ButtonComponent
+            config={{
+              name: "registrar-nuevo-paciente",
+              text: "Registrar nuevo paciente",
+              type: "button",
+              variant: "blue",
+            }}
+            onClick={onRegistrarPaciente}
+          />
+        </div>
+      )}
+
       {contenido}
 
       {seleccionado && (
@@ -303,10 +322,10 @@ function SelectorPaciente({
 function AnalisisPlantar() {
   const {
     navigate,
-    pacientes,
     cargandoPacientes,
     busqueda,
     paginaSegura,
+    hayPacientes,
     pacienteSeleccionado,
     pieIzquierdo,
     pieDerecho,
@@ -448,7 +467,7 @@ function AnalisisPlantar() {
 
           <SelectorPaciente
             cargando={cargandoPacientes}
-            hayPacientes={pacientes.length > 0}
+            hayPacientes={hayPacientes}
             pacientesPagina={pacientesPagina}
             totalPaginas={totalPaginas}
             pagina={paginaSegura}
@@ -458,7 +477,9 @@ function AnalisisPlantar() {
             onLimpiarBusqueda={limpiarBusqueda}
             seleccionado={pacienteSeleccionado}
             onSeleccionar={seleccionarPaciente}
-            onRegistrarPaciente={() => navigate("/registro-paciente")}
+            onRegistrarPaciente={() =>
+              navigate("/registro-paciente?origen=analisis")
+            }
           />
 
           <section className="analisis-step" aria-labelledby="analisis-paso-2">
@@ -574,7 +595,7 @@ function AnalisisPlantar() {
                 variant: "green",
                 loading: cargando,
                 loadingText: "Analizando…",
-                disabled: pacientes.length === 0,
+                disabled: !pacienteSeleccionado,
               }}
               onClick={analizarPies}
             />
@@ -587,7 +608,7 @@ function AnalisisPlantar() {
                 variant: "purple",
                 loading: guardando,
                 loadingText: "Guardando…",
-                disabled: pacientes.length === 0,
+                disabled: !pacienteSeleccionado,
               }}
               onClick={guardarAnalisis}
             />

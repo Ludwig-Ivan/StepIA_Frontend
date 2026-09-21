@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import "./RegistroPaciente.css";
 import { PacienteCreateModel } from "../../models/pacientes/pacienteCreateModel.js";
 import { registrarActividad } from "../../utils/historial";
@@ -72,6 +72,8 @@ const SECCIONES_FORMULARIO = [
 
 function RegistroPaciente() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const origen = searchParams.get("origen");
   const [errorGeneral, setErrorGeneral] = useState("");
   const emailUsuario = localStorage.getItem("UsuarioActivo");
   const [cargando, setCargando] = useState(true);
@@ -153,6 +155,11 @@ function RegistroPaciente() {
         paciente: `${data.nombre} ${data.apellidoPaterno} ${data.apellidoMaterno}`,
         detalles: `CURP: ${data.curp}`,
       });
+
+      if (origen === "analisis") {
+        navigate(`/analisis-plantar?paciente=${data.curp}`);
+        return;
+      }
 
       navigate("/expediente");
     } catch (error) {
@@ -315,7 +322,9 @@ function RegistroPaciente() {
                 type: "button",
                 disabled: isSubmitting,
               }}
-              onClick={() => navigate("/menu")}
+              onClick={() =>
+                navigate(origen === "analisis" ? "/analisis-plantar" : "/menu")
+              }
             />
 
             <ButtonComponent
