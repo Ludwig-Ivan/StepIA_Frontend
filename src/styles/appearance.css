@@ -22,6 +22,8 @@
 
   --step-input-text: rgba(25, 48, 44, 0.92);
 
+  --step-history-text: rgba(25, 48, 44, 0.92);
+
   --step-text-secondary:
     rgba(255, 255, 255, 0.75);
 
@@ -58,6 +60,8 @@ html.tema-claro {
   --step-text: #FFF;
 
   --step-input-text: rgba(25, 48, 44, 0.92);
+
+  --step-history-text: rgba(25, 48, 44, 0.92);
 
   --step-text-secondary:
     rgba(255, 255, 255, 0.75);
@@ -97,6 +101,8 @@ html.tema-oscuro {
 
   --step-input-text: rgba(241, 248, 247, 0.92);
 
+  --step-history-text: rgba(255, 255, 255, 0.75);
+
   --step-text-secondary:
     rgba(255, 255, 255, 0.70);
 
@@ -134,6 +140,8 @@ html.tema-oscuro {
       rgba(15, 35, 32, 0.90);
 
     --step-text: #ffffff;
+
+    --step-history-text: rgba(255, 255, 255, 0.75);
 
     --step-text-secondary:
       rgba(255, 255, 255, 0.70);
@@ -174,6 +182,8 @@ html.tema-oscuro {
       rgba(255, 255, 255, 0.88);
 
     --step-text: #243b39;
+
+    --step-history-text: rgba(25, 48, 44, 0.92);
 
     --step-text-secondary: #58706e;
 

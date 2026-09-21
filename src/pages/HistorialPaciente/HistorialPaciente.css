@@ -179,7 +179,7 @@
 }
 
 .historial-buscador-icono {
-  color: var(--step-surface);
+  color: var(--step-history-text);
 
   font-size: 15px;
 
@@ -197,13 +197,13 @@
 
   background: transparent;
 
-  color: var(--step-surface);
+  color: var(--step-history-text);
 
   font-size: 14px;
 }
 
 .historial-buscador input::placeholder {
-  color: var(--step-input-text);
+  color: var(--step-history-text);
 }
 
 .historial-clear {
@@ -222,7 +222,7 @@
 
   background: transparent;
 
-  color: var(--step-surface);
+  color: var(--step-history-text);
 
   cursor: pointer;
 
@@ -230,9 +230,9 @@
 }
 
 .historial-clear:hover {
-  background: var(--step-input-bg);
+  background: var(--step-surface-hover);
 
-  color: var(--step-text);
+  color: var(--step-history-text);
 }
 
 /* =========================
@@ -517,7 +517,7 @@
 
   border: 1px solid var(--step-border);
 
-  color: var(--step-input-text);
+  color: var(--step-history-text);
 
   border-radius: 10px;
 

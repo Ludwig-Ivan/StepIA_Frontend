@@ -574,7 +574,6 @@ function VisorDocumento({ presignedUrl, alt }) {
         width="100%"
         height="600px"
         title={alt || "Documento adjunto"}
-        sandbox="allow-same-origin"
       />
     );
   }
