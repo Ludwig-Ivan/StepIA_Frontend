@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registrarActividad } from "../../utils/historial";
+import { convertirABase64 } from "../../utils/archivos.js";
 
 const TAMANO_PACIENTES = 5;
 
@@ -48,17 +49,6 @@ const normalizarPacientes = (lista) => {
       nss: nssFinal,
       idPaciente: generarIdPaciente({ ...paciente, nss: nssFinal }, index),
     };
-  });
-};
-
-const convertirABase64 = (archivo) => {
-  return new Promise((resolve, reject) => {
-    const lector = new FileReader();
-
-    lector.onload = () => resolve(lector.result);
-    lector.onerror = (error) => reject(error);
-
-    lector.readAsDataURL(archivo);
   });
 };
 

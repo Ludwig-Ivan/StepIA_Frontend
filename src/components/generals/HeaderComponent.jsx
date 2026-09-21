@@ -3,6 +3,7 @@ import "./HeaderComponentStyle.css";
 import { cerrarSesion } from "../../utils/session";
 import EstadoConexion from "./EstadoConexion";
 import PerfilMenu from "./PerfilMenu";
+import Logo from "../../assets/images/Logo.svg";
 
 /**
  * @param {Object} props
@@ -23,6 +24,7 @@ function HeaderComponent({ childrenLeft, childrenRigth, data }) {
   return (
     <header className="top-menu">
       <div className="top-menu-left">
+        {/* <img src={Logo} height={40} /> */}
         <button
           type="button"
           className="top-logo"

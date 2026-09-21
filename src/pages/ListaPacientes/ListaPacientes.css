@@ -5,7 +5,7 @@
 .lista-page {
   min-height: 100vh;
 
-  background-image: var(--step-overlay), url('../../assets/images/fondo-medico.jpg');
+  background-image: var(--step-overlay), url('../../assets/images/fondo-medico.svg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -116,18 +116,16 @@
   width: 100%;
   max-width: 1150px;
 
-  background: rgba(65, 78, 88, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: var(--step-surface);
+  border: 1px solid var(--step-border);
   border-radius: 22px;
 
   padding: clamp(20px, 3vw, 30px) clamp(20px, 3vw, 34px);
 
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 
   box-shadow:
-    0 20px 45px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    0 20px 45px var(--step-shadow);
 }
 
 /* Encabezado */

@@ -5,7 +5,7 @@
 .informe-page {
   min-height: 100vh;
 
-  background-image: var(--step-overlay), url('../../assets/images/fondo-medico.jpg');
+  background-image: var(--step-overlay), url('../../assets/images/fondo-medico.svg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -163,8 +163,8 @@
   width: 100%;
   max-width: 1050px;
 
-  background: rgba(65, 78, 88, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: var(--step-surface);
+  border: 1px solid var(--step-border);
   border-radius: 22px;
 
   padding: clamp(22px, 3vw, 32px) clamp(22px, 3.5vw, 36px);
@@ -178,8 +178,7 @@
   -webkit-backdrop-filter: blur(12px);
 
   box-shadow:
-    0 20px 45px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    0 20px 45px var(--step-shadow);
 }
 
 /* Campos generales */
@@ -190,7 +189,7 @@
 }
 
 .campo label,
-.upload-pie-card > label {
+.upload-pie-card>label {
   color: white;
   font-size: 0.94rem;
   font-weight: 800;
@@ -545,7 +544,7 @@
   margin-top: 18px;
 }
 
-.informe-buttons > div {
+.informe-buttons>div {
   display: flex;
   gap: 18px;
   flex-wrap: wrap;
@@ -682,6 +681,7 @@
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -937,7 +937,7 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-.proxima-consulta > p {
+.proxima-consulta>p {
   margin: 0 0 16px;
 
   color: rgba(255, 255, 255, 0.85);
@@ -1008,6 +1008,7 @@
 }
 
 @media print {
+
   .informe-buttons,
   .btn-subir-imagen,
   .boton-analizar-informe,
@@ -1019,6 +1020,7 @@
 
 /* Tablets */
 @media (max-width: 900px) {
+
   .informe-top,
   .informe-card,
   .informe-buttons {
@@ -1115,7 +1117,7 @@
     gap: 15px;
   }
 
-  .informe-buttons > div {
+  .informe-buttons>div {
     width: 100%;
     justify-content: center;
   }

@@ -9,7 +9,6 @@ import { getInformeByPaciente } from "../../services/informeService";
 import { getAnalisisByInforme } from "../../services/analisisService";
 import { getDocumentosByInforme } from "../../services/documentService";
 import { GeneratedDownloadUrl } from "../../services/documentCloudService";
-import { FaUserAlt } from "react-icons/fa";
 import {
   FaDownload,
   FaFile,
@@ -22,6 +21,8 @@ import {
 import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
 import Collapse from "@mui/material/Collapse";
 import Alert from "@mui/material/Alert";
+import HeaderComponent from "../../components/generals/HeaderComponent.jsx";
+import { obtenerByEmail } from "../../services/profesionalService.js";
 
 const TAMANO_PAGINA = 5;
 
@@ -313,23 +314,6 @@ const generarPdfHistorial = async (informe, paciente, analisis, documentos) => {
   pdf.save(nombreArchivo);
 };
 
-function HeaderHistorialPaciente({ onMenu }) {
-  return (
-    <header className="historial-header">
-      <button type="button" className="historial-logo" onClick={onMenu}>
-        StepIA
-      </button>
-
-      <div className="historial-user" title="Profesional en sesión">
-        <span>USUARIO</span>
-        <div className="historial-user-icon" aria-hidden="true">
-          <FaUserAlt />
-        </div>
-      </div>
-    </header>
-  );
-}
-
 function EstadoCarga() {
   return (
     <div className="historial-carga" role="status" aria-live="polite">
@@ -420,12 +404,22 @@ function EstadoError({ onReintentar, onVolver }) {
 
       <div className="historial-error-botones">
         <ButtonComponent
-          config={{ name: "reintentar", text: "Reintentar", type: "button", variant: "green" }}
+          config={{
+            name: "reintentar",
+            text: "Reintentar",
+            type: "button",
+            variant: "green",
+          }}
           onClick={onReintentar}
         />
 
         <ButtonComponent
-          config={{ name: "volver-lista", text: "Volver a la lista", type: "button", variant: "blue" }}
+          config={{
+            name: "volver-lista",
+            text: "Volver a la lista",
+            type: "button",
+            variant: "blue",
+          }}
           onClick={onVolver}
         />
       </div>
@@ -437,7 +431,9 @@ function CampoHistorial({ etiqueta, valor, multiline }) {
   return (
     <div className="historial-campo">
       <span className="historial-campo-rotulo">{etiqueta}</span>
-      <div className={`historial-valor${multiline ? " historial-valor--leer" : ""}`}>
+      <div
+        className={`historial-valor${multiline ? " historial-valor--leer" : ""}`}
+      >
         {valor || "Sin dato"}
       </div>
     </div>
@@ -452,11 +448,7 @@ function ImagenIA({ analisisIA, url }) {
       <figcaption>{textoPie}</figcaption>
 
       <div className="historial-imagen">
-        {url ? (
-          <img src={url} alt={textoPie} />
-        ) : (
-          <span>Sin imagen</span>
-        )}
+        {url ? <img src={url} alt={textoPie} /> : <span>Sin imagen</span>}
       </div>
     </figure>
   );
@@ -480,8 +472,15 @@ function PanelAiHistorial({ cargando, error, analisisIa, imagenesIA }) {
       </div>
 
       {cargando ? (
-        <div className="historial-carga-recursos" role="status" aria-live="polite">
-          <span className="historial-spinner historial-spinner--mini" aria-hidden="true" />
+        <div
+          className="historial-carga-recursos"
+          role="status"
+          aria-live="polite"
+        >
+          <span
+            className="historial-spinner historial-spinner--mini"
+            aria-hidden="true"
+          />
           Cargando análisis…
         </div>
       ) : error ? (
@@ -493,11 +492,7 @@ function PanelAiHistorial({ cargando, error, analisisIa, imagenesIA }) {
           <div className="historial-imagenes">
             {imagenesIA.length > 0 ? (
               imagenesIA.map((img) => (
-                <ImagenIA
-                  key={img.idAnalisis}
-                  analisisIA={img}
-                  url={img.url}
-                />
+                <ImagenIA key={img.idAnalisis} analisisIA={img} url={img.url} />
               ))
             ) : (
               <p className="historial-sin-imagenes">Sin imágenes de análisis</p>
@@ -546,8 +541,15 @@ function VisorDocumento({ presignedUrl, alt }) {
 
   if (!blobUrl || !headers) {
     return (
-      <div className="historial-carga-recursos" role="status" aria-live="polite">
-        <span className="historial-spinner historial-spinner--mini" aria-hidden="true" />
+      <div
+        className="historial-carga-recursos"
+        role="status"
+        aria-live="polite"
+      >
+        <span
+          className="historial-spinner historial-spinner--mini"
+          aria-hidden="true"
+        />
         Cargando documento…
       </div>
     );
@@ -556,7 +558,13 @@ function VisorDocumento({ presignedUrl, alt }) {
   const contentType = headers["content-type"] || "";
 
   if (contentType.startsWith("image/")) {
-    return <img src={blobUrl} alt={alt || "Documento adjunto"} style={{ maxWidth: "100%" }} />;
+    return (
+      <img
+        src={blobUrl}
+        alt={alt || "Documento adjunto"}
+        style={{ maxWidth: "100%" }}
+      />
+    );
   }
 
   if (contentType === "application/pdf") {
@@ -644,8 +652,15 @@ function EstudiosHistorial({ cargando, error, documentos }) {
       <h4>Otros Estudios</h4>
 
       {cargando ? (
-        <div className="historial-carga-recursos" role="status" aria-live="polite">
-          <span className="historial-spinner historial-spinner--mini" aria-hidden="true" />
+        <div
+          className="historial-carga-recursos"
+          role="status"
+          aria-live="polite"
+        >
+          <span
+            className="historial-spinner historial-spinner--mini"
+            aria-hidden="true"
+          />
           Cargando estudios…
         </div>
       ) : error ? (
@@ -797,7 +812,11 @@ function HistorialRow({ informe, paciente }) {
           />
         </div>
 
-        <CampoHistorial etiqueta="Estado General" valor={informe.estadoGeneral} multiline />
+        <CampoHistorial
+          etiqueta="Estado General"
+          valor={informe.estadoGeneral}
+          multiline
+        />
 
         <PanelAiHistorial
           cargando={cargandoRecursos}
@@ -806,16 +825,39 @@ function HistorialRow({ informe, paciente }) {
           imagenesIA={imagenesIA}
         />
 
-        <CampoHistorial etiqueta="Observaciones Manuales" valor={informe.observaciones} multiline />
-        <CampoHistorial etiqueta="Diagnóstico" valor={informe.diagnostico} multiline />
+        <CampoHistorial
+          etiqueta="Observaciones Manuales"
+          valor={informe.observaciones}
+          multiline
+        />
+        <CampoHistorial
+          etiqueta="Diagnóstico"
+          valor={informe.diagnostico}
+          multiline
+        />
 
         <div className="historial-grid">
-          <CampoHistorial etiqueta="Síntomas" valor={informe.sintomas} multiline />
-          <CampoHistorial etiqueta="Tratamiento" valor={informe.tratamiento} multiline />
-          <CampoHistorial etiqueta="Evoluciones" valor={informe.evolucion} multiline />
+          <CampoHistorial
+            etiqueta="Síntomas"
+            valor={informe.sintomas}
+            multiline
+          />
+          <CampoHistorial
+            etiqueta="Tratamiento"
+            valor={informe.tratamiento}
+            multiline
+          />
+          <CampoHistorial
+            etiqueta="Evoluciones"
+            valor={informe.evolucion}
+            multiline
+          />
         </div>
 
-        <section className="historial-proxima-consulta" aria-label="Próxima consulta">
+        <section
+          className="historial-proxima-consulta"
+          aria-label="Próxima consulta"
+        >
           <h4>Próxima consulta</h4>
 
           <div className="historial-grid">
@@ -848,7 +890,12 @@ function ListaInformes({ informes, paciente }) {
   );
 }
 
-function PaginacionHistorial({ pagina, totalPaginas, onIrAPagina, deshabilitado }) {
+function PaginacionHistorial({
+  pagina,
+  totalPaginas,
+  onIrAPagina,
+  deshabilitado,
+}) {
   return (
     <nav className="historial-paginacion" aria-label="Paginación del historial">
       <button
@@ -911,6 +958,62 @@ function HistorialPaciente() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
+
+  const emailUsuario = localStorage.getItem("UsuarioActivo");
+  const [cargandoUser, setCargandoUser] = useState(true);
+  const [errorUser, setErrorUser] = useState("");
+  const [usuario, setUsuario] = useState(null);
+
+  const cargarDoctor = useCallback(async () => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    try {
+      const doctor = await obtenerByEmail(emailUsuario);
+      setUsuario(doctor);
+    } catch {
+      setErrorUser(
+        "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+      );
+    } finally {
+      setCargandoUser(false);
+    }
+  }, [emailUsuario, navigate]);
+
+  const reintentarUser = () => {
+    setErrorUser("");
+    setCargandoUser(true);
+    cargarDoctor();
+  };
+
+  useEffect(() => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    let activo = true;
+
+    obtenerByEmail(emailUsuario)
+      .then((doctor) => {
+        if (activo) setUsuario(doctor);
+      })
+      .catch(() => {
+        if (activo)
+          setErrorUser(
+            "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+          );
+      })
+      .finally(() => {
+        if (activo) setCargandoUser(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [emailUsuario, navigate]);
 
   const cargarDatos = useCallback((id, paginaNueva) => {
     const idSolicitud = ++solicitudActual.current;
@@ -977,7 +1080,8 @@ function HistorialPaciente() {
         informe.observaciones,
         formatearFecha(informe.fechaRegistro),
       ].some(
-        (valor) => typeof valor === "string" && valor.toLowerCase().includes(texto),
+        (valor) =>
+          typeof valor === "string" && valor.toLowerCase().includes(texto),
       ),
     );
   }, [informes, busqueda]);
@@ -1026,9 +1130,7 @@ function HistorialPaciente() {
     }
 
     if (informesFiltrados.length === 0) {
-      return (
-        <EstadoSinResultados onLimpiarBusqueda={() => setBusqueda("")} />
-      );
+      return <EstadoSinResultados onLimpiarBusqueda={() => setBusqueda("")} />;
     }
 
     return (
@@ -1047,16 +1149,69 @@ function HistorialPaciente() {
     );
   };
 
+  if (cargandoUser) {
+    return (
+      <div className="menu-page">
+        <header className="top-menu" aria-hidden="true">
+          <div className="top-menu-left">
+            <div className="skeleton skeleton-logo" />
+            <div className="skeleton skeleton-chip" />
+          </div>
+          <div className="top-menu-right">
+            <div className="skeleton skeleton-chip" />
+            <div className="skeleton skeleton-avatar" />
+          </div>
+        </header>
+
+        <main className="menu-overlay" role="status">
+          <div className="menu-skeleton-card">
+            <div className="skeleton skeleton-stepai" />
+            <div className="skeleton skeleton-title" />
+            <div className="skeleton skeleton-line" />
+            <div className="skeleton skeleton-line skeleton-line--short" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (errorUser) {
+    return (
+      <div className="menu-page">
+        <main className="menu-overlay" role="alert">
+          <div className="menu-error-card">
+            <h1>No se pudo cargar el panel</h1>
+            <p>{errorUser}</p>
+            <button
+              type="button"
+              className="btn btn-green"
+              onClick={reintentarUser}
+            >
+              Reintentar
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="historial-page">
-      <HeaderHistorialPaciente onMenu={() => navigate("/menu")} />
+      <HeaderComponent data={{ usuario }} />
 
       <main className="historial-main">
         <section className="historial-card" aria-labelledby="historial-titulo">
           <div className="historial-top">
             <div>
               <h3 id="historial-titulo">Historial del Paciente</h3>
-              <p>{paciente ? `${paciente.nombre}${paciente.curp ? ` • ${paciente.curp}` : ""}` : "Cargando…"}</p>
+              <p>
+                {paciente
+                  ? `${paciente.nombre}${paciente.curp ? ` • ${paciente.curp}` : ""}`
+                  : "Cargando…"}
+              </p>
             </div>
 
             <ButtonComponent
@@ -1076,11 +1231,15 @@ function HistorialPaciente() {
                 Buscar en el historial
               </label>
 
-              <FaMagnifyingGlass className="historial-buscador-icono" aria-hidden="true" />
+              <FaMagnifyingGlass
+                className="historial-buscador-icono"
+                aria-hidden="true"
+              />
 
               <input
                 id="historial-input-busqueda"
-                type="search"
+                type="text"
+                role="searchbox"
                 placeholder="Buscar por diagnóstico, estado general, observaciones…"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
@@ -1100,8 +1259,15 @@ function HistorialPaciente() {
           )}
 
           {cargando && informes ? (
-            <p className="historial-carga-ligera" role="status" aria-live="polite">
-              <span className="historial-spinner historial-spinner--mini" aria-hidden="true" />
+            <p
+              className="historial-carga-ligera"
+              role="status"
+              aria-live="polite"
+            >
+              <span
+                className="historial-spinner historial-spinner--mini"
+                aria-hidden="true"
+              />
               Cargando…
             </p>
           ) : null}

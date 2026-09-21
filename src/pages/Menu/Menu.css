@@ -15,7 +15,7 @@
 
   background-image:
     var(--step-overlay),
-    url('../../assets/images/fondo-medico.jpg');
+    url('../../assets/images/fondo-medico.svg');
 
   background-size: cover;
   background-position: center;
@@ -190,6 +190,7 @@
 }
 
 @keyframes skeleton-pulse {
+
   0%,
   100% {
     opacity: 0.55;

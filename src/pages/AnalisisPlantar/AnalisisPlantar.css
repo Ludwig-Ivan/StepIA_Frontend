@@ -4,7 +4,7 @@
   --analisis-header-height: 56px;
 
   min-height: 100vh;
-  background-image: var(--step-overlay), url("../../assets/images/fondo-medico.jpg");
+  background-image: var(--step-overlay), url("../../assets/images/fondo-medico.svg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -232,11 +232,11 @@
   transition: 0.2s ease;
 }
 
-.paciente-opcion input:focus-visible + .paciente-opcion-marcador {
+.paciente-opcion input:focus-visible+.paciente-opcion-marcador {
   box-shadow: 0 0 0 3px rgba(66, 184, 131, 0.4);
 }
 
-.paciente-opcion input:checked + .paciente-opcion-marcador {
+.paciente-opcion input:checked+.paciente-opcion-marcador {
   border-color: var(--step-accent);
   background: var(--step-accent);
   box-shadow: inset 0 0 0 4px var(--step-input-bg);

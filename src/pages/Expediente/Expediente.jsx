@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Expediente.css";
 
@@ -10,18 +10,72 @@ import InputComponent from "../../components/inputs/InputComponent.jsx";
 import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
 import Alert from "@mui/material/Alert";
 import Collapse from "@mui/material/Collapse";
+import HeaderComponent from "../../components/generals/HeaderComponent.jsx";
+import { obtenerByEmail } from "../../services/profesionalService.js";
 
 const expedienteFormSchema = z.object({
-  antecedentes: z
-    .string()
-    .trim()
-    .max(255, "Máximo 255 caracteres"),
+  antecedentes: z.string().trim().max(255, "Máximo 255 caracteres"),
 });
 
 function Expediente() {
   const navigate = useNavigate();
   const idPaciente = localStorage.getItem("idPaciente");
   const [errorGeneral, setErrorGeneral] = useState("");
+  const emailUsuario = localStorage.getItem("UsuarioActivo");
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+  const [usuario, setUsuario] = useState(null);
+
+  const cargarDoctor = useCallback(async () => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    try {
+      const doctor = await obtenerByEmail(emailUsuario);
+      setUsuario(doctor);
+    } catch {
+      setError(
+        "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+      );
+    } finally {
+      setCargando(false);
+    }
+  }, [emailUsuario, navigate]);
+
+  const reintentar = () => {
+    setError("");
+    setCargando(true);
+    cargarDoctor();
+  };
+
+  useEffect(() => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    let activo = true;
+
+    obtenerByEmail(emailUsuario)
+      .then((doctor) => {
+        if (activo) setUsuario(doctor);
+      })
+      .catch(() => {
+        if (activo)
+          setError(
+            "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+          );
+      })
+      .finally(() => {
+        if (activo) setCargando(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [emailUsuario, navigate]);
 
   const {
     control,
@@ -34,30 +88,59 @@ function Expediente() {
     defaultValues: { antecedentes: "" },
   });
 
-  const header = (
-    <header className="expediente-header">
-      <button
-        type="button"
-        className="expediente-logo"
-        onClick={() => navigate("/menu")}
-      >
-        StepIA
-      </button>
+  if (cargando) {
+    return (
+      <div className="menu-page">
+        <header className="top-menu" aria-hidden="true">
+          <div className="top-menu-left">
+            <div className="skeleton skeleton-logo" />
+            <div className="skeleton skeleton-chip" />
+          </div>
+          <div className="top-menu-right">
+            <div className="skeleton skeleton-chip" />
+            <div className="skeleton skeleton-avatar" />
+          </div>
+        </header>
 
-      <button
-        type="button"
-        className="expediente-volver"
-        onClick={() => navigate("/menu")}
-      >
-        Panel principal
-      </button>
-    </header>
-  );
+        <main className="menu-overlay" role="status">
+          <div className="menu-skeleton-card">
+            <div className="skeleton skeleton-stepai" />
+            <div className="skeleton skeleton-title" />
+            <div className="skeleton skeleton-line" />
+            <div className="skeleton skeleton-line skeleton-line--short" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="menu-page">
+        <main className="menu-overlay" role="alert">
+          <div className="menu-error-card">
+            <h1>No se pudo cargar el panel</h1>
+            <p>{error}</p>
+            <button
+              type="button"
+              className="btn btn-green"
+              onClick={reintentar}
+            >
+              Reintentar
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (!idPaciente) {
     return (
       <div className="expediente-page">
-        {header}
+        <HeaderComponent data={{ usuario }} />
 
         <main className="expediente-main">
           <section className="expediente-card expediente-card--vacio">
@@ -76,9 +159,7 @@ function Expediente() {
                 variant: "green",
                 type: "button",
               }}
-              onClick={() =>
-                navigate("/registro-paciente", { replace: true })
-              }
+              onClick={() => navigate("/registro-paciente", { replace: true })}
             />
           </section>
         </main>
@@ -107,8 +188,7 @@ function Expediente() {
 
   return (
     <div className="expediente-page">
-      {header}
-
+      <HeaderComponent data={{ usuario }} />
       <main className="expediente-main">
         <form
           className="expediente-card"

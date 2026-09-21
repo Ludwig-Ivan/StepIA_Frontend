@@ -55,8 +55,7 @@ function TextFieldInput({ config, containerStyle, sx, ...ref }) {
         variant="outlined"
         error={hasError}
         helperText={hasError ? config.error : config.helperText || null}
-        FormHelperTextProps={{ role: hasError ? "alert" : undefined }}
-        inputProps={config.inputProps}
+        formhelpertextprops={{ role: hasError ? "alert" : undefined }}
         sx={{
           "& .MuiFormHelperText-root": {
             marginLeft: "4px",
@@ -65,14 +64,16 @@ function TextFieldInput({ config, containerStyle, sx, ...ref }) {
           },
           ...sx,
         }}
-        InputProps={
+        inputprops={
           showToggle
             ? {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
                       size="small"
-                      aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      aria-label={
+                        visible ? "Ocultar contraseña" : "Mostrar contraseña"
+                      }
                       onClick={() => setVisible((v) => !v)}
                       edge="end"
                     >
@@ -139,10 +140,19 @@ function SelectField({ config, containerStyle, ...ref }) {
 
 function InputComponent({ config, containerStyle, sx, ...ref }) {
   if (config.type === "select") {
-    return <SelectField config={config} containerStyle={containerStyle} {...ref} />;
+    return (
+      <SelectField config={config} containerStyle={containerStyle} {...ref} />
+    );
   }
 
-  return <TextFieldInput config={config} containerStyle={containerStyle} sx={sx} {...ref} />;
+  return (
+    <TextFieldInput
+      config={config}
+      containerStyle={containerStyle}
+      sx={sx}
+      {...ref}
+    />
+  );
 }
 
 export default InputComponent;

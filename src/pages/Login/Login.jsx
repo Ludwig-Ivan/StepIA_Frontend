@@ -68,7 +68,11 @@ function Login() {
             </p>
           </header>
 
-          <div className="login-fields" role="group" aria-label="Datos de acceso">
+          <div
+            className="login-fields"
+            role="group"
+            aria-label="Datos de acceso"
+          >
             <Controller
               name="email"
               control={control}

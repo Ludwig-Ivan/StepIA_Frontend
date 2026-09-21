@@ -3,34 +3,35 @@
 ========================================= */
 
 :root {
-  /* CAPA SOBRE LA IMAGEN */
   --step-overlay:
-    linear-gradient(
-      rgba(44, 94, 90, 0.48),
-      rgba(44, 94, 90, 0.48)
-    );
+    linear-gradient(rgba(210, 235, 231, 0.30),
+      rgba(210, 235, 231, 0.30));
 
-  /* COLORES */
-  --step-header: rgba(48, 86, 82, 0.88);
+  --step-header:
+    rgba(70, 120, 114, 0.82);
 
   --step-surface: rgba(43, 77, 73, 0.72);
 
-  --step-surface-hover: rgba(52, 91, 87, 0.82);
+  --step-surface-hover:
+    rgba(255, 255, 255, 0.94);
 
-  --step-input-bg: rgba(255, 255, 255, 0.12);
+  --step-input-bg:
+    rgba(255, 255, 255, 0.88);
 
-  --step-text: #ffffff;
+  --step-text: #FFF;
+
+  --step-input-text: rgba(25, 48, 44, 0.92);
 
   --step-text-secondary:
     rgba(255, 255, 255, 0.75);
 
   --step-border:
-    rgba(255, 255, 255, 0.18);
+    rgba(40, 80, 75, 0.22);
 
-  --step-accent: #59a890;
+  --step-accent: #478f7a;
 
   --step-shadow:
-    rgba(0, 0, 0, 0.20);
+    rgba(40, 75, 71, 0.18);
 }
 
 
@@ -40,16 +41,13 @@
 
 html.tema-claro {
   --step-overlay:
-    linear-gradient(
-      rgba(210, 235, 231, 0.30),
-      rgba(210, 235, 231, 0.30)
-    );
+    linear-gradient(rgba(210, 235, 231, 0.30),
+      rgba(210, 235, 231, 0.30));
 
   --step-header:
     rgba(70, 120, 114, 0.82);
 
-  --step-surface:
-    rgba(245, 252, 251, 0.82);
+  --step-surface: rgba(43, 77, 73, 0.72);
 
   --step-surface-hover:
     rgba(255, 255, 255, 0.94);
@@ -57,9 +55,12 @@ html.tema-claro {
   --step-input-bg:
     rgba(255, 255, 255, 0.88);
 
-  --step-text: #243b39;
+  --step-text: #FFF;
 
-  --step-text-secondary: #58706e;
+  --step-input-text: rgba(25, 48, 44, 0.92);
+
+  --step-text-secondary:
+    rgba(255, 255, 255, 0.75);
 
   --step-border:
     rgba(40, 80, 75, 0.22);
@@ -77,10 +78,8 @@ html.tema-claro {
 
 html.tema-oscuro {
   --step-overlay:
-    linear-gradient(
-      rgba(5, 20, 18, 0.74),
-      rgba(5, 20, 18, 0.74)
-    );
+    linear-gradient(rgba(5, 20, 18, 0.74),
+      rgba(5, 20, 18, 0.74));
 
   --step-header:
     rgba(13, 31, 28, 0.94);
@@ -95,6 +94,8 @@ html.tema-oscuro {
     rgba(15, 35, 32, 0.90);
 
   --step-text: #ffffff;
+
+  --step-input-text: rgba(241, 248, 247, 0.92);
 
   --step-text-secondary:
     rgba(255, 255, 255, 0.70);
@@ -117,10 +118,8 @@ html.tema-oscuro {
 
   html.tema-automatico {
     --step-overlay:
-      linear-gradient(
-        rgba(5, 20, 18, 0.74),
-        rgba(5, 20, 18, 0.74)
-      );
+      linear-gradient(rgba(5, 20, 18, 0.74),
+        rgba(5, 20, 18, 0.74));
 
     --step-header:
       rgba(13, 31, 28, 0.94);
@@ -159,10 +158,8 @@ html.tema-oscuro {
 
   html.tema-automatico {
     --step-overlay:
-      linear-gradient(
-        rgba(210, 235, 231, 0.30),
-        rgba(210, 235, 231, 0.30)
-      );
+      linear-gradient(rgba(210, 235, 231, 0.30),
+        rgba(210, 235, 231, 0.30));
 
     --step-header:
       rgba(70, 120, 114, 0.82);
@@ -206,109 +203,4 @@ html.tamano-normal {
 
 html.tamano-grande {
   font-size: 18px;
-}
-
-
-/* =========================================
-   ELEMENTOS GENERALES
-========================================= */
-
-body {
-  color: var(--step-text);
-}
-
-
-/* INPUTS */
-
-input,
-select,
-textarea {
-  color: var(--step-text);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--step-text-secondary);
-}
-
-
-/* =========================================
-   HEADERS
-========================================= */
-
-.menu-header,
-.registro-header,
-.ha-header,
-.ajustes-header,
-.agenda-header {
-  background:
-    var(--step-header) !important;
-
-  border-color:
-    var(--step-border) !important;
-}
-
-
-/* =========================================
-   TARJETAS
-========================================= */
-
-.ha-resumen-card,
-.ha-actividad,
-.ha-vacio,
-.apariencia-card {
-  background:
-    var(--step-surface) !important;
-
-  color:
-    var(--step-text) !important;
-
-  border-color:
-    var(--step-border) !important;
-
-  box-shadow:
-    0 7px 18px
-    var(--step-shadow) !important;
-}
-
-
-/* =========================================
-   TEXTOS
-========================================= */
-
-.ha-titulo h1,
-.ajustes-titulo h1,
-.apariencia-header h2,
-.ajuste-campo h3 {
-  color:
-    var(--step-text) !important;
-}
-
-
-.ha-titulo p,
-.ha-fecha,
-.ha-descripcion,
-.ajustes-titulo p,
-.apariencia-header p,
-.ajuste-campo p {
-  color:
-    var(--step-text-secondary) !important;
-}
-
-
-/* =========================================
-   CAMPOS
-========================================= */
-
-.ha-buscador,
-.ha-filtros select,
-.ajuste-campo select {
-  background:
-    var(--step-input-bg) !important;
-
-  color:
-    var(--step-text) !important;
-
-  border-color:
-    var(--step-border) !important;
 }

@@ -12,7 +12,7 @@
 
   background-image:
     var(--step-overlay),
-    url('../../assets/images/fondo-medico.jpg');
+    url('../../assets/images/fondo-medico.svg');
 
   background-size: cover;
   background-position: center;
@@ -68,7 +68,7 @@
   font-size: 13px;
 }
 
-.ha-user > span {
+.ha-user>span {
   opacity: 0.85;
 }
 
@@ -741,7 +741,7 @@
     max-width: 100%;
   }
 
-  .ha-user > span {
+  .ha-user>span {
     display: none;
   }
 

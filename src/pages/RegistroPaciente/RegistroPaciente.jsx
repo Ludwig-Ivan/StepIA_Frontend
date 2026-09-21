@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./RegistroPaciente.css";
 import { PacienteCreateModel } from "../../models/pacientes/pacienteCreateModel.js";
 import { registrarActividad } from "../../utils/historial";
 import { createPaciente } from "../../services/pacienteService.js";
 import { PacienteSchema } from "../../schema/PacienteSchema.js";
+import { obtenerByEmail } from "../../services/profesionalService.js";
 import CURP_REGEX from "../../schema/ExpReg.js";
 import InputComponent from "../../components/inputs/InputComponent.jsx";
 import CAMPOS_REGISTRO_PACIENTES from "../../data/Campos.js";
@@ -14,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Alert from "@mui/material/Alert";
 import Collapse from "@mui/material/Collapse";
+import HeaderComponent from "../../components/generals/HeaderComponent.jsx";
 
 const formularioPacienteSchema = PacienteSchema.extend({
   curp: z
@@ -71,6 +73,61 @@ const SECCIONES_FORMULARIO = [
 function RegistroPaciente() {
   const navigate = useNavigate();
   const [errorGeneral, setErrorGeneral] = useState("");
+  const emailUsuario = localStorage.getItem("UsuarioActivo");
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+  const [usuario, setUsuario] = useState(null);
+
+  const cargarDoctor = useCallback(async () => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    try {
+      const doctor = await obtenerByEmail(emailUsuario);
+      setUsuario(doctor);
+    } catch {
+      setError(
+        "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+      );
+    } finally {
+      setCargando(false);
+    }
+  }, [emailUsuario, navigate]);
+
+  const reintentar = () => {
+    setError("");
+    setCargando(true);
+    cargarDoctor();
+  };
+
+  useEffect(() => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    let activo = true;
+
+    obtenerByEmail(emailUsuario)
+      .then((doctor) => {
+        if (activo) setUsuario(doctor);
+      })
+      .catch(() => {
+        if (activo)
+          setError(
+            "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+          );
+      })
+      .finally(() => {
+        if (activo) setCargando(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [emailUsuario, navigate]);
 
   const {
     control,
@@ -111,25 +168,58 @@ function RegistroPaciente() {
     setErrorGeneral("");
   };
 
+  if (cargando) {
+    return (
+      <div className="menu-page">
+        <header className="top-menu" aria-hidden="true">
+          <div className="top-menu-left">
+            <div className="skeleton skeleton-logo" />
+            <div className="skeleton skeleton-chip" />
+          </div>
+          <div className="top-menu-right">
+            <div className="skeleton skeleton-chip" />
+            <div className="skeleton skeleton-avatar" />
+          </div>
+        </header>
+
+        <main className="menu-overlay" role="status">
+          <div className="menu-skeleton-card">
+            <div className="skeleton skeleton-stepai" />
+            <div className="skeleton skeleton-title" />
+            <div className="skeleton skeleton-line" />
+            <div className="skeleton skeleton-line skeleton-line--short" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="menu-page">
+        <main className="menu-overlay" role="alert">
+          <div className="menu-error-card">
+            <h1>No se pudo cargar el panel</h1>
+            <p>{error}</p>
+            <button
+              type="button"
+              className="btn btn-green"
+              onClick={reintentar}
+            >
+              Reintentar
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="registro-page">
-      <header className="registro-header">
-        <button
-          type="button"
-          className="registro-logo"
-          onClick={() => navigate("/menu")}
-        >
-          StepIA
-        </button>
-
-        <button
-          type="button"
-          className="registro-volver"
-          onClick={() => navigate("/menu")}
-        >
-          Panel principal
-        </button>
-      </header>
+      <HeaderComponent data={{ usuario }} />
 
       <main className="registro-main">
         <form

@@ -1,4 +1,3 @@
-import { FaUserAlt } from "react-icons/fa";
 import { Controller } from "react-hook-form";
 import { Alert, Collapse } from "@mui/material";
 import "./InformePaciente.css";
@@ -8,6 +7,9 @@ import useInformePaciente from "./useInformePaciente";
 import CampoTextareaInforme from "./components/CampoTextareaInforme.jsx";
 import PanelAnalisisIA from "./components/PanelAnalisisIA.jsx";
 import OtrosEstudiosInforme from "./components/OtrosEstudiosInforme.jsx";
+import HeaderComponent from "../../components/generals/HeaderComponent.jsx";
+import { useCallback, useEffect, useState } from "react";
+import { obtenerByEmail } from "../../services/profesionalService.js";
 
 const CAMPOS_TEXTO = [
   {
@@ -73,6 +75,62 @@ function InformePaciente() {
     descargarPDF,
   } = useInformePaciente();
 
+  const emailUsuario = localStorage.getItem("UsuarioActivo");
+  const [cargandoUser, setCargandoUser] = useState(true);
+  const [error, setError] = useState("");
+  const [usuario, setUsuario] = useState(null);
+
+  const cargarDoctor = useCallback(async () => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    try {
+      const doctor = await obtenerByEmail(emailUsuario);
+      setUsuario(doctor);
+    } catch {
+      setError(
+        "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+      );
+    } finally {
+      setCargandoUser(false);
+    }
+  }, [emailUsuario, navigate]);
+
+  const reintentar = () => {
+    setError("");
+    setCargandoUser(true);
+    cargarDoctor();
+  };
+
+  useEffect(() => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    let activo = true;
+
+    obtenerByEmail(emailUsuario)
+      .then((doctor) => {
+        if (activo) setUsuario(doctor);
+      })
+      .catch(() => {
+        if (activo)
+          setError(
+            "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+          );
+      })
+      .finally(() => {
+        if (activo) setCargandoUser(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [emailUsuario, navigate]);
+
   if (carga)
     return (
       <div className="loading-screen" role="status" aria-live="polite">
@@ -82,24 +140,58 @@ function InformePaciente() {
       </div>
     );
 
+  if (cargandoUser) {
+    return (
+      <div className="menu-page">
+        <header className="top-menu" aria-hidden="true">
+          <div className="top-menu-left">
+            <div className="skeleton skeleton-logo" />
+            <div className="skeleton skeleton-chip" />
+          </div>
+          <div className="top-menu-right">
+            <div className="skeleton skeleton-chip" />
+            <div className="skeleton skeleton-avatar" />
+          </div>
+        </header>
+
+        <main className="menu-overlay" role="status">
+          <div className="menu-skeleton-card">
+            <div className="skeleton skeleton-stepai" />
+            <div className="skeleton skeleton-title" />
+            <div className="skeleton skeleton-line" />
+            <div className="skeleton skeleton-line skeleton-line--short" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="menu-page">
+        <main className="menu-overlay" role="alert">
+          <div className="menu-error-card">
+            <h1>No se pudo cargar el panel</h1>
+            <p>{error}</p>
+            <button
+              type="button"
+              className="btn btn-green"
+              onClick={reintentar}
+            >
+              Reintentar
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="informe-page" ref={informeRef}>
-      <header className="informe-header">
-        <button
-          type="button"
-          className="informe-logo"
-          onClick={() => navigate("/menu")}
-        >
-          StepIA
-        </button>
-
-        <div className="informe-user" title="Profesional en sesión">
-          <span>USUARIO</span>
-          <div className="user-icon" aria-hidden="true">
-            <FaUserAlt />
-          </div>
-        </div>
-      </header>
+      <HeaderComponent data={{ usuario }} />
 
       <main className="informe-main">
         <div className="informe-top">

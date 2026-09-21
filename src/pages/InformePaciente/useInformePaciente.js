@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { registrarActividad } from "../../utils/historial";
+import { convertirABase64 } from "../../utils/archivos.js";
 import { AnalisisCreateModel } from "../../models/analisis/AnalisisCreateModel.js";
 import { createAnalisis } from "../../services/analisisService.js";
 import { createPredict } from "../../services/predictService.js";
@@ -47,8 +48,7 @@ export const PIES = [
 
 const informeFormSchema = z.object({
   nombre: z.string().max(100, "Máximo 100 caracteres"),
-  peso: z
-    .coerce
+  peso: z.coerce
     .number()
     .min(0, "El peso no puede ser negativo")
     .max(500, "El peso está fuera del rango permitido"),
@@ -149,17 +149,6 @@ function useInformePaciente() {
     return hashHex;
   };
 
-  const convertirABase64 = (archivo) => {
-    return new Promise((resolve, reject) => {
-      const lector = new FileReader();
-
-      lector.onload = () => resolve(lector.result);
-      lector.onerror = (error) => reject(error);
-
-      lector.readAsDataURL(archivo);
-    });
-  };
-
   const mostrarMensajeEstudios = (tipo, texto) => {
     setMensajeEstudios({ tipo, texto });
     if (timeoutMensaje.current) clearTimeout(timeoutMensaje.current);
@@ -204,9 +193,7 @@ function useInformePaciente() {
     const imgPieIzq = archivosPieRef.current.izquierdo;
 
     if (!imgPieDer || !imgPieIzq) {
-      setMensajeIA(
-        "Debes cargar la imagen de ambos pies antes de analizar.",
-      );
+      setMensajeIA("Debes cargar la imagen de ambos pies antes de analizar.");
       return;
     }
 

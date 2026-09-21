@@ -30,7 +30,7 @@ textarea {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  color: var(--step-text, #243b39);
+  color: var(--step-text, --step-surface);
   font-size: 1rem;
   font-weight: 600;
 }

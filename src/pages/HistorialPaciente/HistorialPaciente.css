@@ -12,7 +12,7 @@
 
   background-image:
     var(--step-overlay),
-    url('../../assets/images/fondo-medico.jpg');
+    url('../../assets/images/fondo-medico.svg');
 
   background-size: cover;
   background-position: center;
@@ -68,7 +68,7 @@
   font-size: 13px;
 }
 
-.historial-user > span {
+.historial-user>span {
   opacity: 0.85;
 }
 
@@ -179,7 +179,7 @@
 }
 
 .historial-buscador-icono {
-  color: var(--step-text-secondary);
+  color: var(--step-surface);
 
   font-size: 15px;
 
@@ -197,13 +197,13 @@
 
   background: transparent;
 
-  color: var(--step-text);
+  color: var(--step-surface);
 
   font-size: 14px;
 }
 
 .historial-buscador input::placeholder {
-  color: var(--step-text-secondary);
+  color: var(--step-input-text);
 }
 
 .historial-clear {
@@ -222,7 +222,7 @@
 
   background: transparent;
 
-  color: var(--step-text-secondary);
+  color: var(--step-surface);
 
   cursor: pointer;
 
@@ -517,6 +517,8 @@
 
   border: 1px solid var(--step-border);
 
+  color: var(--step-input-text);
+
   border-radius: 10px;
 
   background: var(--step-input-bg);
@@ -713,7 +715,7 @@
 
   border-radius: 12px;
 
-  background: var(--step-input-bg);
+  background: var(--step-surface);
 
   border: 1px solid var(--step-border);
 }
@@ -928,7 +930,7 @@
     font-size: 24px;
   }
 
-  .historial-user > span {
+  .historial-user>span {
     display: none;
   }
 

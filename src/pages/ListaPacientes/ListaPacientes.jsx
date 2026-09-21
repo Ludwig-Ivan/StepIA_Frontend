@@ -2,11 +2,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ListaPacientes.css";
 import { getPacientes } from "../../services/pacienteService";
-import { FaUserAlt } from "react-icons/fa";
-import { FaPen, FaRegFileLines, FaMagnifyingGlass, FaUsers } from "react-icons/fa6";
+import {
+  FaPen,
+  FaRegFileLines,
+  FaMagnifyingGlass,
+  FaUsers,
+} from "react-icons/fa6";
 import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
 import Collapse from "@mui/material/Collapse";
 import Alert from "@mui/material/Alert";
+import HeaderComponent from "../../components/generals/HeaderComponent.jsx";
+import { obtenerByEmail } from "../../services/profesionalService.js";
 
 const TAMANO_PAGINA = 10;
 
@@ -52,27 +58,6 @@ function crearPaginas(paginaActual, total) {
   return paginas;
 }
 
-function ListaHeader({ onVolverMenu }) {
-  return (
-    <header className="lista-header">
-      <button
-        type="button"
-        className="lista-logo"
-        onClick={onVolverMenu}
-      >
-        StepIA
-      </button>
-
-      <div className="lista-user" title="Profesional en sesión">
-        <span>USUARIO</span>
-        <div className="user-icon" aria-hidden="true">
-          <FaUserAlt />
-        </div>
-      </div>
-    </header>
-  );
-}
-
 function BuscadorPacientes({ busqueda, onCambio, onBuscar, deshabilitado }) {
   return (
     <search className="buscador">
@@ -83,7 +68,7 @@ function BuscadorPacientes({ busqueda, onCambio, onBuscar, deshabilitado }) {
       <div className="buscador-campo">
         <input
           id="input-busqueda"
-          testid="input-search"
+          data-testid="input-search"
           type="search"
           placeholder="Buscar por nombre o CURP..."
           value={busqueda}
@@ -98,7 +83,7 @@ function BuscadorPacientes({ busqueda, onCambio, onBuscar, deshabilitado }) {
 
         <button
           type="button"
-          testid="btn-search"
+          data-testid="btn-search"
           className="btn-buscar"
           aria-label="Buscar pacientes"
           onClick={onBuscar}
@@ -135,7 +120,7 @@ function PacienteRow({ paciente, onEditar, onVerHistorial }) {
       <td className="acciones">
         <button
           type="button"
-          testid={`btn-editar-${paciente.curp}`}
+          data-testid={`btn-editar-${paciente.curp}`}
           className="btn-editar"
           onClick={() => onEditar(paciente.curp)}
         >
@@ -145,7 +130,7 @@ function PacienteRow({ paciente, onEditar, onVerHistorial }) {
 
         <button
           type="button"
-          testid={`btn-historial-${paciente.curp}`}
+          data-testid={`btn-historial-${paciente.curp}`}
           className="btn-historial"
           onClick={() => onVerHistorial(paciente.curp)}
         >
@@ -305,6 +290,62 @@ function ListaPacientes() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
+  const emailUsuario = localStorage.getItem("UsuarioActivo");
+  const [cargandoUser, setCargandoUser] = useState(true);
+  const [errorUser, setErrorUser] = useState("");
+  const [usuario, setUsuario] = useState(null);
+
+  const cargarDoctor = useCallback(async () => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    try {
+      const doctor = await obtenerByEmail(emailUsuario);
+      setUsuario(doctor);
+    } catch {
+      setError(
+        "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+      );
+    } finally {
+      setCargando(false);
+    }
+  }, [emailUsuario, navigate]);
+
+  const reintentarUser = () => {
+    setErrorUser("");
+    setCargandoUser(true);
+    cargarDoctor();
+  };
+
+  useEffect(() => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    let activo = true;
+
+    obtenerByEmail(emailUsuario)
+      .then((doctor) => {
+        if (activo) setUsuario(doctor);
+      })
+      .catch(() => {
+        if (activo)
+          setErrorUser(
+            "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+          );
+      })
+      .finally(() => {
+        if (activo) setCargandoUser(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [emailUsuario, navigate]);
+
   const consultarPacientes = useCallback((terminoBusqueda, paginaBusqueda) => {
     const idSolicitud = ++solicitudActual.current;
 
@@ -389,16 +430,67 @@ function ListaPacientes() {
     ? `Mostrando ${inicio}–${fin} de ${totalElementos} paciente${totalElementos === 1 ? "" : "s"}${termino ? ` para “${termino}”` : ""}`
     : "";
 
+  if (cargandoUser) {
+    return (
+      <div className="menu-page">
+        <header className="top-menu" aria-hidden="true">
+          <div className="top-menu-left">
+            <div className="skeleton skeleton-logo" />
+            <div className="skeleton skeleton-chip" />
+          </div>
+          <div className="top-menu-right">
+            <div className="skeleton skeleton-chip" />
+            <div className="skeleton skeleton-avatar" />
+          </div>
+        </header>
+
+        <main className="menu-overlay" role="status">
+          <div className="menu-skeleton-card">
+            <div className="skeleton skeleton-stepai" />
+            <div className="skeleton skeleton-title" />
+            <div className="skeleton skeleton-line" />
+            <div className="skeleton skeleton-line skeleton-line--short" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (errorUser) {
+    return (
+      <div className="menu-page">
+        <main className="menu-overlay" role="alert">
+          <div className="menu-error-card">
+            <h1>No se pudo cargar el panel</h1>
+            <p>{errorUser}</p>
+            <button
+              type="button"
+              className="btn btn-green"
+              onClick={reintentarUser}
+            >
+              Reintentar
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="lista-page">
-      <ListaHeader onVolverMenu={() => navigate("/menu")} />
+      <HeaderComponent data={{ usuario }} />
 
       <main className="lista-main">
         <section className="lista-card" aria-labelledby="lista-titulo">
           <div className="lista-top">
             <div className="lista-titulo">
               <h3 id="lista-titulo">Lista de Pacientes</h3>
-              <p>Busca, consulta y gestiona los expedientes de tus pacientes.</p>
+              <p>
+                Busca, consulta y gestiona los expedientes de tus pacientes.
+              </p>
             </div>
 
             <BuscadorPacientes
@@ -452,7 +544,10 @@ function ListaPacientes() {
 
           {cargando && pacientes.length > 0 && (
             <p className="carga-ligera" role="status" aria-live="polite">
-              <span className="carga-spinner carga-spinner--mini" aria-hidden="true" />
+              <span
+                className="carga-spinner carga-spinner--mini"
+                aria-hidden="true"
+              />
               Cargando…
             </p>
           )}

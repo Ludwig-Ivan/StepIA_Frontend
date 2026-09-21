@@ -137,7 +137,7 @@ function Menu() {
             }}
             onClick={() => navigate("/historial")}
           >
-            <LuHistory className="option-icon" aria-hidden="true" />
+            <LuHistory size={20} className="option-icon" aria-hidden="true" />
           </ButtonHeader>,
           <ButtonHeader
             key="agenda-consultas"
@@ -147,7 +147,11 @@ function Menu() {
             }}
             onClick={() => navigate("/agenda-consultas")}
           >
-            <LuCalendarDays className="option-icon" aria-hidden="true" />
+            <LuCalendarDays
+              size={20}
+              className="option-icon"
+              aria-hidden="true"
+            />
           </ButtonHeader>,
         ]}
         childrenRigth={[
@@ -159,7 +163,7 @@ function Menu() {
             }}
             onClick={() => navigate("/ajustes")}
           >
-            <LuSettings className="option-icon" aria-hidden="true" />
+            <LuSettings size={20} className="option-icon" aria-hidden="true" />
           </ButtonHeader>,
           <ButtonHeader
             key="soporte"
@@ -169,7 +173,7 @@ function Menu() {
             }}
             onClick={() => navigate("/soporte")}
           >
-            <LuWrench className="option-icon" aria-hidden="true" />
+            <LuWrench size={20} className="option-icon" aria-hidden="true" />
           </ButtonHeader>,
         ]}
       />
@@ -241,7 +245,10 @@ function Menu() {
               onClick={() => navigate("/analisis-plantar")}
             >
               <span className="menu-option-left">
-                <span className="menu-icon-box menu-icon-box--accent" aria-hidden="true">
+                <span
+                  className="menu-icon-box menu-icon-box--accent"
+                  aria-hidden="true"
+                >
                   <LuFootprints size={22} />
                 </span>
 

@@ -60,7 +60,7 @@ function PanelAnalisisIA({
                           className="input-archivo-oculto"
                           type="file"
                           accept="image/*"
-                          testid={
+                          data-testid={
                             pie.tipo === "izquierdo"
                               ? "input-pie-izquierdo"
                               : "input-pie-derecho"
@@ -104,7 +104,7 @@ function PanelAnalisisIA({
       <div className="boton-analizar-informe">
         <button
           type="button"
-          testid="boton-analizar-informe"
+          data-testid="boton-analizar-informe"
           onClick={onAnalizar}
           disabled={cargando}
           aria-busy={cargando}
