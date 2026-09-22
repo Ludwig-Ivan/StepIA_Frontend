@@ -381,7 +381,7 @@ function InformePaciente() {
               }}
               form="formInforme"
             />
-            <ButtonComponent
+            {/* <ButtonComponent
               config={{
                 name: "pdf",
                 text: "PDF",
@@ -392,7 +392,7 @@ function InformePaciente() {
                 disabled: isSubmitting,
               }}
               onClick={descargarPDF}
-            />
+            /> */}
           </div>
         </div>
 
