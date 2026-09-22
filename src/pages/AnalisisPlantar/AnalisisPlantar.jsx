@@ -169,8 +169,7 @@ function SelectorPaciente({
         >
           {pacientesPagina.map((paciente) => {
             const idPaciente = identificarPaciente(paciente);
-            const coincide =
-              identificarPaciente(seleccionado) === idPaciente;
+            const coincide = identificarPaciente(seleccionado) === idPaciente;
 
             return (
               <label

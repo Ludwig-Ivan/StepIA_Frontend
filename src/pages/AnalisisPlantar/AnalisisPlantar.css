@@ -137,7 +137,7 @@
 .analisis-buscador-icono {
   position: absolute;
   left: 14px;
-  color: var(--step-text-secondary);
+  color: var(--step-input-text);
   font-size: 15px;
   pointer-events: none;
 }
@@ -148,7 +148,7 @@
   border: 1px solid var(--step-border);
   border-radius: var(--analisis-radius);
   background: var(--step-input-bg);
-  color: var(--step-text);
+  color: var(--step-input-text);
   padding: 0 42px;
   font-size: 15px;
   outline: none;
@@ -156,7 +156,7 @@
 }
 
 .analisis-buscador input::placeholder {
-  color: var(--step-text-secondary);
+  color: var(--step-input-text);
 }
 
 .analisis-buscador input:focus {
@@ -205,7 +205,7 @@
   padding: 14px 16px;
   border: 1px solid var(--step-border);
   border-radius: var(--analisis-radius);
-  background: var(--step-input-bg);
+  background: var(--step-surface);
   cursor: pointer;
   transition: 0.2s ease;
 }
@@ -398,7 +398,7 @@
   height: 185px;
   border: 2px solid var(--step-border);
   border-radius: var(--analisis-radius);
-  background: var(--step-input-bg);
+  background: var(--step-surface);
   display: flex;
   align-items: center;
   justify-content: center;
