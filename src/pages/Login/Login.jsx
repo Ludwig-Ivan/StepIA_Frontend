@@ -4,83 +4,145 @@ import "./Login.css";
 import { obtenerByEmail } from "../../services/profesionalService";
 import InputComponent from "../../components/inputs/InputComponent";
 import ButtonComponent from "../../components/buttons/ButtonComponent";
+import Alert from "@mui/material/Alert";
+import Collapse from "@mui/material/Collapse";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import loginSchema from "../../schema/LoginSchema";
+import { guardarSesion } from "../../utils/session";
 
 function Login() {
   const navigate = useNavigate();
+  const [errorGeneral, setErrorGeneral] = useState("");
 
-  const [datos, setDatos] = useState({
-    correo: "",
-    password: "",
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
   });
 
-  const manejarCambio = (e) => {
-    const { name, value } = e.target;
+  const iniciarSesion = async (datos) => {
+    setErrorGeneral("");
+    try {
+      const profesional = await obtenerByEmail(datos.email);
 
-    setDatos({
-      ...datos,
-      [name]: value,
-    });
-  };
+      if (!profesional) {
+        setErrorGeneral(
+          "No se encontró un profesional con ese correo electrónico.",
+        );
+        return;
+      }
 
-  const iniciarSesion = async () => {
-    if (datos.correo.trim() === "" || datos.password.trim() === "") {
-      alert("Por favor completa todos los campos");
-      return;
+      guardarSesion(profesional);
+
+      navigate("/menu");
+    } catch (error) {
+      setErrorGeneral(
+        error?.message ||
+          "No se pudo iniciar sesión. Verifica tu conexión e inténtalo de nuevo.",
+      );
     }
-
-    const profesional = await obtenerByEmail(datos.correo);
-
-    console.log(profesional);
-
-    if (!profesional) return;
-
-    localStorage.setItem("UsuarioActivo", profesional.email);
-    localStorage.setItem("idProfesional", profesional.idProfesional);
-
-    navigate("/menu");
   };
 
   return (
     <div className="login-page">
       <div className="login-overlay">
-        <form className="login-card">
-          <div className="login-badge">StepIA</div>
+        <form
+          className="login-card"
+          noValidate
+          onSubmit={handleSubmit(iniciarSesion)}
+        >
+          <header className="login-header">
+            <div className="login-badge" aria-hidden="true">
+              StepIA
+            </div>
 
-          <h1>Iniciar Sesión</h1>
+            <h1 id="login-title">Iniciar Sesión</h1>
 
-          <p className="login-subtitle">
-            Accede al sistema de análisis plantar
-          </p>
-          <InputComponent
-            config={{
-              label: "Correo Electrónico",
-              name: "correo",
-              type: "email",
-              placeholder: "Ingresa tu correo",
-              value: datos.correo,
-              func: manejarCambio,
-            }}
-          />
+            <p className="login-subtitle">
+              Accede al sistema de análisis plantar para gestionar pacientes y
+              estudios.
+            </p>
+          </header>
 
-          <InputComponent
-            config={{
-              label: "Contraseña",
-              name: "password",
-              type: "password",
-              placeholder: "Ingresa tu contraseña",
-              value: datos.password,
-              func: manejarCambio,
-            }}
-          />
+          <div
+            className="login-fields"
+            role="group"
+            aria-label="Datos de acceso"
+          >
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <InputComponent
+                  config={{
+                    id: "login-email",
+                    label: "Correo Electrónico",
+                    name: "email",
+                    type: "text",
+                    placeholder: "Ingresa tu correo",
+                    value: field.value,
+                    func: field.onChange,
+                    onBlur: field.onBlur,
+                    autoComplete: "email",
+                    autoFocus: true,
+                    error: errors.email?.message,
+                  }}
+                />
+              )}
+            />
+
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => (
+                <InputComponent
+                  config={{
+                    id: "login-password",
+                    label: "Contraseña",
+                    name: "password",
+                    type: "password",
+                    placeholder: "Ingresa tu contraseña",
+                    value: field.value,
+                    func: field.onChange,
+                    onBlur: field.onBlur,
+                    autoComplete: "current-password",
+                    showToggle: true,
+                    error: errors.password?.message,
+                  }}
+                />
+              )}
+            />
+          </div>
+
+          <Collapse in={Boolean(errorGeneral)}>
+            <Alert
+              variant="filled"
+              severity="error"
+              role="alert"
+              sx={{ boxShadow: 3, my: 1, width: "100%" }}
+            >
+              {errorGeneral}
+            </Alert>
+          </Collapse>
+
           <ButtonComponent
             config={{
               name: "ingresar",
               text: "Ingresar",
               variant: "green",
+              type: "submit",
+              loading: isSubmitting,
+              loadingText: "Ingresando…",
             }}
-            onClick={iniciarSesion}
           />
         </form>
+      </div>
+      <div className="sr-only" aria-live="polite">
+        {isSubmitting ? "Ingresando al sistema" : ""}
       </div>
     </div>
   );

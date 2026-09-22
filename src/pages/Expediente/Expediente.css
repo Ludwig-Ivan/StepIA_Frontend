@@ -2,268 +2,291 @@
   box-sizing: border-box;
 }
 
-.datos-page {
- 
+/* =========================================
+   PÁGINA
+========================================= */
+.expediente-page {
   min-height: 100vh;
 
   background-image:
     var(--step-overlay),
-    url('../../assets/images/fondo-medico.jpg');
+    url("../../assets/images/fondo-medico.svg");
 
   background-size: cover;
-
   background-position: center;
-
   background-repeat: no-repeat;
-
   background-attachment: fixed;
 
   color: var(--step-text);
-
-
-  
 }
 
-/* Barra superior */
-.datos-header {
-  width: 100%;
-  height: 56px;
+/* =========================================
+   BARRA SUPERIOR
+========================================= */
+.expediente-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
 
-  background: rgba(25, 38, 50, 0.78);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  width: 100%;
+  height: 3.5rem;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
 
-  padding: 0 32px;
-  color: white;
+  padding: 0 clamp(1rem, 4vw, 2rem);
 
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  background: var(--step-header);
+  color: #fff;
+
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.25);
 }
 
-.datos-header h2 {
+.expediente-logo {
+  border: none;
+  background: transparent;
+
+  padding: 0;
   margin: 0;
-  font-size: 22px;
+
+  font: inherit;
+  font-size: 1.35rem;
   font-weight: 900;
-  color: #dce8e5;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+  letter-spacing: 0.02em;
+
+  color: #fff;
+  cursor: pointer;
+
+  transition: opacity 0.2s ease;
 }
 
-/* Contenido */
-.datos-main {
-  width: 100%;
-  min-height: calc(100vh - 56px);
+.expediente-logo:hover {
+  opacity: 0.85;
+}
 
-  background: rgba(0, 40, 45, 0.28);
+.expediente-logo:focus-visible {
+  outline: 2px solid var(--step-accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.expediente-volver {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+
+  padding: 0.5rem 0.875rem;
+
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+
+  cursor: pointer;
+  white-space: nowrap;
+
+  transition: background 0.2s ease;
+}
+
+.expediente-volver:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.expediente-volver:focus-visible {
+  outline: 2px solid var(--step-accent);
+  outline-offset: 2px;
+}
+
+/* =========================================
+   CONTENIDO
+========================================= */
+.expediente-main {
+  width: 100%;
+  min-height: calc(100vh - 3.5rem);
 
   display: flex;
   justify-content: center;
   align-items: center;
 
-  padding: 35px 20px;
+  padding: 2.25rem 1.25rem;
 }
 
-/* Tarjeta */
-.datos-card {
+/* =========================================
+   TARJETA
+========================================= */
+.expediente-card {
   width: 100%;
-  max-width: 720px;
+  max-width: 52rem;
 
-  background: rgba(65, 78, 88, 0.42);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
 
-  padding: 34px 34px 30px;
+  background: var(--step-surface);
+  border: 1px solid var(--step-border);
+  border-radius: 1.5rem;
+
+  padding: 1.75rem clamp(1.25rem, 4vw, 2.5rem) 2.25rem;
 
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 
   box-shadow:
-    0 20px 45px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    0 1.25rem 2.8rem var(--step-shadow);
 }
 
-.datos-card h1 {
-  margin: 0 0 34px;
-
+.expediente-card--vacio {
+  align-items: center;
   text-align: center;
-  color: white;
+  gap: 1.5rem;
+}
 
-  font-size: 34px;
+/* Barra de progreso del flujo */
+.expediente-progress {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.expediente-progress span {
+  display: block;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.progress-track {
+  width: 100%;
+  height: 0.4rem;
+
+  margin-top: 0.5rem;
+
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 66%;
+  height: 100%;
+
+  border-radius: 999px;
+  background: linear-gradient(90deg, #b7f3f2, #42b883);
+}
+
+/* Encabezado de la tarjeta */
+.expediente-heading {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.expediente-heading h1 {
+  margin: 0;
+
+  color: #fff;
+  font-size: clamp(1.75rem, 4vw, 2.1rem);
   font-weight: 900;
 
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
-/* Formulario */
-.datos-form {
+.expediente-heading p {
+  margin: 0.5rem 0 0;
+
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.95rem;
+}
+
+/* =========================================
+   FORMULARIO
+========================================= */
+.expediente-form {
   width: 100%;
-
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  flex: 1;
 }
 
-.datos-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.datos-group label {
-  color: white;
-  font-size: 15px;
-  font-weight: 800;
-
-  margin-bottom: 8px;
-
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
-}
-
-.datos-group textarea {
+.expediente-campo {
   width: 100%;
-  height: 190px;
-
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  border-radius: 11px;
-
-  background: rgba(235, 240, 243, 0.62);
-  color: #111;
-
-  padding: 12px 14px;
-
-  font-size: 16px;
-  font-family: inherit;
-
-  outline: none;
-  resize: none;
-
-  box-shadow:
-    inset 0 1px 6px rgba(0, 0, 0, 0.18),
-    0 0 10px rgba(255, 255, 255, 0.08);
-
-  transition: 0.2s ease;
 }
 
-.datos-group textarea::placeholder {
-  color: #4f5558;
+/* Altura del área de antecedentes */
+.expediente-campo .input-group {
+  max-width: 100%;
+  margin-bottom: 0;
 }
 
-.datos-group textarea:focus {
-  background: rgba(255, 255, 255, 0.86);
-  border-color: #42b883;
-
-  box-shadow:
-    0 0 0 3px rgba(66, 184, 131, 0.26),
-    inset 0 1px 6px rgba(0, 0, 0, 0.1);
+.expediente-campo .input-group .MuiOutlinedInput-root {
+  min-height: clamp(14rem, 35vh, 22rem);
+  align-items: flex-start;
 }
 
-/* Botones */
-.datos-buttons {
-  grid-column: 1 / 3;
+.expediente-campo .input-group .MuiOutlinedInput-input {
+  padding-top: 1rem;
+}
 
+/* =========================================
+   SOBRESCRITURA LOCAL DE InputComponent
+   dentro de la tarjeta de vidrio (DS)
+========================================= */
+.expediente-card .input-group .label-custom {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.expediente-card .input-group--error .label-custom {
+  color: #ffcece;
+}
+
+.expediente-card .input-group .MuiFormHelperText-root:not(.Mui-error) {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.expediente-card .input-group .MuiFormHelperText-root.Mui-error {
+  color: #ffb4b4;
+}
+
+/* =========================================
+   BOTONES DE ACCIÓN
+========================================= */
+.expediente-buttons {
   display: flex;
   justify-content: center;
-  gap: 24px;
+  align-items: center;
+  gap: 1.75rem;
 
-  margin-top: 8px;
+  margin-top: 1.5rem;
 }
 
-.datos-buttons button {
-  width: 125px;
-  height: 42px;
-
-  border: none;
-  border-radius: 24px;
-
-  color: white;
-
-  font-size: 15px;
-  font-weight: 800;
-
-  cursor: pointer;
-
-  transition: 0.2s ease;
+.expediente-card .btn:focus-visible {
+  outline: 2px solid var(--step-accent);
+  outline-offset: 2px;
 }
 
-.btn-volver-form {
-  background: linear-gradient(180deg, #f0f3f4, #aebbc1);
-  color: #1f2d35 !important;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    0 8px 16px rgba(0, 0, 0, 0.3);
-}
-
-.btn-anterior {
-  background: linear-gradient(180deg, #178797, #0c5360);
-
-  box-shadow:
-    0 0 14px rgba(36, 220, 220, 0.25),
-    0 8px 16px rgba(0, 0, 0, 0.3);
-}
-
-.btn-siguiente {
-  background: linear-gradient(180deg, #37d889, #07944d);
-
-  box-shadow:
-    0 0 18px rgba(35, 255, 143, 0.36),
-    0 8px 16px rgba(0, 0, 0, 0.3);
-}
-
-.datos-buttons button:hover {
-  transform: translateY(-2px);
-  opacity: 0.92;
-}
-
-.datos-buttons button:active {
-  transform: translateY(0);
-}
-
-/* Responsive */
-@media (max-width: 780px) {
-  .datos-card {
-    max-width: 95%;
-    padding: 28px 24px;
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 650px) {
+  .expediente-header {
+    padding: 0 1rem;
   }
 
-  .datos-form {
-    grid-template-columns: 1fr;
-  }
-
-  .datos-buttons {
-    grid-column: 1 / 2;
-  }
-}
-
-@media (max-width: 520px) {
-  .datos-header {
-    padding: 0 18px;
-  }
-
-  .datos-header h2 {
-    font-size: 18px;
-  }
-
-  .datos-main {
-    padding: 24px 12px;
+  .expediente-main {
+    padding: 1.25rem 0.75rem;
     align-items: flex-start;
   }
 
-  .datos-card h1 {
-    font-size: 28px;
+  .expediente-campo .input-group .MuiOutlinedInput-root {
+    min-height: 14rem;
   }
 
-  .datos-group textarea {
-    height: 160px;
-  }
-
-  .datos-buttons {
+  .expediente-buttons {
     flex-direction: column;
-    gap: 14px;
+    gap: 0.875rem;
   }
 
-  .datos-buttons button {
+  .expediente-buttons .btn {
     width: 100%;
   }
 }

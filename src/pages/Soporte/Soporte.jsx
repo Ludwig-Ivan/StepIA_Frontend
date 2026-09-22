@@ -1,1358 +1,772 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import './Soporte.css'
+import { useEffect } from "react";
+import "./Soporte.css";
+import { FaUserAlt } from "react-icons/fa";
+import {
+  FaBookOpen,
+  FaChevronLeft,
+  FaChevronRight,
+  FaCircleInfo,
+  FaCircleQuestion,
+  FaMagnifyingGlass,
+  FaMinus,
+  FaPlus,
+  FaTriangleExclamation,
+  FaXmark,
+} from "react-icons/fa6";
+import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
+import Collapse from "@mui/material/Collapse";
+import Alert from "@mui/material/Alert";
+import useSoporte from "./useSoporte";
 
-function Soporte() {
+const TIPOS_PROBLEMA = [
+  "Error del sistema",
+  "Problema de visualización",
+  "Problema con pacientes",
+  "Problema con análisis",
+  "Problema con informes",
+  "Problema con agenda",
+  "Otro",
+];
 
-  const navigate = useNavigate()
+const PANTALLAS = [
+  "Panel Principal",
+  "Registro Paciente",
+  "Datos Médicos",
+  "Análisis Plantar",
+  "Informe Paciente",
+  "Agenda",
+  "Historial",
+  "Ajustes",
+  "Otra",
+];
 
-  const [busqueda, setBusqueda] = useState('')
+const PASOS_GUIA = [
+  {
+    titulo: "Registrar paciente",
+    descripcion: "Captura los datos generales del paciente.",
+    ruta: "/registro-paciente",
+    etiquetaAccion: "Ir",
+  },
+  {
+    titulo: "Datos médicos",
+    descripcion: "Completa la información médica.",
+  },
+  {
+    titulo: "Análisis plantar",
+    descripcion: "Realiza un nuevo análisis.",
+    ruta: "/analisis-plantar",
+    etiquetaAccion: "Ir",
+  },
+  {
+    titulo: "Informe médico",
+    descripcion: "Guarda diagnóstico, tratamiento y observaciones.",
+  },
+  {
+    titulo: "Agenda",
+    descripcion: "Consulta las próximas citas programadas.",
+    ruta: "/agenda-consultas",
+    etiquetaAccion: "Agenda",
+  },
+  {
+    titulo: "Historial",
+    descripcion: "Consulta las actividades realizadas.",
+    ruta: "/historial",
+    etiquetaAccion: "Historial",
+  },
+];
 
-  const [preguntaAbierta, setPreguntaAbierta] =
-    useState(null)
+const crearPaginas = (paginaActual, total) => {
+  const paginas = [];
+  const incluidas = new Set();
 
-  const [mostrarReporte, setMostrarReporte] =
-    useState(false)
+  const incluir = (valor) => {
+    if (valor < 0 || valor > total - 1 || incluidas.has(valor)) return;
 
-  const [reporte, setReporte] = useState({
-    tipo: '',
-    pantalla: '',
-    asunto: '',
-    descripcion: ''
-  })
+    const ultima = paginas[paginas.length - 1];
 
-
-  /* =========================================
-     DATOS DE SOPORTE
-     CAMBIA ESTOS DATOS POR LOS REALES
-  ========================================= */
-
-  const correoSoporte =
-    'estefaniamoon6@gmail.com'
-
-  const numeroSoporte =
-    '13531018343'
-
-
-  /* =========================================
-     PREGUNTAS FRECUENTES
-  ========================================= */
-
-  const preguntas = [
-
-    {
-      pregunta:
-        '¿Cómo registro un paciente?',
-
-      respuesta:
-        'Desde el Panel Principal selecciona Nuevo Paciente. Captura los datos generales y presiona Siguiente para continuar con los datos médicos.'
-    },
-
-    {
-      pregunta:
-        '¿Cómo realizo un análisis plantar?',
-
-      respuesta:
-        'Desde el Panel Principal selecciona Nuevo Análisis y sigue el proceso correspondiente al paciente.'
-    },
-
-    {
-      pregunta:
-        '¿Cómo guardo un informe médico?',
-
-      respuesta:
-        'Dentro del informe del paciente completa la información requerida y presiona el botón Guardar.'
-    },
-
-    {
-      pregunta:
-        '¿Cómo programo una próxima consulta?',
-
-      respuesta:
-        'Dentro del informe del paciente selecciona la fecha y hora de la próxima consulta y guarda los cambios.'
-    },
-
-    {
-      pregunta:
-        '¿Dónde veo las próximas consultas?',
-
-      respuesta:
-        'Selecciona Agenda de Consultas en el menú superior. Los pacientes aparecerán marcados en el calendario según su fecha y hora.'
-    },
-
-    {
-      pregunta:
-        '¿Dónde veo el historial de actividades?',
-
-      respuesta:
-        'Selecciona Historial de Actividades en el menú superior para consultar las acciones realizadas dentro de StepAI.'
-    },
-
-    {
-      pregunta:
-        '¿Cómo cambio la apariencia?',
-
-      respuesta:
-        'Ve a Ajustes y entra al apartado Apariencia. Puedes seleccionar tema Claro, Oscuro o Automático.'
-    },
-
-    {
-      pregunta:
-        '¿Qué hago si aparece un error?',
-
-      respuesta:
-        'Puedes utilizar la opción Reportar un problema dentro de esta misma pantalla y enviar el reporte por correo o WhatsApp.'
+    if (ultima && valor - ultima.valor > 1) {
+      paginas.push({ valor: null, elipsis: true });
     }
 
-  ]
+    incluidas.add(valor);
+    paginas.push({ valor, elipsis: false });
+  };
 
-
-  /* =========================================
-     FILTRAR PREGUNTAS
-  ========================================= */
-
-  const preguntasFiltradas =
-    useMemo(() => {
-
-      if (!busqueda.trim()) {
-        return preguntas
-      }
-
-      const texto =
-        busqueda.toLowerCase()
-
-      return preguntas.filter(
-        (item) => {
-
-          return (
-            item.pregunta
-              .toLowerCase()
-              .includes(texto) ||
-
-            item.respuesta
-              .toLowerCase()
-              .includes(texto)
-          )
-
-        }
-      )
-
-    }, [busqueda])
-
-
-  /* =========================================
-     OBTENER APARIENCIA ACTUAL
-  ========================================= */
-
-  const apariencia =
-    useMemo(() => {
-
-      try {
-
-        const guardada =
-          JSON.parse(
-            localStorage.getItem(
-              'configuracionApariencia'
-            )
-          )
-
-        return {
-          tema:
-            guardada?.tema ||
-            'automatico',
-
-          tamano:
-            guardada?.tamano ||
-            'normal'
-        }
-
-      } catch {
-
-        return {
-          tema: 'automatico',
-          tamano: 'normal'
-        }
-
-      }
-
-    }, [])
-
-
-  /* =========================================
-     CAMBIAR CAMPOS DEL REPORTE
-  ========================================= */
-
-  const cambiarReporte = (e) => {
-
-    const {
-      name,
-      value
-    } = e.target
-
-    setReporte(
-      (actual) => ({
-        ...actual,
-        [name]: value
-      })
-    )
-
+  incluir(0);
+  if (total > 3) {
+    incluir(paginaActual - 1);
+    incluir(paginaActual);
+    incluir(paginaActual + 1);
   }
-
-
-  /* =========================================
-     VALIDAR REPORTE
-  ========================================= */
-
-  const validarReporte = () => {
-
-    if (
-      !reporte.tipo ||
-      !reporte.pantalla ||
-      !reporte.asunto.trim() ||
-      !reporte.descripcion.trim()
-    ) {
-
-      alert(
-        'Completa todos los campos del reporte'
-      )
-
-      return false
-
-    }
-
-    return true
-
-  }
-
-
-  /* =========================================
-     GUARDAR REPORTE EN LOCALSTORAGE
-  ========================================= */
-
-  const guardarReporteLocal = () => {
-
-    const reportes =
-      JSON.parse(
-        localStorage.getItem(
-          'reportesSoporte'
-        )
-      ) || []
-
-    const nuevoReporte = {
-
-      id: Date.now(),
-
-      tipo:
-        reporte.tipo,
-
-      pantalla:
-        reporte.pantalla,
-
-      asunto:
-        reporte.asunto,
-
-      descripcion:
-        reporte.descripcion,
-
-      fecha:
-        new Date()
-          .toLocaleDateString('es-MX'),
-
-      hora:
-        new Date()
-          .toLocaleTimeString(
-            'es-MX',
-            {
-              hour: '2-digit',
-              minute: '2-digit'
-            }
-          ),
-
-      estado:
-        'Pendiente'
-
-    }
-
-    reportes.unshift(
-      nuevoReporte
-    )
-
-    localStorage.setItem(
-      'reportesSoporte',
-      JSON.stringify(reportes)
-    )
-
-  }
-
-
-  /* =========================================
-     CREAR MENSAJE DEL REPORTE
-  ========================================= */
-
-  const crearMensaje = () => {
-
-    return `
-Hola, necesito soporte técnico con StepAI.
-
-TIPO DE PROBLEMA:
-${reporte.tipo}
-
-PANTALLA DONDE OCURRIÓ:
-${reporte.pantalla}
-
-ASUNTO:
-${reporte.asunto}
-
-DESCRIPCIÓN:
-${reporte.descripcion}
-
-CONFIGURACIÓN DEL SISTEMA:
-
-Tema:
-${apariencia.tema}
-
-Tamaño de interfaz:
-${apariencia.tamano}
-
-Fecha del reporte:
-${new Date().toLocaleDateString('es-MX')}
-
-Hora:
-${new Date().toLocaleTimeString('es-MX')}
-`
-
-  }
-
-
-  /* =========================================
-     ENVIAR POR CORREO
-  ========================================= */
-
-  const enviarCorreo = () => {
-
-    if (!validarReporte()) {
-      return
-    }
-
-    guardarReporteLocal()
-
-    const asunto =
-      `Soporte StepAI - ${reporte.asunto}`
-
-    const mensaje =
-      crearMensaje()
-
-    const enlaceCorreo =
-      `mailto:${correoSoporte}` +
-      `?subject=${encodeURIComponent(asunto)}` +
-      `&body=${encodeURIComponent(mensaje)}`
-
-    window.location.href =
-      enlaceCorreo
-
-  }
-
-
-  /* =========================================
-     ENVIAR POR WHATSAPP
-  ========================================= */
-
-  const enviarWhatsApp = () => {
-
-    if (!validarReporte()) {
-      return
-    }
-
-    guardarReporteLocal()
-
-    const mensaje =
-      crearMensaje()
-
-    const enlaceWhatsApp =
-      `https://wa.me/${numeroSoporte}` +
-      `?text=${encodeURIComponent(mensaje)}`
-
-    window.open(
-      enlaceWhatsApp,
-      '_blank'
-    )
-
-  }
-
-
-  /* =========================================
-     GUARDAR SIN ENVIAR
-  ========================================= */
-
-  const guardarReporte = () => {
-
-    if (!validarReporte()) {
-      return
-    }
-
-    guardarReporteLocal()
-
-    alert(
-      'Reporte guardado correctamente'
-    )
-
-    limpiarReporte()
-
-  }
-
-
-  /* =========================================
-     LIMPIAR REPORTE
-  ========================================= */
-
-  const limpiarReporte = () => {
-
-    setReporte({
-      tipo: '',
-      pantalla: '',
-      asunto: '',
-      descripcion: ''
-    })
-
-    setMostrarReporte(false)
-
-  }
-
-
-  /* =========================================
-     INTERFAZ
-  ========================================= */
+  incluir(total - 1);
+
+  return paginas;
+};
+
+function HeaderSoporte({ onMenu }) {
+  return (
+    <header className="soporte-header">
+      <button type="button" className="soporte-logo" onClick={onMenu}>
+        StepIA
+      </button>
+
+      <div className="soporte-user" title="Profesional en sesión">
+        <span>USUARIO</span>
+        <div className="soporte-user-icon" aria-hidden="true">
+          <FaUserAlt />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function TarjetaSoporte({
+  icono,
+  titulo,
+  descripcion,
+  etiquetaAccion,
+  onAccion,
+}) {
+  return (
+    <article className="soporte-card">
+      <span className="soporte-card-icono" aria-hidden="true">
+        {icono}
+      </span>
+
+      <h3>{titulo}</h3>
+
+      <p>{descripcion}</p>
+
+      <ButtonComponent
+        config={{
+          name: `accion-${titulo}`,
+          text: etiquetaAccion,
+          type: "button",
+          variant: "green",
+        }}
+        onClick={onAccion}
+      />
+    </article>
+  );
+}
+
+function AcordeonPreguntas({ preguntas, abierta, onAlternar }) {
+  return (
+    <div className="faq-lista">
+      {preguntas.map((item, indice) => {
+        const abierto = abierta === item.pregunta;
+        const idBoton = `faq-pregunta-${indice}`;
+        const idRespuesta = `faq-respuesta-${indice}`;
+
+        return (
+          <div className="faq-item" key={item.pregunta}>
+            <button
+              type="button"
+              id={idBoton}
+              className="faq-pregunta"
+              aria-expanded={abierto}
+              aria-controls={idRespuesta}
+              onClick={() => onAlternar(item.pregunta)}
+            >
+              <span>{item.pregunta}</span>
+
+              <span className="faq-icono" aria-hidden="true">
+                {abierto ? <FaMinus /> : <FaPlus />}
+              </span>
+            </button>
+
+            <Collapse in={abierto} timeout={220}>
+              <div
+                id={idRespuesta}
+                className="faq-respuesta"
+                role="region"
+                aria-labelledby={idBoton}
+              >
+                {item.respuesta}
+              </div>
+            </Collapse>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function PaginacionFaq({ pagina, totalPaginas, onIrAPagina }) {
+  if (totalPaginas <= 1) return null;
 
   return (
+    <nav
+      className="faq-paginacion"
+      aria-label="Paginación de preguntas frecuentes"
+    >
+      <button
+        type="button"
+        className="faq-pagina-boton"
+        aria-label="Página anterior"
+        onClick={() => onIrAPagina(pagina - 1)}
+        disabled={pagina <= 0}
+      >
+        <FaChevronLeft aria-hidden="true" />
+      </button>
 
-    <div className="soporte-page">
-
-
-      {/* =====================================
-          HEADER
-      ===================================== */}
-
-      <header className="soporte-header">
-
-
-        <button
-          type="button"
-          className="soporte-logo"
-          onClick={() =>
-            navigate('/menu')
-          }
-        >
-          StepAI
-        </button>
-
-
-        <button
-          type="button"
-          className="soporte-volver"
-          onClick={() =>
-            navigate('/menu')
-          }
-        >
-           Panel Principal
-        </button>
-
-
-      </header>
-
-
-
-      {/* =====================================
-          CONTENIDO
-      ===================================== */}
-
-      <main className="soporte-main">
-
-
-        <div className="soporte-titulo">
-
-          <h1>
-             Soporte Técnico
-          </h1>
-
-          <p>
-            Encuentra ayuda, consulta
-            la guía de uso o reporta
-            un problema.
-          </p>
-
-        </div>
-
-
-
-        {/* =====================================
-            BUSCADOR
-        ===================================== */}
-
-        <div className="soporte-buscador">
-
-          <span>
-            🔍
+      {crearPaginas(pagina, totalPaginas).map((item, indice) =>
+        item.elipsis ? (
+          <span
+            key={`elipsis-${indice}`}
+            className="faq-pagina-elipsis"
+            aria-hidden="true"
+          >
+            …
           </span>
+        ) : (
+          <button
+            key={item.valor}
+            type="button"
+            className={`faq-pagina-boton${item.valor === pagina ? " faq-pagina-boton--activa" : ""}`}
+            aria-label={`Página ${item.valor + 1}`}
+            aria-current={item.valor === pagina ? "page" : undefined}
+            onClick={() => onIrAPagina(item.valor)}
+          >
+            {item.valor + 1}
+          </button>
+        ),
+      )}
 
-          <input
-            type="text"
-            placeholder="Buscar una pregunta o problema..."
-            value={busqueda}
-            onChange={(e) =>
-              setBusqueda(
-                e.target.value
-              )
-            }
-          />
+      <button
+        type="button"
+        className="faq-pagina-boton"
+        aria-label="Página siguiente"
+        onClick={() => onIrAPagina(pagina + 1)}
+        disabled={pagina >= totalPaginas - 1}
+      >
+        <FaChevronRight aria-hidden="true" />
+      </button>
+    </nav>
+  );
+}
 
+function InformacionSistema({ apariencia, onCopiar }) {
+  return (
+    <>
+      <div className="sistema-info">
+        <div className="sistema-fila">
+          <span>Aplicación</span>
+          <strong>StepAI</strong>
         </div>
 
+        <div className="sistema-fila">
+          <span>Versión</span>
+          <strong>1.0.0</strong>
+        </div>
 
+        <div className="sistema-fila">
+          <span>Estado</span>
+          <strong className="sistema-activo">Funcionando</strong>
+        </div>
 
-        {/* =====================================
-            TARJETAS PRINCIPALES
-        ===================================== */}
+        <div className="sistema-fila">
+          <span>Tema</span>
+          <strong>{apariencia.tema}</strong>
+        </div>
 
-        <section className="soporte-grid">
+        <div className="sistema-fila">
+          <span>Tamaño</span>
+          <strong>{apariencia.tamano}</strong>
+        </div>
+      </div>
 
+      <div className="sistema-acciones">
+        <ButtonComponent
+          config={{
+            name: "copiar-info",
+            text: "Copiar información",
+            type: "button",
+            variant: "blue",
+          }}
+          onClick={onCopiar}
+        />
+      </div>
+    </>
+  );
+}
 
-          {/* PREGUNTAS */}
+function ModalReporte({
+  abierto,
+  reporte,
+  errores,
+  onCambio,
+  onCerrar,
+  onGuardar,
+  onCorreo,
+  onWhatsApp,
+  dialogRef,
+}) {
+  const hayErrores = Object.keys(errores).length > 0;
 
-          <article className="soporte-card">
+  useEffect(() => {
+    const dialogo = dialogRef.current;
 
-            <div className="soporte-card-icono">
-              
-            </div>
+    if (!dialogo) return;
 
-            <h2>
-              Preguntas frecuentes
-            </h2>
+    if (abierto && !dialogo.open) {
+      dialogo.showModal();
+    } else if (!abierto && dialogo.open) {
+      dialogo.close();
+    }
+  }, [abierto, dialogRef]);
 
-            <p>
-              Encuentra respuestas rápidas
-              sobre el funcionamiento
-              de StepAI.
-            </p>
+  return (
+    <dialog
+      className="soporte-modal"
+      aria-labelledby="reporte-titulo"
+      aria-describedby="reporte-intro"
+      ref={dialogRef}
+      onClose={onCerrar}
+    >
+      <div className="soporte-modal-contenido">
+        <div className="soporte-modal-header">
+          <div>
+            <h2 id="reporte-titulo">Reportar un problema</h2>
+            <p id="reporte-intro">Describe el problema encontrado.</p>
+          </div>
 
-            <button
-              type="button"
-              className="soporte-card-btn"
-              onClick={() => {
+          <button
+            type="button"
+            className="soporte-modal-cerrar"
+            aria-label="Cerrar reporte"
+            onClick={onCerrar}
+          >
+            <FaXmark aria-hidden="true" />
+          </button>
+        </div>
 
-                document
-                  .getElementById(
-                    'preguntas-frecuentes'
-                  )
-                  ?.scrollIntoView({
-                    behavior: 'smooth'
-                  })
+        <div className="soporte-privacidad" role="note">
+          <FaTriangleExclamation aria-hidden="true" />
+          <span>
+            No incluyas información médica, diagnósticos ni datos sensibles de
+            pacientes.
+          </span>
+        </div>
 
-              }}
+        <div className="soporte-form">
+          <Collapse in={hayErrores}>
+            <Alert
+              variant="filled"
+              severity="error"
+              sx={{ fontWeight: 600, borderRadius: 1.5, marginBottom: "16px" }}
             >
-              Ver preguntas
-            </button>
+              {errores.general ||
+                "Revisa los campos marcados antes de continuar."}
+            </Alert>
+          </Collapse>
 
-          </article>
+          <div className="soporte-form-group">
+            <label htmlFor="reporte-tipo">Tipo de problema</label>
 
-
-
-          {/* GUÍA */}
-
-          <article className="soporte-card">
-
-            
-
-            <h2>
-              Guía de uso
-            </h2>
-
-            <p>
-              Aprende a utilizar las
-              principales funciones
-              de StepAI.
-            </p>
-
-            <button
-              type="button"
-              className="soporte-card-btn"
-              onClick={() => {
-
-                document
-                  .getElementById(
-                    'guia-uso'
-                  )
-                  ?.scrollIntoView({
-                    behavior: 'smooth'
-                  })
-
-              }}
+            <select
+              id="reporte-tipo"
+              name="tipo"
+              value={reporte.tipo}
+              onChange={onCambio}
+              aria-invalid={Boolean(errores.tipo) || undefined}
+              aria-describedby={errores.tipo ? "error-tipo" : undefined}
             >
-              Ver guía
-            </button>
+              <option value="">Seleccionar...</option>
 
-          </article>
+              {TIPOS_PROBLEMA.map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {tipo}
+                </option>
+              ))}
+            </select>
 
+            {errores.tipo && (
+              <span className="soporte-error" id="error-tipo">
+                {errores.tipo}
+              </span>
+            )}
+          </div>
 
+          <div className="soporte-form-group">
+            <label htmlFor="reporte-pantalla">Pantalla donde ocurrió</label>
 
-          {/* REPORTAR */}
-
-          <article className="soporte-card">
-
-          
-
-            <h2>
-              Reportar un problema
-            </h2>
-
-            <p>
-              Envía un reporte
-              directamente por correo
-              o WhatsApp.
-            </p>
-
-            <button
-              type="button"
-              className="soporte-card-btn"
-              onClick={() =>
-                setMostrarReporte(true)
+            <select
+              id="reporte-pantalla"
+              name="pantalla"
+              value={reporte.pantalla}
+              onChange={onCambio}
+              aria-invalid={Boolean(errores.pantalla) || undefined}
+              aria-describedby={
+                errores.pantalla ? "error-pantalla" : undefined
               }
             >
-              Reportar problema
-            </button>
+              <option value="">Seleccionar...</option>
 
-          </article>
+              {PANTALLAS.map((pantalla) => (
+                <option key={pantalla} value={pantalla}>
+                  {pantalla}
+                </option>
+              ))}
+            </select>
 
+            {errores.pantalla && (
+              <span className="soporte-error" id="error-pantalla">
+                {errores.pantalla}
+              </span>
+            )}
+          </div>
 
+          <div className="soporte-form-group">
+            <label htmlFor="reporte-asunto">Asunto</label>
 
-          {/* SISTEMA */}
+            <input
+              id="reporte-asunto"
+              type="text"
+              name="asunto"
+              maxLength={120}
+              placeholder="Ejemplo: No aparece la cita"
+              value={reporte.asunto}
+              onChange={onCambio}
+              aria-invalid={Boolean(errores.asunto) || undefined}
+              aria-describedby={errores.asunto ? "error-asunto" : undefined}
+            />
 
-          <article className="soporte-card">
+            {errores.asunto && (
+              <span className="soporte-error" id="error-asunto">
+                {errores.asunto}
+              </span>
+            )}
+          </div>
 
-        
-            <h2>
-              Información del sistema
-            </h2>
+          <div className="soporte-form-group">
+            <label htmlFor="reporte-descripcion">Describe el problema</label>
 
-            <p>
-              Consulta información útil
-              para identificar problemas.
-            </p>
+            <textarea
+              id="reporte-descripcion"
+              name="descripcion"
+              rows="6"
+              maxLength={800}
+              placeholder="Describe qué estabas haciendo y qué problema apareció..."
+              value={reporte.descripcion}
+              onChange={onCambio}
+              aria-invalid={Boolean(errores.descripcion) || undefined}
+              aria-describedby={
+                errores.descripcion ? "error-descripcion" : undefined
+              }
+            />
 
+            {errores.descripcion && (
+              <span className="soporte-error" id="error-descripcion">
+                {errores.descripcion}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="soporte-modal-footer">
+          <ButtonComponent
+            config={{
+              name: "cancelar",
+              text: "Cancelar",
+              type: "button",
+              variant: "white",
+            }}
+            onClick={onCerrar}
+          />
+
+          <ButtonComponent
+            config={{
+              name: "guardar",
+              text: "Guardar",
+              type: "button",
+              variant: "blue",
+            }}
+            onClick={onGuardar}
+          />
+
+          <ButtonComponent
+            config={{
+              name: "whatsapp",
+              text: "WhatsApp",
+              type: "button",
+              variant: "green",
+            }}
+            onClick={onWhatsApp}
+          />
+
+          <ButtonComponent
+            config={{
+              name: "correo",
+              text: "Correo",
+              type: "button",
+              variant: "purple",
+            }}
+            onClick={onCorreo}
+          />
+        </div>
+      </div>
+    </dialog>
+  );
+}
+
+function Soporte() {
+  const {
+    navigate,
+    busqueda,
+    preguntaAbierta,
+    apariencia,
+    mostrarReporte,
+    reporte,
+    errores,
+    mensaje,
+    dialogRef,
+    preguntasFiltradas,
+    totalPaginas,
+    paginaSegura,
+    preguntasPagina,
+    irASeccion,
+    cambiarBusqueda,
+    limpiarBusqueda,
+    irAPaginaFaq,
+    alternarPregunta,
+    abrirReporte,
+    cerrarReporte,
+    cambiarReporte,
+    guardarReporte,
+    enviarCorreo,
+    enviarWhatsApp,
+    copiarInformacion,
+  } = useSoporte();
+
+  const hayBusqueda = busqueda.trim() !== "";
+  const esError = mensaje?.severidad === "error";
+
+  return (
+    <div className="soporte-page">
+      <HeaderSoporte onMenu={() => navigate("/menu")} />
+
+      <main className="soporte-main">
+        <div className="soporte-titulo">
+          <h1>Soporte Técnico</h1>
+          <p>
+            Encuentra ayuda, consulta la guía de uso o reporta un problema.
+          </p>
+        </div>
+
+        <Collapse in={Boolean(mensaje)}>
+          <div
+            className="soporte-mensaje"
+            role={esError ? "alert" : "status"}
+            aria-live="polite"
+          >
+            <Alert
+              variant="filled"
+              severity={mensaje?.severidad || "info"}
+              sx={{ fontWeight: 600, borderRadius: 1.5 }}
+            >
+              {mensaje?.texto}
+            </Alert>
+          </div>
+        </Collapse>
+
+        <search className="soporte-buscador">
+          <label className="sr-only" htmlFor="soporte-busqueda">
+            Buscar en preguntas frecuentes
+          </label>
+
+          <FaMagnifyingGlass
+            className="soporte-buscador-icono"
+            aria-hidden="true"
+          />
+
+          <input
+            id="soporte-busqueda"
+            type="search"
+            placeholder="Buscar una pregunta o problema..."
+            value={busqueda}
+            onChange={(event) => cambiarBusqueda(event.target.value)}
+          />
+
+          {hayBusqueda && (
             <button
               type="button"
-              className="soporte-card-btn"
-              onClick={() => {
-
-                document
-                  .getElementById(
-                    'informacion-sistema'
-                  )
-                  ?.scrollIntoView({
-                    behavior: 'smooth'
-                  })
-
-              }}
+              className="soporte-clear"
+              aria-label="Limpiar búsqueda"
+              onClick={limpiarBusqueda}
             >
-              Ver información
+              <FaXmark aria-hidden="true" />
             </button>
+          )}
+        </search>
 
-          </article>
+        <section className="soporte-grid" aria-label="Opciones de soporte">
+          <TarjetaSoporte
+            icono={<FaCircleQuestion />}
+            titulo="Preguntas frecuentes"
+            descripcion="Encuentra respuestas rápidas sobre el funcionamiento de StepAI."
+            etiquetaAccion="Ver preguntas"
+            onAccion={() => irASeccion("preguntas-frecuentes")}
+          />
 
+          <TarjetaSoporte
+            icono={<FaBookOpen />}
+            titulo="Guía de uso"
+            descripcion="Aprende a utilizar las principales funciones de StepAI."
+            etiquetaAccion="Ver guía"
+            onAccion={() => irASeccion("guia-uso")}
+          />
 
+          <TarjetaSoporte
+            icono={<FaTriangleExclamation />}
+            titulo="Reportar un problema"
+            descripcion="Envía un reporte directamente por correo o WhatsApp."
+            etiquetaAccion="Reportar problema"
+            onAccion={abrirReporte}
+          />
+
+          <TarjetaSoporte
+            icono={<FaCircleInfo />}
+            titulo="Información del sistema"
+            descripcion="Consulta información útil para identificar problemas."
+            etiquetaAccion="Ver información"
+            onAccion={() => irASeccion("informacion-sistema")}
+          />
         </section>
-
-
-
-        {/* =====================================
-            PREGUNTAS FRECUENTES
-        ===================================== */}
 
         <section
           id="preguntas-frecuentes"
           className="soporte-seccion"
+          aria-labelledby="faq-titulo"
         >
-
           <div className="soporte-seccion-titulo">
+            <h2 id="faq-titulo">Preguntas frecuentes</h2>
 
-            
+            <p>Selecciona una pregunta para ver su respuesta.</p>
 
-            <p>
-              Selecciona una pregunta.
-            </p>
-
+            {hayBusqueda && (
+              <span
+                className="soporte-resultado"
+                role="status"
+                aria-live="polite"
+              >
+                {preguntasFiltradas.length === 0
+                  ? "Sin resultados"
+                  : `${preguntasFiltradas.length} ${
+                      preguntasFiltradas.length === 1
+                        ? "pregunta encontrada"
+                        : "preguntas encontradas"
+                    }`}
+              </span>
+            )}
           </div>
 
+          {preguntasFiltradas.length === 0 ? (
+            <div className="faq-vacio" role="status" aria-live="polite">
+              <FaCircleQuestion
+                className="faq-vacio-icono"
+                aria-hidden="true"
+              />
 
-          <div className="faq-lista">
+              <h3>Sin resultados</h3>
 
+              <p>No se encontraron preguntas con esa búsqueda.</p>
 
-            {
-              preguntasFiltradas.length === 0
-                ? (
+              <ButtonComponent
+                config={{
+                  name: "limpiar-busqueda-faq",
+                  text: "Limpiar búsqueda",
+                  type: "button",
+                  variant: "blue",
+                }}
+                onClick={limpiarBusqueda}
+              />
+            </div>
+          ) : (
+            <>
+              <AcordeonPreguntas
+                preguntas={preguntasPagina}
+                abierta={preguntaAbierta}
+                onAlternar={alternarPregunta}
+              />
 
-                  <div className="faq-sin-resultados">
-                    No se encontraron resultados.
-                  </div>
-
-                )
-                : (
-
-                  preguntasFiltradas.map(
-                    (item, index) => {
-
-                      const abierto =
-                        preguntaAbierta === index
-
-                      return (
-
-                        <div
-                          className="faq-item"
-                          key={item.pregunta}
-                        >
-
-                          <button
-                            type="button"
-                            className="faq-pregunta"
-                            onClick={() =>
-                              setPreguntaAbierta(
-                                abierto
-                                  ? null
-                                  : index
-                              )
-                            }
-                          >
-
-                            
-                            <strong>
-                              {
-                                abierto
-                                  ? '−'
-                                  : '+'
-                              }
-                            </strong>
-
-                          </button>
-
-
-                          {
-                            abierto && (
-
-                              <div className="faq-respuesta">
-                                {item.respuesta}
-                              </div>
-
-                            )
-                          }
-
-
-                        </div>
-
-                      )
-
-                    }
-                  )
-
-                )
-            }
-
-
-          </div>
-
+              <PaginacionFaq
+                pagina={paginaSegura}
+                totalPaginas={totalPaginas}
+                onIrAPagina={irAPaginaFaq}
+              />
+            </>
+          )}
         </section>
-
-
-
-        {/* =====================================
-            GUÍA
-        ===================================== */}
 
         <section
           id="guia-uso"
           className="soporte-seccion"
+          aria-labelledby="guia-titulo"
         >
-
           <div className="soporte-seccion-titulo">
-
-            <h2>
-               Guía de uso
-            </h2>
-
-            <p>
-              Flujo principal del sistema.
-            </p>
-
+            <h2 id="guia-titulo">Guía de uso</h2>
+            <p>Flujo principal del sistema.</p>
           </div>
 
+          <ol className="guia-lista">
+            {PASOS_GUIA.map((paso, indice) => (
+              <li className="guia-paso" key={paso.titulo}>
+                <div className="guia-numero" aria-hidden="true">
+                  {indice + 1}
+                </div>
 
-          <div className="guia-lista">
+                <div className="guia-texto">
+                  <h3>{paso.titulo}</h3>
+                  <p>{paso.descripcion}</p>
+                </div>
 
-
-            <div className="guia-paso">
-
-              <div className="guia-numero">
-                1
-              </div>
-
-              <div>
-
-                <h3>
-                   Registrar paciente
-                </h3>
-
-                <p>
-                  Captura los datos
-                  generales del paciente.
-                </p>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(
-                    '/registro-paciente'
-                  )
-                }
-              >
-                Ir
-              </button>
-
-            </div>
-
-
-
-            <div className="guia-paso">
-
-              <div className="guia-numero">
-                2
-              </div>
-
-              <div>
-
-                <h3>
-                   Datos médicos
-                </h3>
-
-                <p>
-                  Completa la información
-                  médica.
-                </p>
-
-              </div>
-
-            </div>
-
-
-
-            <div className="guia-paso">
-
-              <div className="guia-numero">
-                3
-              </div>
-
-              <div>
-
-                <h3>
-                   Análisis plantar
-                </h3>
-
-                <p>
-                  Realiza un nuevo
-                  análisis.
-                </p>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(
-                    '/analisis-plantar'
-                  )
-                }
-              >
-                Ir
-              </button>
-
-            </div>
-
-
-
-            <div className="guia-paso">
-
-              <div className="guia-numero">
-                4
-              </div>
-
-              <div>
-
-                <h3>
-                   Informe médico
-                </h3>
-
-                <p>
-                  Guarda diagnóstico,
-                  tratamiento y observaciones.
-                </p>
-
-              </div>
-
-            </div>
-
-
-
-            <div className="guia-paso">
-
-              <div className="guia-numero">
-                5
-              </div>
-
-              <div>
-
-                <h3>
-                   Agenda
-                </h3>
-
-                <p>
-                  Consulta las próximas
-                  citas programadas.
-                </p>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(
-                    '/agenda-consultas'
-                  )
-                }
-              >
-                Agenda
-              </button>
-
-            </div>
-
-
-
-            <div className="guia-paso">
-
-              <div className="guia-numero">
-                6
-              </div>
-
-              <div>
-
-                <h3>
-                   Historial
-                </h3>
-
-                <p>
-                  Consulta las actividades
-                  realizadas.
-                </p>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(
-                    '/historial'
-                  )
-                }
-              >
-                Historial
-              </button>
-
-            </div>
-
-
-          </div>
-
+                {paso.ruta && (
+                  <ButtonComponent
+                    config={{
+                      name: `guia-${indice + 1}`,
+                      text: paso.etiquetaAccion,
+                      type: "button",
+                      variant: "green",
+                    }}
+                    onClick={() => navigate(paso.ruta)}
+                  />
+                )}
+              </li>
+            ))}
+          </ol>
         </section>
-
-
-
-        {/* =====================================
-            INFORMACIÓN DEL SISTEMA
-        ===================================== */}
 
         <section
           id="informacion-sistema"
           className="soporte-seccion"
+          aria-labelledby="sistema-titulo"
         >
-
           <div className="soporte-seccion-titulo">
-
-            <h2>
-               Información del sistema
-            </h2>
-
-            <p>
-              Información útil para soporte.
-            </p>
-
+            <h2 id="sistema-titulo">Información del sistema</h2>
+            <p>Información útil para soporte.</p>
           </div>
 
-
-          <div className="sistema-info">
-
-
-            <div className="sistema-fila">
-
-              <span>
-                Aplicación
-              </span>
-
-              <strong>
-                StepAI
-              </strong>
-
-            </div>
-
-
-            <div className="sistema-fila">
-
-              <span>
-                Versión
-              </span>
-
-              <strong>
-                1.0.0
-              </strong>
-
-            </div>
-
-
-            <div className="sistema-fila">
-
-              <span>
-                Estado
-              </span>
-
-              <strong className="sistema-activo">
-                ● Funcionando
-              </strong>
-
-            </div>
-
-
-            <div className="sistema-fila">
-
-              <span>
-                Tema
-              </span>
-
-              <strong>
-                {apariencia.tema}
-              </strong>
-
-            </div>
-
-
-            <div className="sistema-fila">
-
-              <span>
-                Tamaño
-              </span>
-
-              <strong>
-                {apariencia.tamano}
-              </strong>
-
-            </div>
-
-
-          </div>
-
+          <InformacionSistema
+            apariencia={apariencia}
+            onCopiar={copiarInformacion}
+          />
         </section>
-
-
       </main>
 
-
-
-      {/* =====================================
-          MODAL REPORTAR PROBLEMA
-      ===================================== */}
-
-      {
-        mostrarReporte && (
-
-          <div className="soporte-modal-fondo">
-
-
-            <div className="soporte-modal">
-
-
-              <div className="soporte-modal-header">
-
-
-                <div>
-
-                  <h2>
-                     Reportar un problema
-                  </h2>
-
-                  <p>
-                    Describe el problema
-                    encontrado.
-                  </p>
-
-                </div>
-
-
-                <button
-                  type="button"
-                  className="soporte-modal-cerrar"
-                  onClick={() =>
-                    setMostrarReporte(false)
-                  }
-                >
-                  ✕
-                </button>
-
-
-              </div>
-
-
-
-              {/* PRIVACIDAD */}
-
-              <div className="soporte-privacidad">
-
-                 No incluyas información
-                médica, diagnósticos ni
-                datos sensibles de pacientes.
-
-              </div>
-
-
-
-              <div className="soporte-form">
-
-
-                {/* TIPO */}
-
-                <div className="soporte-form-group">
-
-                  <label>
-                    Tipo de problema
-                  </label>
-
-                  <select
-                    name="tipo"
-                    value={reporte.tipo}
-                    onChange={cambiarReporte}
-                  >
-
-                    <option value="">
-                      Seleccionar...
-                    </option>
-
-                    <option value="Error del sistema">
-                      Error del sistema
-                    </option>
-
-                    <option value="Problema de visualización">
-                      Problema de visualización
-                    </option>
-
-                    <option value="Problema con pacientes">
-                      Problema con pacientes
-                    </option>
-
-                    <option value="Problema con análisis">
-                      Problema con análisis
-                    </option>
-
-                    <option value="Problema con informes">
-                      Problema con informes
-                    </option>
-
-                    <option value="Problema con agenda">
-                      Problema con agenda
-                    </option>
-
-                    <option value="Otro">
-                      Otro
-                    </option>
-
-                  </select>
-
-                </div>
-
-
-
-                {/* PANTALLA */}
-
-                <div className="soporte-form-group">
-
-                  <label>
-                    Pantalla donde ocurrió
-                  </label>
-
-                  <select
-                    name="pantalla"
-                    value={reporte.pantalla}
-                    onChange={cambiarReporte}
-                  >
-
-                    <option value="">
-                      Seleccionar...
-                    </option>
-
-                    <option value="Panel Principal">
-                      Panel Principal
-                    </option>
-
-                    <option value="Registro Paciente">
-                      Registro Paciente
-                    </option>
-
-                    <option value="Datos Médicos">
-                      Datos Médicos
-                    </option>
-
-                    <option value="Análisis Plantar">
-                      Análisis Plantar
-                    </option>
-
-                    <option value="Informe Paciente">
-                      Informe Paciente
-                    </option>
-
-                    <option value="Agenda">
-                      Agenda
-                    </option>
-
-                    <option value="Historial">
-                      Historial
-                    </option>
-
-                    <option value="Ajustes">
-                      Ajustes
-                    </option>
-
-                    <option value="Otra">
-                      Otra
-                    </option>
-
-                  </select>
-
-                </div>
-
-
-
-                {/* ASUNTO */}
-
-                <div className="soporte-form-group">
-
-                  <label>
-                    Asunto
-                  </label>
-
-                  <input
-                    type="text"
-                    name="asunto"
-                    placeholder="Ejemplo: No aparece la cita"
-                    value={reporte.asunto}
-                    onChange={cambiarReporte}
-                  />
-
-                </div>
-
-
-
-                {/* DESCRIPCIÓN */}
-
-                <div className="soporte-form-group">
-
-                  <label>
-                    Describe el problema
-                  </label>
-
-                  <textarea
-                    name="descripcion"
-                    rows="6"
-                    placeholder="Describe qué estabas haciendo y qué problema apareció..."
-                    value={
-                      reporte.descripcion
-                    }
-                    onChange={
-                      cambiarReporte
-                    }
-                  />
-
-                </div>
-
-
-              </div>
-
-
-
-              {/* =================================
-                  BOTONES
-              ================================= */}
-
-              <div className="soporte-modal-footer">
-
-
-                <button
-                  type="button"
-                  className="soporte-cancelar"
-                  onClick={() =>
-                    setMostrarReporte(false)
-                  }
-                >
-                  Cancelar
-                </button>
-
-
-                <button
-                  type="button"
-                  className="soporte-guardar"
-                  onClick={guardarReporte}
-                >
-                  💾 Guardar
-                </button>
-
-
-                <button
-                  type="button"
-                  className="soporte-whatsapp"
-                  onClick={enviarWhatsApp}
-                >
-                  💬 WhatsApp
-                </button>
-
-
-                <button
-                  type="button"
-                  className="soporte-email"
-                  onClick={enviarCorreo}
-                >
-                  ✉️ Correo
-                </button>
-
-
-              </div>
-
-
-            </div>
-
-
-          </div>
-
-        )
-      }
-
-
+      <ModalReporte
+        abierto={mostrarReporte}
+        reporte={reporte}
+        errores={errores}
+        onCambio={cambiarReporte}
+        onCerrar={cerrarReporte}
+        onGuardar={guardarReporte}
+        onCorreo={enviarCorreo}
+        onWhatsApp={enviarWhatsApp}
+        dialogRef={dialogRef}
+      />
     </div>
-
-  )
-
+  );
 }
 
-export default Soporte
+export default Soporte;

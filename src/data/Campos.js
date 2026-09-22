@@ -33,6 +33,8 @@ const CAMPOS_REGISTRO_PACIENTE = [
       name: "curp",
       type: "text",
       placeholder: "CURP",
+      helperText: "18 caracteres, se captura en mayúsculas",
+      autoComplete: "off",
     },
   },
   {
@@ -42,6 +44,7 @@ const CAMPOS_REGISTRO_PACIENTE = [
       name: "fechaNacimiento",
       type: "date",
       placeholder: "Fecha Nacimiento",
+      autoComplete: "bday",
     },
   },
   {
@@ -49,8 +52,15 @@ const CAMPOS_REGISTRO_PACIENTE = [
     config: {
       label: "Sexo",
       name: "sexo",
-      type: "text",
-      placeholder: "Sexo",
+      type: "select",
+      placeholder: "Selecciona una opción",
+      options: [
+        { value: "MASCULINO", label: "Masculino" },
+        { value: "FEMENINO", label: "Femenino" },
+        { value: "INTERSEXUAL", label: "Intersexual" },
+        { value: "NO_ESPECIFICADO", label: "No especificado" },
+      ],
+      autoComplete: "sex",
     },
   },
   {
@@ -58,8 +68,10 @@ const CAMPOS_REGISTRO_PACIENTE = [
     config: {
       label: "Teléfono",
       name: "telefono",
-      type: "number",
+      type: "tel",
       placeholder: "Teléfono",
+      helperText: "Formato internacional, ej. +52 987 654 15 53",
+      autoComplete: "tel",
     },
   },
   {

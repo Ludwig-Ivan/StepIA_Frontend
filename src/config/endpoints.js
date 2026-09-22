@@ -1,4 +1,4 @@
-const HOST = "https://api-gateway-255553194796.northamerica-south1.run.app";
+const HOST = import.meta.env.VITE_API_HOST || "http://localhost:8080";
 
 const BASE_URL = {
   PROFESIONALES: `${HOST}/api/core-service/profesionales`,
@@ -18,8 +18,8 @@ export const ENDPOINTS = {
   PACIENTES: {
     CREATE: BASE_URL.PACIENTES,
     GET_BY_ID: (id) => `${BASE_URL.PACIENTES}/${id}`,
-    GET_ALL: (searchTerm, page, limit) =>
-      `${BASE_URL.PACIENTES}?search=${searchTerm}&page=${page}&limit=${limit}`,
+    GET_ALL: (searchTerm, page, size) =>
+      `${BASE_URL.PACIENTES}?search=${encodeURIComponent(searchTerm)}&page=${page}&size=${size}`,
   },
   EXPEDIENTE: {
     CREATE: BASE_URL.EXPEDIENTE,

@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Elementos del agente
+.agents/*
+skills*
+
+.env*

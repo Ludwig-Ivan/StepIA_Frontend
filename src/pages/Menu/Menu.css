@@ -1,12 +1,12 @@
+/* =========================================
+   PANEL PRINCIPAL (DASHBOARD) — Design System
+========================================= */
+
 * {
   box-sizing: border-box;
 }
 
-
-/* =========================================
-   PÁGINA
-========================================= */
-
+/* PÁGINA */
 .menu-page {
   width: 100%;
   min-height: 100vh;
@@ -15,273 +15,293 @@
 
   background-image:
     var(--step-overlay),
-    url('../../assets/images/fondo-medico.jpg');
+    url('../../assets/images/fondo-medico.svg');
 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
 
-  color:
-    var(--step-text, white);
+  color: var(--step-text, white);
 
   position: relative;
 }
 
-
-/* =========================================
-   CONTENIDO CENTRAL
-========================================= */
-
+/* CONTENIDO CENTRAL */
 .menu-overlay {
   width: 100%;
-
-  min-height:
-    calc(100vh - 64px);
+  min-height: calc(100vh - 64px);
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
-  padding:
-    35px 20px;
+  padding: 35px 20px;
 }
 
-
-/* =========================================
-   TARJETA PRINCIPAL
-========================================= */
-
+/* TARJETA PRINCIPAL */
 .menu-card {
   width: 100%;
-
   max-width: 580px;
 
-  padding:
-    24px;
+  padding: 26px 24px;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.20);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 20px;
 
-  border-radius: 18px;
+  background: rgba(20, 40, 38, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 
-  background:
-    rgba(60, 100, 95, 0.30);
-
-  backdrop-filter:
-    blur(12px);
-
-  -webkit-backdrop-filter:
-    blur(12px);
-
-  box-shadow:
-    0 15px 35px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.28);
 }
-
-
-/* =========================================
-   TÍTULOS
-========================================= */
 
 .menu-stepai {
   text-align: center;
-
   color: white;
-
-  font-size: 32px;
-
-  font-weight: 900;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
-
 
 .menu-title {
-  margin:
-    4px 0 0;
-
+  margin: 6px 0 0;
   text-align: center;
-
   color: white;
-
-  font-size: 37px;
-
-  font-weight: 900;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
-
 
 .menu-subtitle {
-  margin:
-    9px 0 24px;
-
+  margin: 9px 0 22px;
   text-align: center;
-
-  color:
-    rgba(255, 255, 255, 0.82);
-
-  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-
-/* =========================================
-   OPCIONES CENTRALES
-========================================= */
-
+/* OPCIONES CENTRALES */
 .menu-options {
   display: flex;
-
   flex-direction: column;
-
-  gap: 13px;
+  gap: 12px;
 }
-
 
 .menu-option {
   width: 100%;
-
   min-height: 74px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   gap: 15px;
 
-  padding:
-    12px 14px;
+  padding: 12px 14px;
 
-  border: none;
-
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 14px;
 
-  background:
-    rgba(65, 105, 100, 0.72);
-
+  background: rgba(46, 78, 74, 0.72);
   color: white;
 
+  font-family: inherit;
+  text-align: left;
   cursor: pointer;
 
-  box-shadow:
-    0 6px 15px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.16);
 
-  transition:
-    transform 0.2s ease,
-    background 0.2s ease;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
-
 
 .menu-option:hover {
-  transform:
-    translateY(-2px);
-
-  background:
-    rgba(75, 120, 114, 0.82);
+  transform: translateY(-2px);
+  background: rgba(58, 100, 95, 0.85);
 }
 
+.menu-option:focus-visible {
+  outline: 2px solid #42b883;
+  outline-offset: 2px;
+}
 
 .menu-option-left {
   display: flex;
-
   align-items: center;
-
   gap: 13px;
-
   min-width: 0;
 }
-
 
 .menu-icon-box {
   width: 47px;
-
   height: 47px;
-
-  flex:
-    0 0 47px;
+  flex: 0 0 47px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
-  border-radius: 11px;
+  border-radius: 12px;
 
-  background:
-    rgba(255, 255, 255, 0.92);
-
-  font-size: 22px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0e7c6a;
 }
 
+.menu-icon-box--accent {
+  color: #0a5247;
+}
 
 .menu-texts {
   text-align: left;
-
   min-width: 0;
 }
 
-
-.menu-texts h3 {
-  margin:
-    0 0 3px;
-
+.menu-texts strong {
+  display: block;
   color: white;
-
-  font-size: 17px;
+  font-size: 16px;
+  font-weight: 700;
 }
 
-
-.menu-texts p {
-  margin: 0;
-
-  color:
-    rgba(255, 255, 255, 0.78);
-
-  font-size: 10px;
+.menu-texts span {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  line-height: 1.35;
 }
-
-.option-icon {
-  font-size: 21px;
-
-  flex-shrink: 0;
-}
-
 
 .menu-arrow {
-  width: 34px;
-
-  height: 34px;
-
-  flex:
-    0 0 34px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background:
-    rgba(25, 35, 34, 0.60);
-
-  color: white;
-
-  font-size: 16px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.85);
 }
 
+/* =========================================
+   SKELETON
+========================================= */
+
+.skeleton {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.skeleton-logo {
+  width: 120px;
+  height: 30px;
+}
+
+.skeleton-chip {
+  width: 90px;
+  height: 36px;
+  border-radius: 9px;
+}
+
+.skeleton-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.menu-skeleton-card {
+  width: 100%;
+  max-width: 580px;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.skeleton-stepai {
+  width: 90px;
+  height: 18px;
+}
+
+.skeleton-title {
+  width: 240px;
+  height: 36px;
+}
+
+.skeleton-line {
+  width: 90%;
+  height: 14px;
+}
+
+.skeleton-line--short {
+  width: 66%;
+}
+
+.skeleton-option {
+  width: 100%;
+  height: 74px;
+  border-radius: 14px;
+}
 
 /* =========================================
-   TABLET
+   ESTADO DE ERROR
+========================================= */
+
+.menu-error-card {
+  width: 100%;
+  max-width: 420px;
+
+  padding: 30px 26px;
+
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 20px;
+
+  background: rgba(20, 40, 38, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  text-align: center;
+  color: white;
+}
+
+.menu-error-card h1 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.menu-error-card p {
+  margin: 0 0 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.menu-error-card .btn {
+  width: 100%;
+  height: 46px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* =========================================
+   RESPONSIVE
 ========================================= */
 
 @media (max-width: 950px) {
-
   .top-menu {
-    padding:
-      6px 12px;
+    padding: 6px 12px;
   }
 
   .top-menu-left,
@@ -289,15 +309,13 @@
     gap: 4px;
   }
 
-  .top-menu-option {
-    padding:
-      4px 5px;
-
-    font-size: 9px;
+  .btn-option {
+    padding: 4px 6px;
+    font-size: 10px;
   }
 
-  .top-menu-icon {
-    font-size: 18px;
+  .option-icon {
+    font-size: 17px;
   }
 
   .doctor-info {
@@ -311,25 +329,18 @@
   .perfil-flecha {
     display: none;
   }
-
 }
 
-
-/* =========================================
-   MÓVIL
-========================================= */
-
 @media (max-width: 650px) {
-
   .connection-status {
     display: none;
   }
 
-  .top-menu-option span:last-child {
+  .btn-option span:last-child {
     display: none;
   }
 
-  .top-menu-option {
+  .btn-option {
     min-height: 40px;
   }
 
@@ -339,23 +350,16 @@
 
   .doctor-avatar {
     width: 32px;
-
     height: 32px;
-
     flex-basis: 32px;
-
-    font-size: 19px;
+    font-size: 12px;
   }
 
   .perfil-dropdown {
     position: fixed;
-
     top: 72px;
-
     left: 15px;
-
     right: 15px;
-
     width: auto;
   }
 
@@ -364,16 +368,20 @@
   }
 
   .menu-card {
-    padding:
-      20px 15px;
+    padding: 20px 15px;
   }
 
   .menu-title {
-    font-size: 29px;
+    font-size: 27px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
   }
 
-  .menu-stepai {
-    font-size: 26px;
+  .menu-option {
+    transition: none;
   }
-
 }

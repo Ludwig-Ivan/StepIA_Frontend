@@ -1,166 +1,611 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "./AgendaConsultas.css";
+import { FaUserAlt } from "react-icons/fa";
+import {
+  FaCalendarCheck,
+  FaCalendarDays,
+  FaChevronLeft,
+  FaChevronRight,
+  FaClock,
+  FaMagnifyingGlass,
+  FaUser,
+  FaXmark,
+} from "react-icons/fa6";
+import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
+import Alert from "@mui/material/Alert";
+
+const TAMANO_PAGINA_CITAS = 6;
+
+const NOMBRES_MESES = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
+
+const DIAS_SEMANA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+/** @param {unknown} valor @returns {string} */
+const convertirTexto = (valor) => `${valor || ""}`.toLowerCase().trim();
+
+const formatearFechaLocal = (fecha) => {
+  const year = fecha.getFullYear();
+  const month = String(fecha.getMonth() + 1).padStart(2, "0");
+  const day = String(fecha.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const obtenerFechaDia = (anio, mes, dia) =>
+  `${anio}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+
+const leerPacientesLocal = () => {
+  try {
+    const guardados = JSON.parse(localStorage.getItem("pacientes"));
+    return Array.isArray(guardados) ? guardados : [];
+  } catch {
+    return null;
+  }
+};
+
+const crearPaginas = (paginaActual, total) => {
+  const paginas = [];
+  const incluidas = new Set();
+
+  const incluir = (valor) => {
+    if (valor < 0 || valor > total - 1 || incluidas.has(valor)) return;
+
+    const ultima = paginas[paginas.length - 1];
+
+    if (ultima && valor - ultima.valor > 1) {
+      paginas.push({ valor: null, elipsis: true });
+    }
+
+    incluidas.add(valor);
+    paginas.push({ valor, elipsis: false });
+  };
+
+  incluir(0);
+  if (total > 3) {
+    incluir(paginaActual - 1);
+    incluir(paginaActual);
+    incluir(paginaActual + 1);
+  }
+  incluir(total - 1);
+
+  return paginas;
+};
+
+function HeaderAgenda({ onMenu }) {
+  return (
+    <header className="agenda-header">
+      <button type="button" className="agenda-logo" onClick={onMenu}>
+        StepIA
+      </button>
+
+      <div className="agenda-user" title="Profesional en sesión">
+        <span>USUARIO</span>
+        <div className="agenda-user-icon" aria-hidden="true">
+          <FaUserAlt />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function DiaCalendario({
+  dia,
+  tituloMes,
+  esHoy,
+  esSeleccionado,
+  citasDia,
+  onSeleccionar,
+}) {
+  const tieneCitas = citasDia.length > 0;
+  const etiqueta = `${dia} ${tituloMes}${
+    tieneCitas
+      ? `, ${citasDia.length} ${citasDia.length === 1 ? "consulta" : "consultas"}`
+      : ""
+  }${esHoy ? ", hoy" : ""}`;
+
+  return (
+    <button
+      type="button"
+      className={`calendario-dia${tieneCitas ? " calendario-dia--cita" : ""}${
+        esSeleccionado ? " calendario-dia--seleccionado" : ""
+      }${esHoy ? " calendario-dia--hoy" : ""}`}
+      onClick={() => onSeleccionar(dia)}
+      aria-pressed={esSeleccionado}
+      aria-current={esHoy ? "date" : undefined}
+      aria-label={etiqueta}
+    >
+      <div className="numero-dia">{dia}</div>
+
+      <div className="mini-citas">
+        {citasDia.slice(0, 3).map((cita) => (
+          <div key={`${cita.id}-${cita.hora}`} className="mini-cita">
+            <span className="mini-hora">{cita.hora}</span>
+            <span className="mini-nombre">{cita.nombre}</span>
+          </div>
+        ))}
+
+        {citasDia.length > 3 && (
+          <div className="mas-citas">+{citasDia.length - 3} más</div>
+        )}
+      </div>
+    </button>
+  );
+}
+
+function CitaAgenda({ cita, onAbrir }) {
+  return (
+    <button
+      type="button"
+      className="cita-card"
+      onClick={() => onAbrir(cita)}
+      aria-label={`Abrir informe de ${cita.nombre}, consulta de las ${cita.hora}`}
+    >
+      <div className="cita-hora">
+        <FaClock aria-hidden="true" />
+        <strong>{cita.hora}</strong>
+      </div>
+
+      <div className="cita-paciente">
+        <div className="cita-avatar" aria-hidden="true">
+          <FaUser />
+        </div>
+
+        <div className="cita-datos">
+          <h3>{cita.nombre}</h3>
+          {cita.nss && <p>NSS: {cita.nss}</p>}
+        </div>
+      </div>
+
+      <FaChevronRight className="cita-flecha" aria-hidden="true" />
+    </button>
+  );
+}
+
+function PaginacionCitas({ pagina, totalPaginas, onIrAPagina }) {
+  return (
+    <nav className="citas-paginacion" aria-label="Paginación de consultas">
+      <button
+        type="button"
+        className="citas-pagina-boton"
+        aria-label="Página anterior"
+        onClick={() => onIrAPagina(pagina - 1)}
+        disabled={pagina <= 0}
+      >
+        <FaChevronLeft aria-hidden="true" />
+      </button>
+
+      {crearPaginas(pagina, totalPaginas).map((item, indice) =>
+        item.elipsis ? (
+          <span
+            key={`elipsis-${indice}`}
+            className="citas-pagina-elipsis"
+            aria-hidden="true"
+          >
+            …
+          </span>
+        ) : (
+          <button
+            key={item.valor}
+            type="button"
+            className={`citas-pagina-boton${item.valor === pagina ? " citas-pagina-boton--activa" : ""}`}
+            aria-label={`Página ${item.valor + 1}`}
+            aria-current={item.valor === pagina ? "page" : undefined}
+            onClick={() => onIrAPagina(item.valor)}
+          >
+            {item.valor + 1}
+          </button>
+        ),
+      )}
+
+      <button
+        type="button"
+        className="citas-pagina-boton"
+        aria-label="Página siguiente"
+        onClick={() => onIrAPagina(pagina + 1)}
+        disabled={pagina >= totalPaginas - 1}
+      >
+        <FaChevronRight aria-hidden="true" />
+      </button>
+    </nav>
+  );
+}
+
+function PanelCitasAgenda({
+  fechaLegible,
+  error,
+  hayPacientes,
+  citasDelDia,
+  citasPagina,
+  busqueda,
+  onCambioBusqueda,
+  onLimpiarBusqueda,
+  pagina,
+  totalPaginas,
+  onIrAPagina,
+  onAbrirCita,
+  onReintentar,
+  onRegistrarPaciente,
+}) {
+  const mostrarBuscador = hayPacientes && !error;
+  const totalDelDia = citasDelDia.length;
+  const sinCoincidencias =
+    mostrarBuscador && busqueda !== "" && citasPagina.length === 0;
+
+  let contenido;
+
+  if (error) {
+    contenido = (
+      <div className="agenda-aviso" role="alert">
+        <Alert
+          variant="filled"
+          severity="error"
+          sx={{ fontWeight: 600, borderRadius: 1.5 }}
+        >
+          No se pudieron leer los pacientes guardados.
+        </Alert>
+
+        <ButtonComponent
+          config={{
+            name: "reintentar",
+            text: "Reintentar",
+            type: "button",
+            variant: "blue",
+          }}
+          onClick={onReintentar}
+        />
+      </div>
+    );
+  } else if (!hayPacientes) {
+    contenido = (
+      <div className="agenda-aviso" role="status" aria-live="polite">
+        <Alert
+          variant="filled"
+          severity="warning"
+          sx={{ fontWeight: 600, borderRadius: 1.5 }}
+        >
+          No hay pacientes registrados todavía.
+        </Alert>
+
+        <ButtonComponent
+          config={{
+            name: "registrar-paciente",
+            text: "Registrar paciente",
+            type: "button",
+            variant: "green",
+          }}
+          onClick={onRegistrarPaciente}
+        />
+      </div>
+    );
+  } else if (sinCoincidencias) {
+    contenido = (
+      <div className="agenda-aviso" role="status" aria-live="polite">
+        <Alert
+          variant="filled"
+          severity="info"
+          sx={{ fontWeight: 600, borderRadius: 1.5 }}
+        >
+          No se encontraron pacientes con esa búsqueda.
+        </Alert>
+
+        <ButtonComponent
+          config={{
+            name: "limpiar-busqueda",
+            text: "Limpiar búsqueda",
+            type: "button",
+            variant: "blue",
+          }}
+          onClick={onLimpiarBusqueda}
+        />
+      </div>
+    );
+  } else if (totalDelDia === 0) {
+    contenido = (
+      <div className="sin-citas" role="status" aria-live="polite">
+        <FaCalendarDays className="sin-citas-icon" aria-hidden="true" />
+
+        <h3>Sin consultas</h3>
+
+        <p>No hay pacientes programados para este día.</p>
+      </div>
+    );
+  } else {
+    contenido = (
+      <>
+        <div className="lista-citas">
+          {citasPagina.map((cita) => (
+            <CitaAgenda
+              key={`${cita.id}-${cita.hora}`}
+              cita={cita}
+              onAbrir={onAbrirCita}
+            />
+          ))}
+        </div>
+
+        {totalPaginas > 1 && (
+          <PaginacionCitas
+            pagina={pagina}
+            totalPaginas={totalPaginas}
+            onIrAPagina={onIrAPagina}
+          />
+        )}
+      </>
+    );
+  }
+
+  return (
+    <aside className="citas-dia-card" aria-label="Consultas del día">
+      <div className="citas-dia-header">
+        <span>Consultas del día</span>
+        <strong>{fechaLegible}</strong>
+
+        {mostrarBuscador && totalDelDia > 0 && (
+          <span className="citas-dia-count" role="status" aria-live="polite">
+            {totalDelDia} {totalDelDia === 1 ? "consulta" : "consultas"}
+          </span>
+        )}
+      </div>
+
+      {mostrarBuscador && (
+        <search className="citas-buscador">
+          <label className="sr-only" htmlFor="agenda-busqueda">
+            Buscar paciente
+          </label>
+
+          <FaMagnifyingGlass
+            className="citas-buscador-icono"
+            aria-hidden="true"
+          />
+
+          <input
+            id="agenda-busqueda"
+            type="search"
+            placeholder="Buscar por nombre o NSS..."
+            value={busqueda}
+            onChange={(e) => onCambioBusqueda(e.target.value)}
+          />
+
+          {busqueda && (
+            <button
+              type="button"
+              className="citas-clear"
+              aria-label="Limpiar búsqueda"
+              onClick={onLimpiarBusqueda}
+            >
+              <FaXmark aria-hidden="true" />
+            </button>
+          )}
+        </search>
+      )}
+
+      <div className="citas-dia-contenido">{contenido}</div>
+    </aside>
+  );
+}
+
+function ResumenAgenda({ totalCitas, citasDelDia }) {
+  return (
+    <div className="agenda-resumen">
+      <div className="resumen-card">
+        <span className="resumen-icono" aria-hidden="true">
+          <FaCalendarCheck />
+        </span>
+
+        <span className="resumen-etiqueta">Próximas consultas</span>
+
+        <strong>{totalCitas}</strong>
+      </div>
+
+      <div className="resumen-card">
+        <span className="resumen-icono" aria-hidden="true">
+          <FaClock />
+        </span>
+
+        <span className="resumen-etiqueta">Consultas este día</span>
+
+        <strong>{citasDelDia}</strong>
+      </div>
+    </div>
+  );
+}
 
 function AgendaConsultas() {
   const navigate = useNavigate();
 
-  const hoy = new Date();
-
+  const [hoy] = useState(() => formatearFechaLocal(new Date()));
   const [pacientes, setPacientes] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(false);
 
-  const [mesActual, setMesActual] = useState(hoy.getMonth());
+  const [mesActual, setMesActual] = useState(() => new Date().getMonth());
+  const [anioActual, setAnioActual] = useState(() => new Date().getFullYear());
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(hoy);
 
-  const [anioActual, setAnioActual] = useState(hoy.getFullYear());
+  const [busqueda, setBusqueda] = useState("");
+  const [paginaCitas, setPaginaCitas] = useState(0);
 
-  const formatearFechaLocal = (fecha) => {
-    const year = fecha.getFullYear();
+  const cargarPacientes = useCallback(() => {
+    return Promise.resolve().then(() => {
+      const resultado = leerPacientesLocal();
 
-    const month = String(fecha.getMonth() + 1).padStart(2, "0");
+      if (resultado === null) {
+        setError(true);
+      } else {
+        setPacientes(resultado);
+      }
 
-    const day = String(fecha.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-  };
-
-  const [fechaSeleccionada, setFechaSeleccionada] = useState(
-    formatearFechaLocal(hoy),
-  );
-
-  /* ======================================
-     CARGAR PACIENTES
-  ====================================== */
-
-  useEffect(() => {
-    const pacientesGuardados =
-      JSON.parse(localStorage.getItem("pacientes")) || [];
-
-    setPacientes(pacientesGuardados);
+      setCargando(false);
+    });
   }, []);
 
-  /* ======================================
-     CITAS
-  ====================================== */
+  useEffect(() => {
+    cargarPacientes();
+  }, [cargarPacientes]);
+
+  const reintentar = () => {
+    setCargando(true);
+    setError(false);
+    cargarPacientes();
+  };
 
   const citas = useMemo(() => {
     return pacientes
-      .filter((paciente) => {
-        return paciente.proximaFechaConsulta;
-      })
-      .map((paciente) => {
-        return {
-          id: paciente.idPaciente || paciente.nss || paciente.nombre,
+      .filter((paciente) => Boolean(paciente && paciente.proximaFechaConsulta))
+      .map((paciente) => ({
+        id: paciente.idPaciente || paciente.nss || paciente.nombre,
 
-          nombre: paciente.nombre || "Paciente",
+        nombre: paciente.nombre || "Paciente",
 
-          fecha: paciente.proximaFechaConsulta,
+        fecha: paciente.proximaFechaConsulta,
 
-          hora: paciente.proximaHoraConsulta || "Sin hora",
+        hora: paciente.proximaHoraConsulta || "Sin hora",
 
-          nss: paciente.nss || "",
+        nss: paciente.nss || "",
 
-          pacienteCompleto: paciente,
-        };
-      });
+        pacienteCompleto: paciente,
+      }));
   }, [pacientes]);
 
-  /* ======================================
-     CITAS DEL DÍA SELECCIONADO
-  ====================================== */
+  const citasPorFecha = useMemo(() => {
+    const mapa = new Map();
+
+    for (const cita of citas) {
+      const lista = mapa.get(cita.fecha);
+
+      if (lista) {
+        lista.push(cita);
+      } else {
+        mapa.set(cita.fecha, [cita]);
+      }
+    }
+
+    return mapa;
+  }, [citas]);
 
   const citasDiaSeleccionado = useMemo(() => {
-    return citas
-      .filter((cita) => cita.fecha === fechaSeleccionada)
-      .sort((a, b) => {
-        if (a.hora === "Sin hora" || b.hora === "Sin hora") {
-          return 0;
-        }
+    const lista = citasPorFecha.get(fechaSeleccionada) || [];
 
-        return a.hora.localeCompare(b.hora);
+    return [...lista].sort((a, b) => {
+      if (a.hora === "Sin hora" || b.hora === "Sin hora") {
+        return 0;
+      }
+
+      return a.hora.localeCompare(b.hora);
+    });
+  }, [citasPorFecha, fechaSeleccionada]);
+
+  const citasBuscadas = useMemo(() => {
+    const texto = convertirTexto(busqueda);
+
+    if (texto === "") return citasDiaSeleccionado;
+
+    return citasDiaSeleccionado.filter((cita) => {
+      const incluye = (valor) =>
+        `${valor || ""}`.toLowerCase().trim().includes(texto);
+
+      return incluye(cita.nombre) || incluye(cita.nss);
+    });
+  }, [citasDiaSeleccionado, busqueda]);
+
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(citasBuscadas.length / TAMANO_PAGINA_CITAS),
+  );
+  const paginaSegura = Math.min(paginaCitas, totalPaginas - 1);
+  const citasPagina = citasBuscadas.slice(
+    paginaSegura * TAMANO_PAGINA_CITAS,
+    (paginaSegura + 1) * TAMANO_PAGINA_CITAS,
+  );
+
+  const cantidadDias = new Date(anioActual, mesActual + 1, 0).getDate();
+  const diaInicio = new Date(anioActual, mesActual, 1).getDay();
+  const tituloMes = `${NOMBRES_MESES[mesActual]} ${anioActual}`;
+
+  const diasDelMes = useMemo(() => {
+    const lista = [];
+
+    for (let dia = 1; dia <= cantidadDias; dia++) {
+      const fecha = obtenerFechaDia(anioActual, mesActual, dia);
+
+      lista.push({
+        dia,
+        fecha,
+        esHoy: fecha === hoy,
+        esSeleccionado: fecha === fechaSeleccionada,
+        citasDia: citasPorFecha.get(fecha) || [],
       });
-  }, [citas, fechaSeleccionada]);
+    }
 
-  /* ======================================
-     DATOS DEL CALENDARIO
-  ====================================== */
-
-  const primerDiaMes = new Date(anioActual, mesActual, 1);
-
-  const ultimoDiaMes = new Date(anioActual, mesActual + 1, 0);
-
-  const cantidadDias = ultimoDiaMes.getDate();
-
-  const diaInicio = primerDiaMes.getDay();
-
-  const nombresMeses = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ];
-
-  /* ======================================
-     CAMBIAR MES
-  ====================================== */
+    return lista;
+  }, [
+    anioActual,
+    mesActual,
+    cantidadDias,
+    hoy,
+    fechaSeleccionada,
+    citasPorFecha,
+  ]);
 
   const mesAnterior = () => {
     if (mesActual === 0) {
       setMesActual(11);
-
-      setAnioActual(anioActual - 1);
+      setAnioActual((anio) => anio - 1);
     } else {
-      setMesActual(mesActual - 1);
+      setMesActual((mes) => mes - 1);
     }
   };
 
   const mesSiguiente = () => {
     if (mesActual === 11) {
       setMesActual(0);
-
-      setAnioActual(anioActual + 1);
+      setAnioActual((anio) => anio + 1);
     } else {
-      setMesActual(mesActual + 1);
+      setMesActual((mes) => mes + 1);
     }
   };
 
-  /* ======================================
-     OBTENER CITAS DE UN DÍA
-  ====================================== */
-
-  const obtenerCitasDia = (dia) => {
-    const fecha =
-      `${anioActual}-` +
-      `${String(mesActual + 1).padStart(2, "0")}-` +
-      `${String(dia).padStart(2, "0")}`;
-
-    return citas.filter((cita) => cita.fecha === fecha);
-  };
-
-  /* ======================================
-     SELECCIONAR DÍA
-  ====================================== */
-
   const seleccionarDia = (dia) => {
-    const fecha =
-      `${anioActual}-` +
-      `${String(mesActual + 1).padStart(2, "0")}-` +
-      `${String(dia).padStart(2, "0")}`;
-
-    setFechaSeleccionada(fecha);
+    setFechaSeleccionada(obtenerFechaDia(anioActual, mesActual, dia));
+    setBusqueda("");
+    setPaginaCitas(0);
   };
 
-  /* ======================================
-     ABRIR PACIENTE
-  ====================================== */
+  const cambiarBusqueda = (valor) => {
+    setBusqueda(valor);
+    setPaginaCitas(0);
+  };
+
+  const limpiarBusqueda = () => {
+    setBusqueda("");
+    setPaginaCitas(0);
+  };
+
+  const irAPagina = (nuevaPagina) => {
+    if (
+      nuevaPagina === paginaSegura ||
+      nuevaPagina < 0 ||
+      nuevaPagina >= totalPaginas
+    ) {
+      return;
+    }
+
+    setPaginaCitas(nuevaPagina);
+  };
 
   const abrirPaciente = (cita) => {
     localStorage.setItem(
@@ -171,215 +616,103 @@ function AgendaConsultas() {
     navigate("/informe-paciente");
   };
 
-  /* ======================================
-     CREAR CALENDARIO
-  ====================================== */
-
-  const crearCalendario = () => {
-    const dias = [];
-
-    /* espacios antes del día 1 */
-
-    for (let i = 0; i < diaInicio; i++) {
-      dias.push(<div key={`vacio-${i}`} className="calendario-dia vacio" />);
-    }
-
-    /* días del mes */
-
-    for (let dia = 1; dia <= cantidadDias; dia++) {
-      const fecha =
-        `${anioActual}-` +
-        `${String(mesActual + 1).padStart(2, "0")}-` +
-        `${String(dia).padStart(2, "0")}`;
-
-      const citasDia = obtenerCitasDia(dia);
-
-      const esSeleccionado = fecha === fechaSeleccionada;
-
-      const esHoy = fecha === formatearFechaLocal(hoy);
-
-      dias.push(
-        <button
-          key={dia}
-          type="button"
-          className={`
-            calendario-dia
-
-            ${citasDia.length > 0 ? "tiene-cita" : ""}
-
-            ${esSeleccionado ? "seleccionado" : ""}
-
-            ${esHoy ? "hoy" : ""}
-            `}
-          onClick={() => seleccionarDia(dia)}
-        >
-          <div className="numero-dia">{dia}</div>
-
-          {/* CITAS MARCADAS EN CALENDARIO */}
-
-          <div className="mini-citas">
-            {citasDia.slice(0, 3).map((cita, index) => (
-              <div key={`${cita.id}-${index}`} className="mini-cita">
-                <span className="mini-hora">{cita.hora}</span>
-
-                <span className="mini-nombre">{cita.nombre}</span>
-              </div>
-            ))}
-
-            {citasDia.length > 3 && (
-              <div className="mas-citas">+{citasDia.length - 3} más</div>
-            )}
-          </div>
-        </button>,
-      );
-    }
-
-    return dias;
-  };
-
-  /* ======================================
-     VISTA
-  ====================================== */
-
   return (
     <div className="agenda-page">
-      {/* HEADER */}
-
-      <header className="agenda-header">
-        <button
-          type="button"
-          className="agenda-logo"
-          onClick={() => navigate("/menu")}
-        >
-          StepAI
-        </button>
-
-        <div className="agenda-header-right">
-          <span className="agenda-conectado">
-            <span className="agenda-punto"></span>
-            Conectado
-          </span>
-
-          <button
-            type="button"
-            className="agenda-menu-btn"
-            onClick={() => navigate("/menu")}
-          >
-            🏠 Panel Principal
-          </button>
-        </div>
-      </header>
+      <HeaderAgenda onMenu={() => navigate("/menu")} />
 
       <main className="agenda-main">
-        <div className="agenda-title">
-          <div>
-            <h1>📅 Agenda de Consultas</h1>
-
-            <p>Consulta las próximas citas programadas de tus pacientes.</p>
+        {cargando ? (
+          <div className="agenda-carga" role="status" aria-live="polite">
+            <span className="agenda-spinner" aria-hidden="true" />
+            Cargando agenda…
           </div>
-        </div>
-
-        <div className="agenda-layout">
-          {/* ============================
-              CALENDARIO
-          ============================ */}
-
-          <section className="calendario-card">
-            <div className="calendario-header">
-              <button type="button" onClick={mesAnterior}>
-                ‹
-              </button>
-
-              <h2>
-                {nombresMeses[mesActual]} {anioActual}
-              </h2>
-
-              <button type="button" onClick={mesSiguiente}>
-                ›
-              </button>
+        ) : (
+          <>
+            <div className="agenda-title">
+              <h1>Agenda de Consultas</h1>
+              <p>Consulta las próximas citas programadas de tus pacientes.</p>
             </div>
 
-            <div className="dias-semana">
-              <div>Dom</div>
-              <div>Lun</div>
-              <div>Mar</div>
-              <div>Mié</div>
-              <div>Jue</div>
-              <div>Vie</div>
-              <div>Sáb</div>
-            </div>
-
-            <div className="calendario-grid">{crearCalendario()}</div>
-          </section>
-
-          {/* ============================
-              CITAS DEL DÍA
-          ============================ */}
-
-          <aside className="citas-dia-card">
-            <div className="citas-dia-header">
-              <span>Consultas del día</span>
-
-              <strong>
-                {fechaSeleccionada.split("-").reverse().join("/")}
-              </strong>
-            </div>
-
-            {citasDiaSeleccionado.length === 0 ? (
-              <div className="sin-citas">
-                <div className="sin-citas-icon">📅</div>
-
-                <h3>Sin consultas</h3>
-
-                <p>No hay pacientes programados para este día.</p>
-              </div>
-            ) : (
-              <div className="lista-citas">
-                {citasDiaSeleccionado.map((cita, index) => (
+            <div className="agenda-layout">
+              <section
+                className="calendario-card"
+                aria-labelledby="agenda-calendario-titulo"
+              >
+                <div className="calendario-header">
                   <button
                     type="button"
-                    key={`${cita.id}-${index}`}
-                    className="cita-card"
-                    onClick={() => abrirPaciente(cita)}
+                    className="calendario-nav"
+                    aria-label="Mes anterior"
+                    onClick={mesAnterior}
                   >
-                    <div className="cita-hora">
-                      🕐
-                      <strong>{cita.hora}</strong>
-                    </div>
-
-                    <div className="cita-paciente">
-                      <div className="cita-avatar">👤</div>
-
-                      <div>
-                        <h3>{cita.nombre}</h3>
-
-                        {cita.nss && <p>NSS: {cita.nss}</p>}
-                      </div>
-                    </div>
-
-                    <span className="cita-flecha">➜</span>
+                    <FaChevronLeft aria-hidden="true" />
                   </button>
-                ))}
-              </div>
-            )}
-          </aside>
-        </div>
 
-        {/* RESUMEN */}
+                  <h2 id="agenda-calendario-titulo">{tituloMes}</h2>
 
-        <div className="agenda-resumen">
-          <div className="resumen-card">
-            <span>Próximas consultas</span>
+                  <button
+                    type="button"
+                    className="calendario-nav"
+                    aria-label="Mes siguiente"
+                    onClick={mesSiguiente}
+                  >
+                    <FaChevronRight aria-hidden="true" />
+                  </button>
+                </div>
 
-            <strong>{citas.length}</strong>
-          </div>
+                <div className="dias-semana" aria-hidden="true">
+                  {DIAS_SEMANA.map((dia) => (
+                    <div key={dia}>{dia}</div>
+                  ))}
+                </div>
 
-          <div className="resumen-card">
-            <span>Consultas este día</span>
+                <div className="calendario-grid">
+                  {Array.from({ length: diaInicio }).map((_, indice) => (
+                    <div
+                      key={`vacio-${indice}`}
+                      className="calendario-dia calendario-dia--vacio"
+                      aria-hidden="true"
+                    />
+                  ))}
 
-            <strong>{citasDiaSeleccionado.length}</strong>
-          </div>
-        </div>
+                  {diasDelMes.map((item) => (
+                    <DiaCalendario
+                      key={item.dia}
+                      dia={item.dia}
+                      tituloMes={tituloMes}
+                      esHoy={item.esHoy}
+                      esSeleccionado={item.esSeleccionado}
+                      citasDia={item.citasDia}
+                      onSeleccionar={seleccionarDia}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              <PanelCitasAgenda
+                fechaLegible={fechaSeleccionada.split("-").reverse().join("/")}
+                error={error}
+                hayPacientes={pacientes.length > 0}
+                citasDelDia={citasDiaSeleccionado}
+                citasPagina={citasPagina}
+                busqueda={busqueda}
+                onCambioBusqueda={cambiarBusqueda}
+                onLimpiarBusqueda={limpiarBusqueda}
+                pagina={paginaSegura}
+                totalPaginas={totalPaginas}
+                onIrAPagina={irAPagina}
+                onAbrirCita={abrirPaciente}
+                onReintentar={reintentar}
+                onRegistrarPaciente={() => navigate("/registro-paciente")}
+              />
+            </div>
+
+            <ResumenAgenda
+              totalCitas={citas.length}
+              citasDelDia={citasDiaSeleccionado.length}
+            />
+          </>
+        )}
       </main>
     </div>
   );

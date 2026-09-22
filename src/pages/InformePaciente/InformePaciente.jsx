@@ -1,772 +1,404 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import { LiaEyeSolid } from "react-icons/lia";
-import { FaUserAlt } from "react-icons/fa";
-import { FaTrashCan } from "react-icons/fa6";
-import { FcOpenedFolder } from "react-icons/fc";
+import { Controller } from "react-hook-form";
+import { Alert, Collapse } from "@mui/material";
 import "./InformePaciente.css";
-import { registrarActividad } from "../../utils/historial";
-import { AnalisisCreateModel } from "../../models/analisis/AnalisisCreateModel.js";
-import { InformeCreateUpdateModel } from "../../models/informes/InformeCreateUpdateModel.js";
-import { createAnalisis } from "../../services/analisisService.js";
-import { createPredict } from "../../services/predictService.js";
-import { PredictModel } from "../../models/analisis/PredictModel.js";
-import { getPacienteById } from "../../services/pacienteService.js";
-import { estudio } from "../../models/estudios/estudio.js";
-import { createInforme } from "../../services/informeService.js";
-import {
-  CompleteUpload,
-  GenerateUploadUrl,
-  UploadFile,
-} from "../../services/documentCloudService.js";
-import { createDocumento } from "../../services/documentService.js";
+import InputComponent from "../../components/inputs/InputComponent.jsx";
+import ButtonComponent from "../../components/buttons/ButtonComponent.jsx";
+import useInformePaciente from "./useInformePaciente";
+import CampoTextareaInforme from "./components/CampoTextareaInforme.jsx";
+import PanelAnalisisIA from "./components/PanelAnalisisIA.jsx";
+import OtrosEstudiosInforme from "./components/OtrosEstudiosInforme.jsx";
+import HeaderComponent from "../../components/generals/HeaderComponent.jsx";
+import { useCallback, useEffect, useState } from "react";
+import { obtenerByEmail } from "../../services/profesionalService.js";
+
+const CAMPOS_TEXTO = [
+  {
+    name: "estadoGeneral",
+    id: "informe-estado-general",
+    label: "Estado General",
+    rows: 3,
+  },
+  {
+    name: "observaciones",
+    id: "informe-observaciones",
+    label: "Observaciones Manuales",
+    rows: 4,
+  },
+  {
+    name: "diagnostico",
+    id: "informe-diagnostico",
+    label: "Diagnóstico",
+    rows: 4,
+  },
+  { name: "sintomas", id: "informe-sintomas", label: "Síntomas", rows: 4 },
+  {
+    name: "tratamiento",
+    id: "informe-tratamiento",
+    label: "Tratamiento",
+    rows: 4,
+  },
+  {
+    name: "evolucion",
+    id: "informe-evolucion",
+    label: "Evoluciones",
+    rows: 4,
+  },
+];
 
 function InformePaciente() {
-  const navigate = useNavigate();
-  const informeRef = useRef(null);
-  const idProfesional = localStorage.getItem("idProfesional");
-  const idPaciente = localStorage.getItem("idPaciente");
-  const [informe, setInforme] = useState(InformeCreateUpdateModel());
-  const [analisisPieIzq, setAnalisisPieIzq] = useState(PredictModel());
-  const [analisisPieDer, setAnalisisPieDer] = useState(PredictModel());
-  const [imgPieIzq, setImgPieIzq] = useState();
-  const [imgPieDer, setImgPieDer] = useState();
-  const [imgPieIzq64, setImgPieIzq64] = useState();
-  const [imgPieDer64, setImgPieDer64] = useState();
-  const [estudios, setEstudios] = useState([]);
-  const [fechaConsulta, setFechaConsulta] = useState("0000-00-00");
-  const [horaConsulta, setHoraConsulta] = useState("00:00");
-  const [cargando, setCargando] = useState(false);
-  const [carga, setCarga] = useState(true);
-  const [paciente, setPaciente] = useState(null);
+  const {
+    navigate,
+    informeRef,
+    paciente,
+    analisisPieIzq,
+    analisisPieDer,
+    imgPieIzq64,
+    imgPieDer64,
+    estudios,
+    cargando,
+    carga,
+    errorGeneral,
+    mensajeIA,
+    mensajeEstudios,
+    confirmaEliminarId,
+    setConfirmaEliminarId,
+    descargando,
+    control,
+    errors,
+    isSubmitting,
+    cargarImagen,
+    analizarDesdeInforme,
+    subirOtroEstudio,
+    eliminarEstudio,
+    verEstudio,
+    manejarSubmit,
+    descargarPDF,
+  } = useInformePaciente();
+
+  const emailUsuario = localStorage.getItem("UsuarioActivo");
+  const [cargandoUser, setCargandoUser] = useState(true);
+  const [error, setError] = useState("");
+  const [usuario, setUsuario] = useState(null);
+
+  const cargarDoctor = useCallback(async () => {
+    if (!emailUsuario) {
+      navigate("/");
+      return;
+    }
+
+    try {
+      const doctor = await obtenerByEmail(emailUsuario);
+      setUsuario(doctor);
+    } catch {
+      setError(
+        "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+      );
+    } finally {
+      setCargandoUser(false);
+    }
+  }, [emailUsuario, navigate]);
+
+  const reintentar = () => {
+    setError("");
+    setCargandoUser(true);
+    cargarDoctor();
+  };
 
   useEffect(() => {
-    const cargarInforme = async () => {
-      setInforme({
-        ...informe,
-        idPaciente: idPaciente,
-        idProfesional: idProfesional,
-      });
-    };
-    const obtenerPaciente = async () => {
-      try {
-        const paciente = await getPacienteById(idPaciente);
-        setPaciente(paciente);
-        cargarInforme();
-      } catch (error) {
-        console.log("Error, no se encontro al paciente", error);
-        navigate("/registro-paciente");
-      } finally {
-        setCarga(false);
-      }
-    };
-
-    obtenerPaciente();
-  }, [idPaciente]);
-
-  const manejarCambioInforme = (e) => {
-    const { name, value } = e.target;
-
-    setInforme({
-      ...informe,
-      [name]: value,
-    });
-  };
-
-  const calcularSHA256 = async (archivo) => {
-    const buffer = await archivo.arrayBuffer();
-    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-
-    // Convertir ArrayBuffer a string hexadecimal
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
-    return hashHex;
-  };
-
-  const convertirABase64 = (archivo) => {
-    return new Promise((resolve, reject) => {
-      const lector = new FileReader();
-
-      lector.onload = () => resolve(lector.result);
-      lector.onerror = (error) => reject(error);
-
-      lector.readAsDataURL(archivo);
-    });
-  };
-
-  const cargarImagen = async (e, tipo) => {
-    const archivo = e.target.files[0];
-
-    if (!archivo) return;
-
-    if (!archivo.type.startsWith("image/")) {
-      alert("Solo se permiten imágenes");
+    if (!emailUsuario) {
+      navigate("/");
       return;
     }
 
-    const imagenBase64 = await convertirABase64(archivo);
+    let activo = true;
 
-    if (tipo === "izquierdo") {
-      setImgPieIzq(archivo);
-      setImgPieIzq64(imagenBase64);
-    } else {
-      setImgPieDer(archivo);
-      setImgPieDer64(imagenBase64);
-    }
-  };
-
-  const analizarDesdeInforme = async () => {
-    if (!imgPieDer || !imgPieDer) {
-      alert("Debes cargar ambas imágenes de los pies");
-      return;
-    }
-
-    setCargando(true);
-    var predict = await createPredict(imgPieDer);
-    setAnalisisPieDer(predict);
-    predict = await createPredict(imgPieIzq);
-    setAnalisisPieIzq(predict);
-    setCargando(false);
-  };
-
-  const subirOtroEstudio = async (e) => {
-    const archivo = e.target.files[0];
-
-    if (!archivo) return;
-
-    const tiposPermitidos = [
-      "application/pdf",
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-    ];
-
-    if (!tiposPermitidos.includes(archivo.type)) {
-      alert("Solo puedes subir archivos PDF, JPG, PNG o WEBP");
-      e.target.value = "";
-      return;
-    }
-
-    const tamañoMaximo = 5 * 1024 * 1024;
-
-    if (archivo.size > tamañoMaximo) {
-      alert("El archivo no puede superar los 5 MB");
-      e.target.value = "";
-      return;
-    }
-
-    try {
-      const archivoBase64 = await convertirABase64(archivo);
-
-      const nuevoEstudio = {
-        nombre: archivo.name,
-        tipo: archivo.type,
-        tamaño: archivo.size,
-        archivo: archivoBase64,
-      };
-
-      setEstudios([...estudios, estudio(nuevoEstudio)]);
-
-      registrarActividad({
-        tipo: "Estudio adicional",
-        descripcion: "Se agregó un estudio al informe del paciente",
-        paciente: paciente.nombre || "Paciente",
-        detalles: `Archivo: ${archivo.name}`,
+    obtenerByEmail(emailUsuario)
+      .then((doctor) => {
+        if (activo) setUsuario(doctor);
+      })
+      .catch(() => {
+        if (activo)
+          setError(
+            "No se pudo cargar la información del profesional. Verifica tu conexión o inténtalo de nuevo.",
+          );
+      })
+      .finally(() => {
+        if (activo) setCargandoUser(false);
       });
 
-      alert("Estudio agregado correctamente");
-    } catch (error) {
-      console.error(error);
-      alert("No se pudo cargar el archivo");
-    }
-
-    e.target.value = "";
-  };
-
-  const eliminarEstudio = (idEstudio) => {
-    const confirmar = window.confirm("¿Deseas eliminar este estudio?");
-
-    if (!confirmar) return;
-
-    const estudioEliminado = estudios.find(
-      (estudio) => estudio.id === idEstudio,
-    );
-
-    const nuevosEstudios = estudios.filter(
-      (estudio) => estudio.id !== idEstudio,
-    );
-
-    setEstudios(nuevosEstudios);
-
-    registrarActividad({
-      tipo: "Estudio adicional",
-      descripcion: "Se eliminó un estudio del informe del paciente",
-      paciente: paciente.nombre || "Paciente",
-      detalles: estudioEliminado
-        ? `Archivo eliminado: ${estudioEliminado.nombre}`
-        : "Se eliminó un archivo",
-    });
-  };
-
-  const verEstudio = (estudio) => {
-    if (!estudio || !estudio.archivo) {
-      alert("No se encontró el archivo");
-      return;
-    }
-
-    try {
-      const partes = estudio.archivo.split(",");
-
-      if (partes.length < 2) {
-        alert("El archivo guardado no es válido");
-        return;
-      }
-
-      const encabezado = partes[0];
-      const contenidoBase64 = partes[1];
-      const tipoEncontrado = encabezado.match(/data:(.*?);base64/);
-
-      const tipo = tipoEncontrado
-        ? tipoEncontrado[1]
-        : estudio.tipo || "application/octet-stream";
-
-      const contenidoBinario = atob(contenidoBase64);
-      const bytes = new Uint8Array(contenidoBinario.length);
-
-      for (let i = 0; i < contenidoBinario.length; i++) {
-        bytes[i] = contenidoBinario.charCodeAt(i);
-      }
-
-      const blob = new Blob([bytes], { type: tipo });
-      const url = URL.createObjectURL(blob);
-
-      const nuevaVentana = window.open(url, "_blank");
-
-      if (!nuevaVentana) {
-        alert(
-          "El navegador bloqueó la ventana. Permite ventanas emergentes para esta página.",
-        );
-        URL.revokeObjectURL(url);
-        return;
-      }
-
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 60000);
-    } catch (error) {
-      console.error("Error al abrir estudio:", error);
-      alert("No se pudo abrir el estudio");
-    }
-  };
-
-  const subirAnalisis = async (idInforme, pieType, analisis, img) => {
-    const { idAnalisis } = await createAnalisis(
-      AnalisisCreateModel({
-        idInforme: idInforme,
-        pieType: pieType,
-        className: analisis.className,
-        confidence: analisis.confidence,
-      }),
-    );
-
-    subirDocumentos(img, idInforme, idAnalisis);
-  };
-
-  const subirDocumentos = async (file, idInforme, idAnalisis = null) => {
-    const { storageKey, uploadUrl } = await GenerateUploadUrl(
-      paciente.curp,
-      file.name,
-      file.type,
-    );
-
-    await UploadFile(uploadUrl, file);
-
-    await CompleteUpload(paciente.curp, storageKey);
-
-    const hash = await calcularSHA256(file);
-    await createDocumento({
-      idPaciente: paciente.curp,
-      idProfesional: idProfesional,
-      idInforme: idInforme,
-      idAnalisis: idAnalisis,
-      storageUri: uploadUrl,
-      storageKey: storageKey,
-      nombreDocumento: file.name,
-      mimeType: file.type,
-      tamanoBytes: file.size,
-      hashSha256: hash,
-      version: 1,
-      fechaDocumento: new Date(file.lastModified).toISOString(),
-    });
-  };
-
-  const guardarCambios = async () => {
-    registrarActividad({
-      tipo: "Informe médico",
-      descripcion: "Se guardaron cambios en el informe médico",
-      paciente: paciente.nombre,
-      detalles: paciente.diagnostico
-        ? `Diagnóstico: ${paciente.diagnostico}`
-        : "Sin diagnóstico registrado",
-    });
-
-    if (!paciente) {
-      alert("No hay paciente seleccionado");
-      return;
-    }
-
-    const { idInforme } = await createInforme(informe);
-
-    await subirAnalisis(idInforme, "DERECHA", analisisPieDer, imgPieDer);
-    await subirAnalisis(idInforme, "IZQUIERDA", analisisPieIzq, imgPieIzq);
-
-    await estudios.forEach(async (estudio) => {
-      await subirDocumentos(estudio, idInforme);
-    });
-
-    const historialKey = `historial_${paciente.curp}`;
-    const historialActual =
-      JSON.parse(localStorage.getItem(historialKey)) || [];
-
-    const nuevoRegistroHistorial = {
-      proximaFechaConsulta: fechaConsulta || "",
-      proximaHoraConsulta: fechaConsulta || "",
-      otrosEstudios: estudios || [],
-
-      idHistorial: Date.now(),
-      fechaHistorial: new Date().toLocaleString(),
-      tipoRegistro: "Cambio guardado",
+    return () => {
+      activo = false;
     };
-
-    localStorage.setItem(
-      historialKey,
-      JSON.stringify([...historialActual, nuevoRegistroHistorial]),
-    );
-
-    alert("Cambios guardados y agregados al historial del paciente");
-    navigate("/lista-pacientes");
-  };
-
-  const descargarPDF = async () => {
-    if (!informeRef.current) return;
-
-    const botones = document.querySelector(".informe-buttons");
-    const botonesSubir = document.querySelectorAll(".btn-subir-imagen");
-    const botonAnalizar = document.querySelector(".boton-analizar-informe");
-    const controlesEstudios = document.querySelectorAll(
-      ".controles-estudio-pdf",
-    );
-
-    if (botones) botones.style.display = "none";
-    if (botonAnalizar) botonAnalizar.style.display = "none";
-
-    botonesSubir.forEach((boton) => {
-      boton.style.display = "none";
-    });
-
-    controlesEstudios.forEach((control) => {
-      control.style.display = "none";
-    });
-
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const canvas = await html2canvas(informeRef.current, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-      scrollX: 0,
-      scrollY: -window.scrollY,
-    });
-
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    const imgWidth = pdfWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pdfHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
-    }
-
-    if (botones) botones.style.display = "";
-    if (botonAnalizar) botonAnalizar.style.display = "";
-
-    botonesSubir.forEach((boton) => {
-      boton.style.display = "";
-    });
-
-    controlesEstudios.forEach((control) => {
-      control.style.display = "";
-    });
-
-    const nombreArchivo = paciente.nombre
-      ? `Informe-${paciente.nombre}.pdf`
-      : "Informe-Paciente.pdf";
-
-    pdf.save(nombreArchivo);
-  };
+  }, [emailUsuario, navigate]);
 
   if (carga)
     return (
-      <div className="loading-screen">
-        <h2>Cargando...</h2>
+      <div className="loading-screen" role="status" aria-live="polite">
+        <div className="loading-spinner" aria-hidden="true" />
+        <h2>Cargando…</h2>
         <p>Obteniendo información del paciente</p>
       </div>
     );
 
+  if (cargandoUser) {
+    return (
+      <div className="menu-page">
+        <header className="top-menu" aria-hidden="true">
+          <div className="top-menu-left">
+            <div className="skeleton skeleton-logo" />
+            <div className="skeleton skeleton-chip" />
+          </div>
+          <div className="top-menu-right">
+            <div className="skeleton skeleton-chip" />
+            <div className="skeleton skeleton-avatar" />
+          </div>
+        </header>
+
+        <main className="menu-overlay" role="status">
+          <div className="menu-skeleton-card">
+            <div className="skeleton skeleton-stepai" />
+            <div className="skeleton skeleton-title" />
+            <div className="skeleton skeleton-line" />
+            <div className="skeleton skeleton-line skeleton-line--short" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+            <div className="skeleton skeleton-option" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="menu-page">
+        <main className="menu-overlay" role="alert">
+          <div className="menu-error-card">
+            <h1>No se pudo cargar el panel</h1>
+            <p>{error}</p>
+            <button
+              type="button"
+              className="btn btn-green"
+              onClick={reintentar}
+            >
+              Reintentar
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="informe-page" ref={informeRef}>
-      <header className="informe-header">
-        <h2>StepIA</h2>
-
-        <div className="informe-user">
-          <span>USUARIO</span>
-          <div className="user-icon">
-            <FaUserAlt />
-          </div>
-        </div>
-      </header>
+      <HeaderComponent data={{ usuario }} />
 
       <main className="informe-main">
         <div className="informe-top">
-          <h3>Informe sobre Paciente</h3>
+          <div className="informe-titulo">
+            <h3>Informe de paciente</h3>
+            {paciente && (
+              <p>
+                {paciente.nombre} {paciente.apellidoPaterno}{" "}
+                {paciente.apellidoMaterno}
+              </p>
+            )}
+          </div>
+
           <input
             className="fecha-input"
             type="text"
             name="fecha"
             placeholder="Fecha"
-            value={new Date().toDateString()}
+            disabled
+            aria-label="Fecha de generación del informe"
+            defaultValue={new Date().toDateString()}
           />
         </div>
 
-        <section className="informe-card">
+        <form
+          id="formInforme"
+          className="informe-card"
+          noValidate
+          onSubmit={manejarSubmit}
+        >
+          <Collapse in={Boolean(errorGeneral)}>
+            <Alert
+              variant="filled"
+              severity="error"
+              role="alert"
+              sx={{ my: 2, fontWeight: 600, borderRadius: 1.5 }}
+            >
+              {errorGeneral}
+            </Alert>
+          </Collapse>
+
           <div className="datos-basicos">
-            <div className="campo campo-nombre">
-              <label>Nombre Paciente</label>
-              <input
-                readOnly
-                type="text"
-                name="nombre"
-                placeholder="Nombre Paciente"
-                value={paciente.nombre}
-              />
-            </div>
-
-            <div className="campo campo-peso">
-              <label>Peso</label>
-              <input
-                type="number"
-                name="pesoKg"
-                placeholder="Peso"
-                value={informe.pesoKg}
-                onChange={manejarCambioInforme}
-              />
-            </div>
-          </div>
-
-          <div className="campo">
-            <label>Estado General</label>
-            <textarea
-              name="estadoGeneral"
-              placeholder="Estado General"
-              value={informe.estadoGeneral}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
-
-          <section className="ai-panel">
-            <div className="ai-panel-header">
-              <span>Análisis AI</span>
-            </div>
-
-            <div className="ai-layout">
-              <div className="ai-pies-columna">
-                <div className="pies-grid">
-                  <div className="upload-pie-card">
-                    <label>Pie Izquierdo</label>
-
-                    <div className="imagen-pie">
-                      {imgPieIzq64 ? (
-                        <img src={imgPieIzq64} alt="Pie izquierdo" />
-                      ) : (
-                        <span>Sin imagen</span>
-                      )}
-                    </div>
-
-                    <label className="btn-subir-imagen">
-                      Subir imagen
-                      <input
-                        type="file"
-                        accept="image/*"
-                        testid="input-pie-izquierdo"
-                        onChange={(e) => cargarImagen(e, "izquierdo")}
-                      />
-                    </label>
-                  </div>
-
-                  <div className="upload-pie-card">
-                    <label>Pie Derecho</label>
-
-                    <div className="imagen-pie">
-                      {imgPieDer64 ? (
-                        <img src={imgPieDer64} alt="Pie derecho" />
-                      ) : (
-                        <span>Sin imagen</span>
-                      )}
-                    </div>
-
-                    <label className="btn-subir-imagen">
-                      Subir imagen
-                      <input
-                        type="file"
-                        accept="image/*"
-                        testid="input-pie-derecho"
-                        onChange={(e) => cargarImagen(e, "derecho")}
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div className="campo tipo-pie-box">
-                  <label>Tipo de Pie</label>
-
-                  <input
-                    type="text"
-                    name="tipoPie"
-                    placeholder="Tipo de Pie"
-                    value={``}
-                    readOnly
-                    className="campo-bloqueado"
-                  />
-                </div>
-              </div>
-
-              <div className="ai-resultados-columna">
-                <div className="campo resultado-ia-box">
-                  <label>Resultado dado por IA</label>
-
-                  <textarea
-                    className="lista-box campo-bloqueado"
-                    name="resultadoIA"
-                    placeholder="Resultado generado por IA..."
-                    value={`Pie Izq (${analisisPieIzq.className ?? "?"}) -> Porcentaje de Confianza: %${analisisPieIzq.confidence ?? "?"} 
-                    \nPie Der (${analisisPieDer.className ?? "?"}) -> Porcentaje de Confianza: %${analisisPieDer.confidence ?? "?"}`}
-                    readOnly
-                  ></textarea>
-                </div>
-              </div>
-            </div>
-
-            <div className="boton-analizar-informe">
-              <button
-                type="button"
-                testid="boton-analizar-informe"
-                onClick={analizarDesdeInforme}
-                disabled={cargando}
-              >
-                {cargando ? "Analizando..." : "Analizar con IA"}
-              </button>
-            </div>
-          </section>
-
-          <div className="campo observaciones-manuales">
-            <label>Observaciones Manuales</label>
-            <textarea
-              name="observaciones"
-              placeholder="Observaciones"
-              value={informe.observaciones}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
-
-          <div className="campo diagnostico-final">
-            <label>Diagnóstico</label>
-            <textarea
-              name="diagnostico"
-              placeholder="Diagnóstico"
-              value={informe.diagnostico}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
-
-          <div className="campo">
-            <label>Síntomas</label>
-
-            <textarea
-              name="sintomas"
-              placeholder="Síntomas"
-              value={informe.sintomas}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
-
-          <div className="campo">
-            <label>Tratamiento</label>
-
-            <textarea
-              name="tratamiento"
-              placeholder="Tratamiento"
-              value={informe.tratamiento}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
-
-          <div className="campo">
-            <label>Evoluciones</label>
-
-            <textarea
-              name="evolucion"
-              placeholder="Evoluciones"
-              value={informe.evolucion}
-              onChange={manejarCambioInforme}
-            ></textarea>
-          </div>
-
-          {/* OTROS ESTUDIOS */}
-
-          <div className="otros-estudios">
-            <div className="otros-estudios-header">
-              <div>
-                <h4>Otros Estudios</h4>
-                <p>
-                  Agrega estudios adicionales del paciente, como radiografías,
-                  análisis clínicos, resonancias u otros documentos.
-                </p>
-              </div>
-
-              <label className="btn-subir-estudio controles-estudio-pdf">
-                Subir otro estudio
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png,.webp"
-                  onChange={subirOtroEstudio}
+            <Controller
+              name="nombre"
+              control={control}
+              render={({ field }) => (
+                <InputComponent
+                  config={{
+                    id: "informe-nombre",
+                    name: "nombre",
+                    label: "Nombre del Paciente",
+                    placeholder: "Nombre del Paciente",
+                    value: field.value,
+                    func: field.onChange,
+                    onBlur: field.onBlur,
+                    type: "text",
+                    error: errors.nombre?.message,
+                  }}
+                  containerStyle={{ maxWidth: "400px" }}
                 />
-              </label>
-            </div>
+              )}
+            />
 
-            {estudios.length === 0 ? (
-              <div className="sin-estudios">
-                <div className="sin-estudios-icono">
-                  <FcOpenedFolder />
-                </div>
-                <strong>No hay otros estudios</strong>
-                <span>Los archivos que agregues aparecerán aquí.</span>
-              </div>
-            ) : (
-              <div className="lista-estudios">
-                {estudios.map((estudio) => (
-                  <div className="estudio-item" key={estudio.id}>
-                    <div className="estudio-icono">
-                      {estudio.tipo === "application/pdf" ? "📄" : "🖼️"}
-                    </div>
-
-                    <div className="estudio-datos">
-                      <strong>{estudio.nombre}</strong>
-                      <span>
-                        {estudio.fecha}
-                        {" • "}
-                        {estudio.hora}
-                      </span>
-                      <span>
-                        {(estudio.tamaño / 1024 / 1024).toFixed(2)} MB
-                      </span>
-                    </div>
-
-                    <div className="estudio-acciones controles-estudio-pdf">
-                      <button
-                        type="button"
-                        className="btn-ver-estudio"
-                        onClick={() => verEstudio(estudio)}
-                      >
-                        <LiaEyeSolid /> Ver
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn-eliminar-estudio"
-                        onClick={() => eliminarEstudio(estudio.id)}
-                      >
-                        <FaTrashCan />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <Controller
+              name="peso"
+              control={control}
+              render={({ field }) => (
+                <InputComponent
+                  config={{
+                    id: "informe-peso",
+                    name: "pesoKg",
+                    label: "Peso",
+                    placeholder: "Peso",
+                    type: "number",
+                    value: field.value,
+                    func: field.onChange,
+                    onBlur: field.onBlur,
+                    error: errors.peso?.message,
+                    inputProps: { min: 0, max: 500, step: 0.1 },
+                  }}
+                  containerStyle={{ maxWidth: "150px" }}
+                />
+              )}
+            />
           </div>
 
-          {/* PRÓXIMA CONSULTA */}
+          {CAMPOS_TEXTO.map((campo) => (
+            <CampoTextareaInforme
+              key={campo.name}
+              control={control}
+              name={campo.name}
+              id={campo.id}
+              label={campo.label}
+              rows={campo.rows}
+              error={errors[campo.name]?.message}
+            />
+          ))}
+
+          <PanelAnalisisIA
+            control={control}
+            imgPieIzq64={imgPieIzq64}
+            imgPieDer64={imgPieDer64}
+            analisisPieIzq={analisisPieIzq}
+            analisisPieDer={analisisPieDer}
+            mensajeIA={mensajeIA}
+            cargando={cargando}
+            onCargarImagen={cargarImagen}
+            onAnalizar={analizarDesdeInforme}
+          />
+
+          <OtrosEstudiosInforme
+            estudios={estudios}
+            mensajeEstudios={mensajeEstudios}
+            confirmaEliminarId={confirmaEliminarId}
+            onSubir={subirOtroEstudio}
+            onVer={verEstudio}
+            onEliminar={eliminarEstudio}
+            onSolicitarEliminar={setConfirmaEliminarId}
+          />
 
           <div className="proxima-consulta">
             <h4>Próxima consulta</h4>
             <p>Selecciona la fecha y hora de la siguiente cita del paciente.</p>
 
             <div className="proxima-consulta-grid">
-              <div className="campo">
-                <label>Fecha de la próxima consulta</label>
-
-                <input
-                  type="date"
-                  name="proximaFechaConsulta"
-                  value={fechaConsulta}
-                  onChange={() => {
-                    setFechaConsulta(fechaConsulta);
-                  }}
-                />
-              </div>
-
-              <div className="campo">
-                <label>Hora de la próxima consulta</label>
-
-                <input
-                  type="time"
-                  name="proximaHoraConsulta"
-                  value={horaConsulta}
-                  onChange={() => {
-                    setHoraConsulta(horaConsulta);
-                  }}
-                />
-              </div>
+              <Controller
+                name="proximaFechaConsulta"
+                control={control}
+                render={({ field }) => (
+                  <InputComponent
+                    config={{
+                      id: "informe-proxima-fecha",
+                      name: "proximaFechaConsulta",
+                      label: "Fecha de la próxima consulta",
+                      type: "date",
+                      value: field.value,
+                      func: field.onChange,
+                      onBlur: field.onBlur,
+                    }}
+                    containerStyle={{ maxWidth: "none" }}
+                  />
+                )}
+              />
+              <Controller
+                name="proximaHoraConsulta"
+                control={control}
+                render={({ field }) => (
+                  <InputComponent
+                    config={{
+                      id: "informe-proxima-hora",
+                      name: "proximaHoraConsulta",
+                      label: "Hora de la próxima consulta",
+                      type: "time",
+                      value: field.value,
+                      func: field.onChange,
+                      onBlur: field.onBlur,
+                    }}
+                    containerStyle={{ maxWidth: "none" }}
+                  />
+                )}
+              />
             </div>
           </div>
-        </section>
+        </form>
 
         <div className="informe-buttons">
-          <button type="button" onClick={() => navigate("/menu")}>
-            Cerrar
-          </button>
-
+          <ButtonComponent
+            config={{
+              name: "cerrar",
+              text: "Cerrar",
+              type: "button",
+              variant: "blue",
+              disabled: isSubmitting || descargando,
+            }}
+            onClick={() => navigate("/menu")}
+          />
           <div>
-            <button
-              type="button"
-              testid="boton-guardar-informe"
-              onClick={guardarCambios}
-            >
-              Guardar
-            </button>
-
-            <button type="button" onClick={descargarPDF}>
-              PDF
-            </button>
+            <ButtonComponent
+              config={{
+                name: "guardar",
+                text: "Guardar",
+                type: "submit",
+                variant: "green",
+                loading: isSubmitting,
+                loadingText: "Guardando…",
+                disabled: descargando,
+              }}
+              form="formInforme"
+            />
+            <ButtonComponent
+              config={{
+                name: "pdf",
+                text: "PDF",
+                type: "button",
+                variant: "purple",
+                loading: descargando,
+                loadingText: "Generando…",
+                disabled: isSubmitting,
+              }}
+              onClick={descargarPDF}
+            />
           </div>
         </div>
+
+        <span className="sr-only" aria-live="polite">
+          {isSubmitting ? "Guardando informe" : ""}
+        </span>
       </main>
     </div>
   );
